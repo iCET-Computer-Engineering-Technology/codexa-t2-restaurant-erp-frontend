@@ -26,10 +26,20 @@ export const routes: Routes = [
     },
     {
         path: 'admin',
-        loadComponent: () => import('./page/admin/admin').then(m => m.Admin)
+        loadComponent: () => import('./page/admin/admin').then(m => m.Admin),
+        children:[
+            {
+                path: '',
+                component:Dashboard
+            },
+            {
+                path: 'admin-customer',
+                component: Customers
+            },
+            {
+                path: 'admin-dashboard',
+                component: Dashboard
+            }
+        ]
     },
-    {
-        path: 'customers',
-        component: Customers
-    }
 ];

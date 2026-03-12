@@ -1,38 +1,83 @@
-<div style="height: 100vh; display: flex; align-items: center; justify-content: center;">
-    <div class="container">
+<div class="login-wrapper">
+    <div class="container fade-in">
+        <!-- Welcome Section -->
         <div id="customImg" class="welcome-section mix-color">
-            <h1 class="welcome-text">WELCOME</h1>
+            <div class="welcome-content">
+                <div class="welcome-icon">
+                    <i class="fas fa-utensils"></i>
+                </div>
+                <h1 class="welcome-text">Restaurant<span class="text-accent">ERP</span></h1>
+                <p class="welcome-subtitle">Management System</p>
+            </div>
         </div>
-        <div class="login-section">
-            <div class="login-card">
-                <h2>LOGIN</h2>
-                <div class="user-type-selector">
-                    <form class="login-form" (ngSubmit)="handleAdminLogin($event)">
-                        <div *ngIf="errorMessage" class="error-message"
-                            style="color: red; margin-bottom: 15px; font-size: 14px;">
-                            {{ errorMessage }}
-                        </div>
 
-                        <label for="adm-email">USER NAME</label>
-                        <div class="input-group">
-                            <input type="text" id="adm-email" placeholder="UserName" [(ngModel)]="username"
-                                name="username" [disabled]="isLoading" required>
+        <!-- Login Section -->
+        <div class="login-section">
+            <div class="login-card slide-up">
+                <div class="login-header">
+                    <h2>Welcome Back</h2>
+                    <p class="login-subtitle">Sign in to your account</p>
+                </div>
+
+                <form class="login-form" (ngSubmit)="handleAdminLogin($event)">
+                    <!-- Error Message -->
+                    <div *ngIf="errorMessage" class="error-message">
+                        <i class="fas fa-exclamation-circle"></i>
+                        {{ errorMessage }}
+                    </div>
+
+                    <!-- Username Field -->
+                    <div class="form-group">
+                        <label for="adm-email">
+                            <i class="fas fa-user"></i> Username
+                        </label>
+                        <div class="input-wrapper">
+                            <input 
+                                type="text" 
+                                id="adm-email" 
+                                placeholder="Enter your username"
+                                [(ngModel)]="username"
+                                name="username" 
+                                [disabled]="isLoading"
+                                class="form-input"
+                                required>
+                            <span class="input-icon"><i class="fas fa-user"></i></span>
                         </div>
-                        <label for="adm-password">PASSWORD</label>
-                        <div class="input-group password-group">
-                            <input [type]="showPassword ? 'text' : 'password'" id="adm-password" placeholder="********"
-                                [(ngModel)]="password" name="password" [disabled]="isLoading" required>
-                            <span class="password-toggle" (click)="togglePasswordVisibility()" style="cursor: pointer;">
+                    </div>
+
+                    <!-- Password Field -->
+                    <div class="form-group">
+                        <label for="adm-password">
+                            <i class="fas fa-lock"></i> Password
+                        </label>
+                        <div class="input-wrapper password-wrapper">
+                            <input 
+                                [type]="showPassword ? 'text' : 'password'" 
+                                id="adm-password" 
+                                placeholder="Enter your password"
+                                [(ngModel)]="password" 
+                                name="password" 
+                                [disabled]="isLoading"
+                                class="form-input"
+                                required>
+                            <span class="password-toggle" (click)="togglePasswordVisibility()" title="Toggle password visibility">
                                 <i [class]="showPassword ? 'fas fa-eye' : 'fas fa-eye-slash'"></i>
                             </span>
                         </div>
+                    </div>
 
-                        <button class="login-btn" type="submit" [disabled]="isLoading">
-                            {{ isLoading ? 'LOGGING IN...' : 'LOGIN' }}
-                        </button>
-                    </form>
+                    <!-- Login Button -->
+                    <button class="login-btn" type="submit" [disabled]="isLoading">
+                        <span class="btn-content">
+                            <i [class]="isLoading ? 'fas fa-spinner fa-spin' : 'fas fa-sign-in-alt'"></i>
+                            {{ isLoading ? 'Signing in...' : 'Sign In' }}
+                        </span>
+                    </button>
+                </form>
+
+                <div class="login-footer">
+                    <p>© 2026 RestaurantERP. All rights reserved.</p>
                 </div>
-                <div class="login-form-container" id="login-form-containerToLoad"></div>
             </div>
         </div>
     </div>
