@@ -34,7 +34,7 @@ export class Customers implements OnInit {
   }
 
   loadCustomers() {
-    this.http.get<any[]>('http://localhost:8080/customers/getAll').subscribe({
+    this.http.get<any[]>('http://localhost:8080/customers/get-all').subscribe({
       next: (data) => {
         this.customers = data;
         this.filteredCustomers = data;
