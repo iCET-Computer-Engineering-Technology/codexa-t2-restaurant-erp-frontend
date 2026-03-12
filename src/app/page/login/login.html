@@ -1,24 +1,39 @@
-
-
-<div class="w-full max-w-sm bg-neutral-primary-soft p-6 border border-default rounded-base shadow-xs">
-    <form action="#">
-        <h5 class="text-xl font-semibold text-heading mb-6">Sign in to our platform</h5>
-        <div class="mb-4">
-            <label for="email" class="block mb-2.5 text-sm font-medium text-heading">Your email</label>
-            <input type="email" id="email" class="bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand block w-full px-3 py-2.5 shadow-xs placeholder:text-body" placeholder="example@company.com" required />
+<div style="height: 100vh; display: flex; align-items: center; justify-content: center;">
+    <div class="container">
+        <div id="customImg" class="welcome-section mix-color">
+            <h1 class="welcome-text">WELCOME</h1>
         </div>
-        <div>
-            <label for="password" class="block mb-2.5 text-sm font-medium text-heading">Your password</label>
-            <input type="password" id="password" class="bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand block w-full px-3 py-2.5 shadow-xs placeholder:text-body" placeholder="•••••••••" required />
-        </div>
-        <div class="flex items-start my-6">
-            <div class="flex items-center">
-                <input id="checkbox-remember" type="checkbox" value="" class="w-4 h-4 border border-default-medium rounded-xs bg-neutral-secondary-medium focus:ring-2 focus:ring-brand-soft">
-                <label for="checkbox-remember" class="ms-2 text-sm font-medium text-heading">Remember me</label>
+        <div class="login-section">
+            <div class="login-card">
+                <h2>LOGIN</h2>
+                <div class="user-type-selector">
+                    <form class="login-form" (ngSubmit)="handleAdminLogin($event)">
+                        <div *ngIf="errorMessage" class="error-message"
+                            style="color: red; margin-bottom: 15px; font-size: 14px;">
+                            {{ errorMessage }}
+                        </div>
+
+                        <label for="adm-email">USER NAME</label>
+                        <div class="input-group">
+                            <input type="text" id="adm-email" placeholder="UserName" [(ngModel)]="username"
+                                name="username" [disabled]="isLoading" required>
+                        </div>
+                        <label for="adm-password">PASSWORD</label>
+                        <div class="input-group password-group">
+                            <input [type]="showPassword ? 'text' : 'password'" id="adm-password" placeholder="********"
+                                [(ngModel)]="password" name="password" [disabled]="isLoading" required>
+                            <span class="password-toggle" (click)="togglePasswordVisibility()" style="cursor: pointer;">
+                                <i [class]="showPassword ? 'fas fa-eye' : 'fas fa-eye-slash'"></i>
+                            </span>
+                        </div>
+
+                        <button class="login-btn" type="submit" [disabled]="isLoading">
+                            {{ isLoading ? 'LOGGING IN...' : 'LOGIN' }}
+                        </button>
+                    </form>
+                </div>
+                <div class="login-form-container" id="login-form-containerToLoad"></div>
             </div>
-            <a href="#" class="ms-auto text-sm font-medium text-fg-brand hover:underline">Lost Password?</a>
         </div>
-        <button type="button" class="text-white bg-brand box-border border border-transparent hover:bg-brand-strong focus:ring-4 focus:ring-brand-medium shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2.5 focus:outline-none w-full mb-3">Login to your account</button>
-        <div class="text-sm font-medium text-body">Not registered? <a href="#" class="text-fg-brand hover:underline">Create account</a></div>
-    </form>
+    </div>
 </div>
