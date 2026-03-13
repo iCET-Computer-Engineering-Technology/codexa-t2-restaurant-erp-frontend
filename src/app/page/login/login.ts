@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from "../../../../node_modules/@angular/router/types/_router_module-chunk";
+import { RouterOutlet, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-login',
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, RouterLink],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
