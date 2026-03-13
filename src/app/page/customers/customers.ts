@@ -23,6 +23,7 @@ export class Customers implements OnInit {
   totalPages: number = 1;
 
   isUpdateMode: boolean = false;
+  isSubmitted: boolean = false;
 
   showProfileModal: boolean = false;
   selectedCustomer: any = null;
@@ -102,23 +103,37 @@ export class Customers implements OnInit {
 
   resetForm() {
     this.isUpdateMode = false;
+    this.isSubmitted = false; 
     this.newCustomer = { id: 0, name: '', email: '', phone: '', address: '' };
   }
 
   editCustomer(customer: any) {
     this.isUpdateMode = true;
+    this.isSubmitted = false;
     this.newCustomer = { ...customer };
   }
 
+  isValidName() {
+    return this.newCustomer.name && this.newCustomer.name.trim() !== '';
+  }
+
+  isValidEmail() {
+    if (!this.newCustomer.email || this.newCustomer.email.trim() === '') return true; 
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+    return emailRegex.test(this.newCustomer.email);
+  }
+
+  isValidPhone() {
+    if (!this.newCustomer.phone || this.newCustomer.phone.trim() === '') return false;
+    const phoneRegex = /^07[01245678]\d{7}$/;
+    return phoneRegex.test(this.newCustomer.phone.trim());
+  }
+
   saveCustomer() {
-    if (!this.newCustomer.name || !this.newCustomer.name.trim() ||
-      !this.newCustomer.phone || !this.newCustomer.phone.trim()) {
-      Swal.fire({
-        icon: "warning",
-        title: "Missing Details",
-        text: "Please enter at least the name and phone number."
-      });
-      return;
+    this.isSubmitted = true;
+
+    if (!this.isValidName() || !this.isValidEmail() || !this.isValidPhone()) {
+      return; 
     }
 
     if (this.isUpdateMode) {
@@ -134,14 +149,7 @@ export class Customers implements OnInit {
             this.loadCustomers();
           }
         },
-        error: (err) => {
-          console.error('Error updating customer:', err);
-          Swal.fire({
-            icon: "error",
-            title: "Oops...",
-            text: "Something went wrong!"
-          });
-        }
+        error: (err) => this.handleBackendError(err)
       });
     } else {
       this.http.post<boolean>('http://localhost:8080/customers/add', this.newCustomer).subscribe({
@@ -155,15 +163,27 @@ export class Customers implements OnInit {
             this.loadCustomers();
           }
         },
-        error: (err) => {
-          console.error('Error saving customer:', err);
-          Swal.fire({
-            icon: "error",
-            title: "Failed to save customer. Please try again."
-          });
-        }
+        error: (err) => this.handleBackendError(err)
       });
     }
+  }
+
+  handleBackendError(err: any) {
+    console.error('Backend Error:', err);
+    let errorMessage = "Something went wrong! Please try again.";
+
+    if (err.status === 400 && err.error) {
+      const firstErrorKey = Object.keys(err.error)[0];
+      if (firstErrorKey) {
+        errorMessage = err.error[firstErrorKey];
+      }
+    }
+
+    Swal.fire({
+      icon: "error",
+      title: "Validation Failed! ",
+      text: errorMessage
+    });
   }
 
   deleteCustomer(phone: string) {
