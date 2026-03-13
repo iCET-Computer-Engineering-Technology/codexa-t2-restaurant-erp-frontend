@@ -73,8 +73,8 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let c of filteredCustomers let i = index">
-            <td>{{ i + 1 }}</td>
+          <tr *ngFor="let c of paginatedCustomers let i = index">
+            <td>{{ ((currentPage - 1) * itemsPerPage) + i + 1 }}</td>
             <td>
               <div class="customer-info">
                 <div class="avatar">{{ c.name.charAt(0) | uppercase }}</div>
@@ -107,13 +107,34 @@
             </td>
           </tr>
 
-          <tr *ngIf="filteredCustomers.length === 0">
+          <tr *ngIf="paginatedCustomers.length === 0 && filteredCustomers.length === 0">
             <td colspan="5" style="text-align: center; padding: 30px; color: #64748b;">
               No customers found matching your search. 
             </td>
           </tr>
         </tbody>
       </table>
+
+      <!-- Pagination Controls -->
+      <div class="pagination-controls" style="display: flex; justify-content: space-between; align-items: center; padding: 20px; border-top: 1px solid #e2e8f0;">
+        <button class="pagination-btn" 
+                (click)="prevPage()" 
+                [disabled]="currentPage === 1"
+                style="padding: 8px 16px; background-color: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; font-weight: 500;">
+          ← Previous
+        </button>
+        
+        <div style="color: #64748b; font-weight: 500;">
+          Page {{ currentPage }} of {{ totalPages }}
+        </div>
+        
+        <button class="pagination-btn" 
+                (click)="nextPage()" 
+                [disabled]="currentPage === totalPages"
+                style="padding: 8px 16px; background-color: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; font-weight: 500;">
+          Next →
+        </button>
+      </div>
     </div>
 
   </div>

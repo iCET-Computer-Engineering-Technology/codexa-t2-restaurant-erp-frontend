@@ -19,7 +19,7 @@ export class Customers implements OnInit {
 
   paginatedCustomers: any[] = [];
   currentPage: number = 1;
-  itemsPerPage: number = 50;
+  itemsPerPage: number = 5;
   totalPages: number = 1;
 
   isUpdateMode: boolean = false;
