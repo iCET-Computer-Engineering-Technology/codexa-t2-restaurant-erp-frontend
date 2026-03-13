@@ -9,10 +9,37 @@ export const routes: Routes = [
     },
     {
         path: 'dashboard',
-        component: Dashboard,
+
+        component: Dashboard
     },
     {
-        path: 'customers',
-        component: Customers
-    } 
+        path: 'cashier',
+        loadComponent: () => import('./page/cashier/cashier').then(m => m.Cashier)
+    },
+    {
+        path: 'waiter',
+        loadComponent: () => import('./page/waiter/waiter').then(m => m.Waiter)
+    },
+    {
+        path: 'chef',
+        loadComponent: () => import('./page/chef/chef').then(m => m.Chef)
+    },
+    {
+        path: 'admin',
+        loadComponent: () => import('./page/admin/admin').then(m => m.Admin),
+        children:[
+            {
+                path: '',
+                component:Dashboard
+            },
+            {
+                path: 'admin-customer',
+                component: Customers
+            },
+            {
+                path: 'admin-dashboard',
+                component: Dashboard
+            }
+        ]
+    },
 ];
