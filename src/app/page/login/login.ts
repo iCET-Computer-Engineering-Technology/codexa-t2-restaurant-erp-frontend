@@ -1,11 +1,13 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from "../../../../node_modules/@angular/router/types/_router_module-chunk";
+import { CommonModule } from '@angular/common';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-login',
-  imports: [RouterOutlet],
+  imports: [CommonModule, RouterOutlet],
   templateUrl: './login.html',
   styleUrl: './login.css',
+  standalone: true
 })
 export class Login {
 
