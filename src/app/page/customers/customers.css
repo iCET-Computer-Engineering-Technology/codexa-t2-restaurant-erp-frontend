@@ -142,3 +142,53 @@ td { padding: 16px; border-bottom: 1px solid #f1f5f9; font-size: 14px; vertical-
   background-color: #fecaca; 
   transform: scale(1.05); 
 }
+
+@media (max-width: 992px) {
+  
+  .main-content-grid {
+    flex-direction: column; 
+  }
+  
+  .form-section, .table-section {
+    flex: none; 
+    width: 100%; 
+    box-sizing: border-box;
+  }
+
+  .form-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
+  
+  .form-group {
+    margin-bottom: 0;
+  }
+
+  .table-section {
+    overflow-x: auto; 
+  }
+
+  .table-header-box {
+    flex-direction: column; 
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .search-box {
+    width: 100%; 
+  }
+}
+
+@media (max-width: 576px) {
+  .dashboard-container {
+    padding: 15px;
+  }
+  .page-title {
+    margin: 15px 0 10px 15px;
+  }
+
+  .form-body {
+    grid-template-columns: 1fr; 
+  }
+}

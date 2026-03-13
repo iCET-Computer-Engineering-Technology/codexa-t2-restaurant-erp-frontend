@@ -17,7 +17,16 @@ export class Customers implements OnInit {
   totalCustomers: number = 0;
   searchText: string = '';
 
+  paginatedCustomers: any[] = [];
+  currentPage: number = 1;
+  itemsPerPage: number = 50;
+  totalPages: number = 1;
+
   isUpdateMode: boolean = false;
+
+  showProfileModal: boolean = false;
+  selectedCustomer: any = null;
+  visitHistory: any[] = [];
 
   newCustomer = {
     id: 0,
@@ -39,10 +48,56 @@ export class Customers implements OnInit {
         this.customers = data;
         this.filteredCustomers = data;
         this.totalCustomers = data.length;
+        this.updatePagination();
         this.cdr.detectChanges();
       },
       error: (err) => console.error('Failed to load customer data:', err)
     });
+  }
+
+  updatePagination() {
+    this.totalPages = Math.ceil(this.filteredCustomers.length / this.itemsPerPage);
+    if (this.totalPages === 0) this.totalPages = 1;
+
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+
+    this.paginatedCustomers = this.filteredCustomers.slice(startIndex, endIndex);
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updatePagination();
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updatePagination();
+    }
+  }
+
+  viewProfile(customer: any) {
+    this.selectedCustomer = customer;
+    this.showProfileModal = true;
+
+    this.http.get<any[]>('http://localhost:8080/customers/visits/' + customer.phone).subscribe({
+      next: (data) => {
+        this.visitHistory = data;
+      },
+      error: (err) => {
+        console.error('Failed to load visit history', err);
+        this.visitHistory = [];
+      }
+    });
+  }
+
+  closeProfile() {
+    this.showProfileModal = false;
+    this.selectedCustomer = null;
+    this.visitHistory = [];
   }
 
   resetForm() {
@@ -60,7 +115,8 @@ export class Customers implements OnInit {
       !this.newCustomer.phone || !this.newCustomer.phone.trim()) {
       Swal.fire({
         icon: "warning",
-        title: "Missing Details"
+        title: "Missing Details",
+        text: "Please enter at least the name and phone number."
       });
       return;
     }
@@ -149,5 +205,7 @@ export class Customers implements OnInit {
         (c.address && c.address.toLowerCase().includes(text))
       );
     }
+    this.currentPage = 1; 
+    this.updatePagination();
   }
 }
