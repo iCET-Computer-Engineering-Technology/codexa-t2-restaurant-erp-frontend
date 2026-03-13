@@ -174,7 +174,7 @@ export class Customers implements OnInit {
       showDenyButton: true,
       confirmButtonText: "Delete",
       denyButtonText: `Cancel`
-    }).then((result) => {
+    }).then((result: any) => {
       if (result.isConfirmed) {
         this.http.delete<boolean>('http://localhost:8080/customers/delete/' + phone).subscribe({
           next: (res) => {
