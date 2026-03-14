@@ -24,7 +24,7 @@ export class Table {
   }
 
   serveOrder(orderId: number) {
-    this.http.put(`http://localhost:8080/api/waiter/serve/${orderId}`, {})
+    this.http.put(`http://localhost:8080/api/waiter/${orderId}`, {})
       .subscribe(() => {
         alert("Order " + orderId + " served");
         this.getUnservedOrders();

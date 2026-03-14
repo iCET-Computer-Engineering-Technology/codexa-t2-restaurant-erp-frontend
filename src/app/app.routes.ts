@@ -2,6 +2,8 @@ import { RouterModule, Routes } from '@angular/router';
 import { Login } from './page/login/login';
 import { Dashboard } from './page/dashboard/dashboard';
 import { Customers } from './page/customers/customers';
+import { NgModule } from '@angular/core';
+import { Table } from './page/table/table';
 export const routes: Routes = [
     {
         path: '',
@@ -39,6 +41,10 @@ export const routes: Routes = [
             {
                 path: 'admin-dashboard',
                 component: Dashboard
+            },
+            {
+                path: 'table',
+                component: Table
             }
         ]
     },
