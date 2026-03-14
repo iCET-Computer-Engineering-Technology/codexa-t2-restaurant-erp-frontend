@@ -17,7 +17,7 @@ export class Table {
   ngOnInit() {
     this.getUnservedOrders();
   }
-
+  
   getUnservedOrders() {
     this.http.get<any[]>("http://localhost:8080/api/waiter/unserved")
       .subscribe(data => this.orderList = data);
