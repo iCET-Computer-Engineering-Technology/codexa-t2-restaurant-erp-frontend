@@ -42,7 +42,7 @@ export class Customers implements OnInit {
   }
 
   loadCustomers() {
-    this.http.get<any[]>('http://localhost:8080/customers/get').subscribe({
+    this.http.get<any[]>('http://localhost:8080/customers').subscribe({
       next: (data) => {
         this.customers = data;
         this.filteredCustomers = data;
@@ -113,7 +113,7 @@ export class Customers implements OnInit {
     this.isSubmitted = true;
     if (!this.isValidFirstName() || !this.isValidLastName() || !this.isValidEmail() || !this.isValidPhone()) return;
 
-    const url = this.isUpdateMode ? 'http://localhost:8080/customers/update' : 'http://localhost:8080/customers/save';
+    const url = this.isUpdateMode ? 'http://localhost:8080/customers' : 'http://localhost:8080/customers';
     const request = this.isUpdateMode ? this.http.put<boolean>(url, this.newCustomer) : this.http.post<boolean>(url, this.newCustomer);
 
     request.subscribe({
