@@ -16,7 +16,6 @@ export interface MenuItemsModel{
     name : String;
     categoryId : number;
     description : String;
-    category : String;
     isAvailable : Boolean;
     imageUrl : String;
 }
