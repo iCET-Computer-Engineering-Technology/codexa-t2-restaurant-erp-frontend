@@ -69,8 +69,9 @@
         <thead>
           <tr>
             <th>Id</th>
-            <th>Item Details</th>
-            <th>Category</th>
+            <th>Name</th>
+            <th>Category Id</th>
+            <th>Description</th>
             <th>Status</th>
             <th>Actions</th>
           </tr>
@@ -78,24 +79,23 @@
 
         <tbody>
 
-          <tr>
-            <td>1</td>
+          <tr *ngFor="let menuItems of menuItemList">
+            <td>{{menuItems.id}}</td>
 
             <td>
               <div class="customer-info">
-                <div class="avatar">A</div>
+                <div class="avatar">{{menuItems.imageUrl}}</div>
                 <div>
-                  <div class="fw-bold">Sample Item</div>
-                  <div class="text-muted">Sample description</div>
+                  <div class="fw-bold">{{menuItems.name}}</div>
                 </div>
               </div>
-            </td>
-
-            <td>Electronics</td>
+            </td>              
+            <td>{{menuItems.categoryId}}</td>
+            <td>{{menuItems.description}}</td>
 
             <!-- STATUS COLUMN FIXED -->
             <td>
-              <span class="text-green-600 fw-bold">Active</span>
+              <span class="text-green-600 fw-bold">{{menuItems.isAvailable}}</span>
             </td>
 
             <!-- ACTIONS COLUMN FIXED -->
