@@ -2,8 +2,8 @@ import { Routes } from '@angular/router';
 import { Login } from './page/login/login';
 import { Dashboard } from './page/dashboard/dashboard';
 import { Items } from './page/items/items';
-import { PortionSize } from './page/portion-size/portion-size';
 import { Category } from './page/category/category';
+import { Portions } from './page/portions/portions';
 
 export const routes: Routes = [
     {
@@ -19,8 +19,8 @@ export const routes: Routes = [
         component: Items
     },
     {
-        path: "portionSize",
-        component: PortionSize
+        path: "portions",
+        component: Portions
     },
     {
         path: "category",
