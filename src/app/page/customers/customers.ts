@@ -54,26 +54,28 @@ export class Customers implements OnInit {
     });
   }
 
-  viewProfile(customer: any) {
-    this.selectedCustomer = customer;
-    this.showProfileModal = true;
+customerProfile: any = null;
 
-    this.http.get<any[]>('http://localhost:8080/customers/visits/' + customer.phone).subscribe({
-      next: (data) => {
-        this.visitHistory = data;
-      },
-      error: (err) => {
-        console.error('Failed to load visit history', err);
-        this.visitHistory = [];
-      }
-    });
-  }
+viewProfile(customer: any) {
+  this.showProfileModal = true;
+  this.selectedCustomer = customer;
 
-  closeProfile() {
-    this.showProfileModal = false;
-    this.selectedCustomer = null;
-    this.visitHistory = [];
-  }
+  this.http.get<any>('http://localhost:8080/customers/profile').subscribe({
+    next: (data) => {
+      this.customerProfile = data;
+      console.log('Profile Data:', data);
+    },
+    error: (err) => {
+      console.error('Failed to load profile:', err);
+      this.customerProfile = { ...customer, last10Visits: [], loyaltyPoints: 0, lifetimeSpend: 0 };
+    }
+  });
+}
+
+closeProfile() {
+  this.showProfileModal = false;
+  this.customerProfile = null;
+}
 
   updatePagination() {
     this.totalPages = Math.ceil(this.filteredCustomers.length / this.itemsPerPage);
