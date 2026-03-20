@@ -1,9 +1,10 @@
 import { Routes } from '@angular/router';
 import { Login } from './page/login/login';
 import { Dashboard } from './page/dashboard/dashboard';
-import { Items } from './page/items/items';
-import { Category } from './page/category/category';
 import { Portions } from './page/portions/portions';
+import { MenuItemPrice } from './page/menu-item-price/menu-item-price';
+import { MenuCategories } from './page/menu-categories/menu-categories';
+import { MenuItems } from './page/menu-items/menu-items';
 
 export const routes: Routes = [
     {
@@ -15,15 +16,19 @@ export const routes: Routes = [
         component: Dashboard,
     },
     {
-        path: "items",
-        component: Items
+        path: "menu-items",
+        component: MenuItems
     },
     {
         path: "portions",
         component: Portions
     },
     {
-        path: "category",
-        component: Category
+        path: "menu-categories",
+        component: MenuCategories
+    },
+    {
+        path: "menu-item-price",
+        component: MenuItemPrice
     }
 ];

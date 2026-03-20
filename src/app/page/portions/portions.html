@@ -58,29 +58,18 @@
         <thead>
           <tr>
             <th>Id</th>
-            <th>Portion Size</th>
-            <th>Description</th>
+            <th>Size Name</th>
             <th>Actions</th>
           </tr>
         </thead>
 
         <tbody>
 
-          <tr>
-            <td>1</td>
-
+          <tr *ngFor = "let portions of portionsList">
+            <td>{{portions.id}}</td>
             <td>
-              <div class="customer-info">
-                <div class="avatar">S</div>
-                <div>
-                  <div class="fw-bold">Small</div>
-                  <div class="text-muted">Small portion</div>
-                </div>
-              </div>
+                  <div class="fw-bold">{{portions.name}}</div>
             </td>
-
-            <td>Small portion for single serving</td>
-
             <td>
               <button class="action-btn edit-btn">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none"
@@ -104,11 +93,11 @@
             </td>
           </tr>
 
-          <tr>
+          <!-- <tr>
             <td colspan="4" style="text-align: center; padding: 30px; color: #64748b;">
               No portion sizes found.
             </td>
-          </tr>
+          </tr> -->
 
         </tbody>
       </table>
