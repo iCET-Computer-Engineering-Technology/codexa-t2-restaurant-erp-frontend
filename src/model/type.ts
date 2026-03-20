@@ -19,3 +19,11 @@ export interface MenuItemsModel{
     isAvailable : Boolean;
     imageUrl : String;
 }
+
+export interface MenuItemPriceModel {
+    id : number;
+    itemid : number;
+    portionId : number;
+    price : DoubleRange;
+    isActive : Boolean;
+}
