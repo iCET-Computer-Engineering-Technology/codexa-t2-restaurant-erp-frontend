@@ -47,15 +47,18 @@ export class CampaignService {
   }
 
   send(id: number): Observable<any> {
-    return this.http.post<any>(`${this.base}/${id}/send`, {});
+    const url = `${this.base}/${id}/send`;
+    return this.http.post<any>(url, {});
   }
 
   schedule(id: number, scheduledAt: string): Observable<any> {
+    const url = `${this.base}/${id}/schedule`;
     const params = new HttpParams().set('scheduledAt', scheduledAt);
-    return this.http.post<any>(`${this.base}/${id}/schedule`, {}, { params });
+    return this.http.post<any>(url, {}, { params });
   }
 
   cancel(id: number): Observable<any> {
-    return this.http.post<any>(`${this.base}/${id}/cancel`, {});
+    const url = `${this.base}/${id}/cancel`;
+    return this.http.post<any>(url, {});
   }
 }

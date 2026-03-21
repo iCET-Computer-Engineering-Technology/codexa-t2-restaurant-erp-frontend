@@ -5,7 +5,7 @@
     <p>Loading campaigns from database...</p>
   </div>
 
-  <!-- Main Content -->
+  <!-- Page Header & Test Button -->
   <div *ngIf="!loading">
     <div class="page-header">
       <div>
@@ -104,16 +104,36 @@
             <td class="mono">{{ (c.sentAt || c.scheduledAt || c.createdAt) | date:'d MMM y' }}</td>
             <td>
               <div class="actions">
-                <button *ngIf="c.status === 'DRAFT'" class="btn btn-sm btn-ghost" (click)="send(c.id!)" title="Send now">
-                  ▶ Send
+                <button
+                  *ngIf="isDraft(c)"
+                  class="btn btn-sm btn-ghost"
+                  [disabled]="isSending(c.id!) || sendDisabledFor(c.id!)"
+                  (click)="send(c.id!)"
+                  title="Send now"
+                >
+                  <span *ngIf="isSending(c.id!)">⏳ Sending…</span>
+                  <span *ngIf="!isSending(c.id!)">▶ Send</span>
                 </button>
-                <button *ngIf="c.status === 'DRAFT'" class="btn btn-sm btn-ghost" (click)="openEditModal(c)" title="Edit">
+                <button *ngIf="isDraft(c)" class="btn btn-sm btn-ghost" (click)="schedule(c)" title="Schedule">
+                  ⏰ Schedule
+                </button>
+                <button
+                  *ngIf="isScheduled(c)"
+                  class="btn btn-sm btn-ghost"
+                  [disabled]="isSending(c.id!) || sendDisabledFor(c.id!)"
+                  (click)="send(c.id!)"
+                  title="Send now"
+                >
+                  <span *ngIf="isSending(c.id!)">⏳ Sending…</span>
+                  <span *ngIf="!isSending(c.id!)">▶ Send</span>
+                </button>
+                <button *ngIf="isDraft(c)" class="btn btn-sm btn-ghost" (click)="openEditModal(c)" title="Edit">
                   ✎ Edit
                 </button>
-                <button *ngIf="c.status === 'DRAFT' || c.status === 'SCHEDULED'" class="btn btn-sm btn-danger" (click)="cancel(c.id!)" title="Cancel">
+                <button *ngIf="isDraft(c) || isScheduled(c)" class="btn btn-sm btn-danger" (click)="cancel(c.id!)" title="Cancel">
                   ✕ Cancel
                 </button>
-                <button class="btn btn-sm btn-danger" (click)="delete(c.id!)" title="Delete">⌫</button>
+                <button class="btn btn-sm btn-danger" (click)="delete(c.id!)" title="Delete">Delete</button>
               </div>
             </td>
           </tr>
@@ -125,8 +145,8 @@
 </div>
 
 <!-- Create/Edit Campaign Modal -->
-<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()" (keydown.escape)="closeModal()">
-  <div class="modal" (click)="$event.stopPropagation()" (keydown.escape)="closeModal()">
+<div class="modal-overlay" *ngIf="showModal">
+  <div class="modal">
     <div class="modal-header">
       <h2>{{ modalMode === 'create' ? 'New Campaign' : 'Edit Campaign' }}</h2>
       <button class="modal-close" (click)="closeModal()" aria-label="Close dialog">×</button>
@@ -189,6 +209,79 @@
         <button type="button" class="btn btn-ghost" (click)="closeModal()">Cancel</button>
         <button type="submit" class="btn btn-primary" [disabled]="campaignForm.invalid">
           {{ modalMode === 'create' ? 'Create Campaign' : 'Update Campaign' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Confirmation Modal: Confirm Action -->
+<div class="modal-overlay" *ngIf="showConfirmModal">
+  <div class="modal">
+    <div class="modal-header confirm-modal-header" [ngClass]="confirmAction">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2>
+          <span class="confirm-icon" *ngIf="confirmAction === 'schedule'">⏰</span>
+          <span class="confirm-icon" *ngIf="confirmAction === 'send'">📧</span>
+          <span class="confirm-icon" *ngIf="confirmAction === 'cancel'">🚫</span>
+          <span class="confirm-icon" *ngIf="confirmAction === 'delete'">🗑️</span>
+          <span *ngIf="confirmAction === 'schedule'">Schedule Campaign</span>
+          <span *ngIf="confirmAction === 'send'">Send Campaign</span>
+          <span *ngIf="confirmAction === 'cancel'">Cancel Campaign</span>
+          <span *ngIf="confirmAction === 'delete'">Delete Campaign</span>
+        </h2>
+        <button class="modal-close" (click)="closeConfirmModal()" aria-label="Close dialog">×</button>
+      </div>
+    </div>
+    <div class="confirm-modal-info">
+      <p><strong>📋 Campaign:</strong> {{ confirmModalCampaign?.campaignName }}</p>
+      <span class="sub-text">{{ confirmModalCampaign?.subject }}</span>
+    </div>
+    <div class="confirm-modal-message">
+      <p>{{ getConfirmMessage() }}</p>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-ghost" (click)="closeConfirmModal()">❌ No, Cancel</button>
+      <button 
+        type="button" 
+        class="btn" 
+        [ngClass]="{'btn-primary': confirmAction !== 'delete', 'btn-danger': confirmAction === 'delete'}"
+        (click)="confirmActionHandler()"
+      >
+        ✓ {{ getConfirmButtonText() }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Schedule Campaign Modal -->
+<div class="modal-overlay" *ngIf="showScheduleModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Schedule Campaign</h2>
+      <button class="modal-close" (click)="closeScheduleModal()" aria-label="Close dialog">×</button>
+    </div>
+    <form [formGroup]="scheduleForm" (ngSubmit)="submitScheduleForm()">
+      <div class="form-group">
+        <label for="scheduleDateTime">Schedule Date & Time *</label>
+        <input
+          id="scheduleDateTime"
+          formControlName="scheduledAt"
+          type="datetime-local"
+          required
+        >
+        <span *ngIf="scheduleForm.get('scheduledAt')?.hasError('required')" class="error-text">Date and time required</span>
+      </div>
+
+      <div class="form-group" *ngIf="scheduleModalCampaign">
+        <p><strong>Campaign:</strong> {{ scheduleModalCampaign.campaignName }}</p>
+        <p class="sub-text">{{ scheduleModalCampaign.subject }}</p>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" (click)="closeScheduleModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary" [disabled]="scheduleForm.invalid">
+          Schedule Campaign
         </button>
       </div>
     </form>

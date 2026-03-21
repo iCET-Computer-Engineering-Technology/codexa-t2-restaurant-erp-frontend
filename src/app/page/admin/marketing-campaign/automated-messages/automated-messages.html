@@ -112,8 +112,8 @@
 </div>
 
 <!-- Create/Edit Rule Modal -->
-<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()" (keydown.escape)="closeModal()">
-  <div class="modal" (click)="$event.stopPropagation()" (keydown.escape)="closeModal()">
+<div class="modal-overlay" *ngIf="showModal">
+  <div class="modal">
     <div class="modal-header">
       <h2>{{ modalMode === 'create' ? 'New Automated Rule' : 'Edit Rule' }}</h2>
       <button class="modal-close" (click)="closeModal()" aria-label="Close dialog">×</button>
@@ -178,8 +178,8 @@
 </div>
 
 <!-- Test Email Modal -->
-<div class="modal-overlay" *ngIf="showTestModal" (click)="showTestModal = false" (keydown.escape)="showTestModal = false">
-  <div class="modal modal-sm" (click)="$event.stopPropagation()" (keydown.escape)="showTestModal = false">
+<div class="modal-overlay" *ngIf="showTestModal">
+  <div class="modal modal-sm">
     <div class="modal-header">
       <h2>Send Test Email</h2>
       <button class="modal-close" (click)="showTestModal = false" aria-label="Close dialog">×</button>
