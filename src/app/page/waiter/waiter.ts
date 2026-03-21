@@ -2,12 +2,11 @@ import { HttpClient } from '@angular/common/http';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { OrderAssignment } from '../../../model/OrderAssignment';
-import { RouterOutlet } from '@angular/router';
 
 
 @Component({
   selector: 'app-waiter',
-  imports: [RouterOutlet, CommonModule],
+  imports: [CommonModule],
   templateUrl: './waiter.html',
   styleUrl: './waiter.css',
 })
