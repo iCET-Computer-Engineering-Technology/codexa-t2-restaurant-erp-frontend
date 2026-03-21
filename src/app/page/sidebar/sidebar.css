@@ -32,8 +32,8 @@
 
 /* === Brand Area === */
 .sidebar-brand-icon {
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+  background: transparent;
+  box-shadow: none;
 }
 
 .sidebar-brand-sub {
@@ -196,6 +196,76 @@
 /* === Additional dark theme overrides === */
 aside {
   background-color: transparent !important;
+}
+
+/* === Marketing Submenu === */
+.marketing-menu-group {
+  position: relative;
+}
+
+.marketing-submenu {
+  padding: 0;
+  margin: 0;
+  background: rgba(255, 255, 255, 0.02);
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-in-out, padding 0.3s ease-in-out;
+}
+
+.marketing-menu-group:hover .marketing-submenu {
+  max-height: 300px;
+  padding: 8px 0 12px 0;
+}
+
+.sidebar-submenu-item {
+  color: rgba(203, 213, 225, 0.7);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.sidebar-submenu-item:hover {
+  color: #ffffff;
+  background: rgba(99, 102, 241, 0.12);
+}
+
+.sidebar-submenu-item .sidebar-item-icon {
+  background: rgba(99, 102, 241, 0.1);
+  color: rgba(129, 140, 248, 0.9);
+}
+
+.sidebar-submenu-item:hover .sidebar-item-icon {
+  background: rgba(99, 102, 241, 0.2);
+  color: #818cf8;
+}
+
+.sidebar-submenu-item-active {
+  color: #ffffff !important;
+  background: rgba(99, 102, 241, 0.15) !important;
+}
+
+.sidebar-submenu-item-active .sidebar-item-icon {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
+  color: white !important;
+}
+
+/* Light theme submenu */
+.sidebar-wrapper-light .marketing-submenu {
+  background: rgba(15, 23, 42, 0.02);
+}
+
+.sidebar-wrapper-light .sidebar-submenu-item {
+  color: rgba(30, 41, 59, 0.75);
+}
+
+.sidebar-wrapper-light .sidebar-submenu-item:hover {
+  color: #0f172a;
+  background: rgba(99, 102, 241, 0.1);
+}
+
+.sidebar-wrapper-light .sidebar-submenu-item .sidebar-item-icon {
+  background: rgba(99, 102, 241, 0.08);
+  color: rgba(99, 102, 241, 0.9);
 }
 
 a {
