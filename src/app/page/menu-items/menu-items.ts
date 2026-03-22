@@ -35,4 +35,10 @@ export class MenuItems {
       this.cdr.detectChanges();
     })
   }
+
+  addMenuItem() : void {
+    this.http.post("http://localhost:8080/menu-items", this.menuItemObj).subscribe(data => {
+      this.getAll();
+    })
+  }
 }

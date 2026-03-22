@@ -36,7 +36,7 @@
 
           <div class="form-group">
             <label>Image</label>
-            <input type="text" [(ngModel)]="menuItemObj.imageUrl" placeholder="Enter category" class="form-control">
+            <input type="text" [(ngModel)]="menuItemObj.imageUrl" placeholder="Enter Image Url" class="form-control">
           </div>
 
         </div>
@@ -100,7 +100,10 @@
 
             <!-- STATUS COLUMN FIXED -->
             <td>
-              <span class="text-green-600 fw-bold">{{menuItems.isAvailable}}</span>
+              <div>
+                  <span *ngIf="menuItems.isAvailable" style="color: #16a34a; font-weight: bold;">Available</span>
+                  <span *ngIf="!menuItems.isAvailable" style="color: #dc2626; font-weight: bold;">Un Available</span>
+                </div>
             </td>
 
             <!-- ACTIONS COLUMN FIXED -->
