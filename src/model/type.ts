@@ -24,6 +24,6 @@ export interface MenuItemPriceModel {
     id : number;
     itemId : number;
     portionId : number;
-    price : DoubleRange;
+    price : number;
     isActive : Boolean;
 }

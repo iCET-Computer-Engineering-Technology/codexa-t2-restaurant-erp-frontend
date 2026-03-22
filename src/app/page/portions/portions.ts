@@ -38,4 +38,11 @@ export class Portions {
     })
   }
 
+  clearForm(): void {
+      this.portionsObj = {
+      id : 0,
+      name : ''
+    }
+  }
+
 }

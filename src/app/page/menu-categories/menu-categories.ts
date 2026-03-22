@@ -42,6 +42,14 @@ export class MenuCategories {
     })
   }
 
+  clearForm(): void {
+    this.categoryObj = { 
+      id: 0, 
+      name: '', 
+      isActive: true 
+    };
+  }
+
 }
 
 
