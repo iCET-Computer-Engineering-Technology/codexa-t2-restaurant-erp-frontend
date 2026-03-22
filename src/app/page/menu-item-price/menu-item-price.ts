@@ -20,7 +20,7 @@ export class MenuItemPrice {
   }
   
   getAll(){
-    this.http.get<MenuItemPriceModel[]>("http://localhost:8080/menu-item-price//find/{itemId}").subscribe(data => {
+    this.http.get<MenuItemPriceModel[]>("http://localhost:8080/menu-item-price").subscribe(data => {
       this.menuItemPriceList = data;
       this.cdr.detectChanges();
     })

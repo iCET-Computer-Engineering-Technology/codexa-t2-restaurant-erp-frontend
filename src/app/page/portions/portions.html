@@ -15,19 +15,14 @@
 
           <div class="form-group">
             <label>Portion Size Name</label>
-            <input type="text" placeholder="Enter portion size name" class="form-control">
-          </div>
-
-          <div class="form-group">
-            <label>Description</label>
-            <input type="text" placeholder="Enter description" class="form-control">
+            <input type="text" [(ngModel)] = "portionsObj.name" placeholder="Enter portion size name" class="form-control">
           </div>
 
         </div>
 
         <div class="form-footer">
           <button class="cancel-btn">Clear</button>
-          <button class="save-btn">Add</button>
+          <button class="save-btn" (click)="addCategory()">Add</button>
         </div>
       </div>
 

@@ -13,32 +13,37 @@
 
           <div class="form-group">
             <label>Item Name</label>
-            <input type="text" placeholder="Enter item name" class="form-control">
+            <input type="text" [(ngModel)]="menuItemObj.name" placeholder="Enter item name" class="form-control">
+          </div>
+
+          <div class="form-group">
+            <label>Category Id</label>
+            <input type="text" [(ngModel)]="menuItemObj.categoryId" placeholder="Enter item name" class="form-control">
           </div>
 
           <div class="form-group">
             <label>Description</label>
-            <input type="text" placeholder="Enter description" class="form-control">
-          </div>
-
-          <div class="form-group">
-            <label>Category</label>
-            <input type="text" placeholder="Enter category" class="form-control">
+            <input type="text" [(ngModel)]="menuItemObj.description" placeholder="Enter description" class="form-control">
           </div>
 
           <div class="form-group">
             <label>Status</label>
-            <select class="form-control">
-              <option>Active</option>
-              <option>Inactive</option>
+            <select class="form-control" [(ngModel)]="menuItemObj.isAvailable">
+              <option [ngValue]="true">Available</option>
+              <option [ngValue]="false">UnAvailable</option>
             </select>
+          </div>
+
+          <div class="form-group">
+            <label>Image</label>
+            <input type="text" [(ngModel)]="menuItemObj.imageUrl" placeholder="Enter category" class="form-control">
           </div>
 
         </div>
 
         <div class="form-footer">
           <button class="cancel-btn">Clear</button>
-          <button class="save-btn">Add</button>
+          <button class="save-btn" (click)="addMenuItem()">Add</button>
         </div>
       </div>
 
@@ -89,7 +94,7 @@
                   <div class="fw-bold">{{menuItems.name}}</div>
                 </div>
               </div>
-            </td>              
+            </td>                 
             <td>{{menuItems.categoryId}}</td>
             <td>{{menuItems.description}}</td>
 

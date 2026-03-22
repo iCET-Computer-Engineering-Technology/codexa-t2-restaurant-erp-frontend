@@ -11,14 +11,22 @@
 
         <div class="form-body">
           <div class="form-group">
-            <label>Category Name</label>
-            <input type="text" placeholder="e.g. Electronics, Clothing" class="form-control">
+            <label >Category Name</label>
+            <input type="text"  name="name" [(ngModel)]="categoryObj.name" placeholder="e.g. Electronics, Clothing" class="form-control">
           </div>
+          
+          <div class="form-group">
+            <label>Status</label>
+            <select class="form-control" [(ngModel)]="categoryObj.isActive">
+              <option [ngValue]="true">Active</option>
+              <option [ngValue]="false">Inactive</option>
+            </select>
           </div>
+        </div>
 
         <div class="form-footer">
           <button class="cancel-btn">Clear</button>
-          <button class="save-btn">Add Category</button>
+          <button class="save-btn" (click)="addCategory()">Add Category</button>
         </div>
       </div>
     </div>
@@ -54,12 +62,17 @@
               <div class="category-info">
                   <div class="fw-bold">{{category.name}}</div>
               </div>
-            </td>
+            </td> 
             <td>  
                 <div>
-                  <div class="fw-bold">{{category.isActive}}</div>
+                  <span *ngIf="category.isActive" style="color: #16a34a; font-weight: bold;">Active</span>
+                  <span *ngIf="!category.isActive" style="color: #dc2626; font-weight: bold;">Inactive</span>
                 </div>
-            </td>  
+            </td>
+                <!-- <div>
+                  <div class="fw-bold">{{category.isActive}}</div>
+                </div> -->
+            
             <td>
               <button class="action-btn edit-btn" title="Edit">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

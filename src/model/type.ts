@@ -22,7 +22,7 @@ export interface MenuItemsModel{
 
 export interface MenuItemPriceModel {
     id : number;
-    itemid : number;
+    itemId : number;
     portionId : number;
     price : DoubleRange;
     isActive : Boolean;
