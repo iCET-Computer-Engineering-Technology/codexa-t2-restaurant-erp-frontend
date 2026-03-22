@@ -12,6 +12,8 @@ import { FormsModule } from '@angular/forms';
 })
 export class MenuItemPrice {
 
+  isEditMode : boolean = false;
+
   menuItemPriceList: Array<MenuItemPriceModel> = [];
   menuItemPriceObj: MenuItemPriceModel = {
     id: 0,
@@ -48,6 +50,19 @@ export class MenuItemPrice {
       price: 0.0,
       isActive: true
     }
+  }
+
+  onEdit(menuItemPrice: MenuItemPriceModel): void {
+    this.menuItemPriceObj = { ...menuItemPrice }; 
+    this.isEditMode = true; 
+  }
+  
+  updateMenuItemPrice() : void {
+    this.http.put("http://localhost:8080/menu-item-price" , this.menuItemPriceObj).subscribe(data => {
+      this.getAll();
+      this.clearForm();
+      this.isEditMode = false;
+    })
   }
 
 }
