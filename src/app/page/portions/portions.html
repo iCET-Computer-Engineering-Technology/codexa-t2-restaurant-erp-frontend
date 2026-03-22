@@ -22,7 +22,9 @@
 
         <div class="form-footer">
           <button class="cancel-btn" (click)="clearForm()">Clear</button>
-          <button class="save-btn" (click)="addCategory()">Add</button>
+          <button *ngIf="!isEditMode" class="save-btn" (click)="addPortion()">Add</button>
+          <button *ngIf="isEditMode" class="save-btn" style="background-color: #0284c7;"
+            (click)="updatePortion()">save</button>
         </div>
       </div>
 
@@ -66,7 +68,7 @@
                   <div class="fw-bold">{{portions.name}}</div>
             </td>
             <td>
-              <button class="action-btn edit-btn">
+              <button class="action-btn edit-btn" (click)="onEdit(portions)">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none"
                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>

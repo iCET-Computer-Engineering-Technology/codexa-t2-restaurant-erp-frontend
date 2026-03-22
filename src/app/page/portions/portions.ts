@@ -12,6 +12,8 @@ import { FormsModule } from '@angular/forms';
 })
 export class Portions {
 
+  isEditMode : boolean = false;
+
   portionsList : Array<PortionsModel> = [];
 
   portionsObj : PortionsModel = {
@@ -32,7 +34,7 @@ export class Portions {
     })
   }
 
-  addCategory() : void {
+  addPortion() : void {
     this.http.post("http://localhost:8080/portions" , this.portionsObj).subscribe(data => {
       this.getAll();
     })
@@ -44,5 +46,18 @@ export class Portions {
       name : ''
     }
   }
+
+  onEdit(portions : PortionsModel) : void {
+    this.portionsObj = { ...portions }; 
+    this.isEditMode = true;
+  }
+
+  updatePortion() : void {
+  this.http.put("http://localhost:8080/portions" , this.portionsObj).subscribe(data => {
+    this.getAll();
+    this.clearForm();
+    this.isEditMode = false;
+  })
+}
 
 }
