@@ -12,6 +12,8 @@ import { FormsModule } from '@angular/forms';
 })
 export class MenuItems {
 
+  isEditMode : boolean = false;
+
   menuItemList: Array<MenuItemsModel> = [];
   menuItemObj: MenuItemsModel = {
     id: 0,
@@ -52,4 +54,17 @@ export class MenuItems {
       imageUrl: ''
     }
   }
+
+  onEdit(menuItem : MenuItemsModel) : void {
+    this.menuItemObj = { ...menuItem }; 
+  this.isEditMode = true; 
+  }
+
+  updateMenuItem() : void {
+  this.http.put("http://localhost:8080/menu-items" , this.menuItemObj).subscribe(data => {
+    this.getAll();
+    this.clearForm();
+    this.isEditMode = false;
+  })
+}
 }
