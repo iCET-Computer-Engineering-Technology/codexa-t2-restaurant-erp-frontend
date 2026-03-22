@@ -13,8 +13,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 })
 export class MenuCategories {
   
-  
-  
+  isEditMode: boolean = false;
+
   categoryList : Array<CategoryModel> = [];
   categoryObj : CategoryModel = {
     id : 0,
@@ -49,6 +49,19 @@ export class MenuCategories {
       isActive: true 
     };
   }
+
+  onEdit(category: CategoryModel): void {
+  this.categoryObj = { ...category }; 
+  this.isEditMode = true; 
+}
+
+updateCategory() : void {
+  this.http.put("http://localhost:8080/categories" , this.categoryObj).subscribe(data => {
+    this.getAll();
+    this.clearForm();
+    this.isEditMode = false;
+  })
+}
 
 }
 
