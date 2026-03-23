@@ -11,55 +11,59 @@
         </div>
 
         <div class="form-body">
-          <div class="form-group">
-            <label>First Name <span style="color: red;">*</span></label>
-            <input type="text" [(ngModel)]="newCustomer.firstName" placeholder="Enter first name" class="form-control"
-              [ngClass]="{'input-error': isSubmitted && !isValidFirstName()}">
-            <div class="error-message" *ngIf="isSubmitted && !isValidFirstName()">
-              ⚠️ Please enter a first name.
+          <div class="form-row form-row-3">
+            <div class="form-group">
+              <label>First Name <span style="color: red;">*</span></label>
+              <input type="text" [(ngModel)]="newCustomer.firstName" placeholder="Enter first name" class="form-control"
+                [ngClass]="{'input-error': isSubmitted && !isValidFirstName()}">
+              <div class="error-message" *ngIf="isSubmitted && !isValidFirstName()">
+                ⚠️ Please enter a first name.
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Last Name</label>
+              <input type="text" [(ngModel)]="newCustomer.lastName" placeholder="Enter last name" class="form-control">
+            </div>
+
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" [(ngModel)]="newCustomer.email" placeholder="Enter email address" class="form-control"
+                [ngClass]="{'input-error': isSubmitted && !isValidEmail()}">
+              <div class="error-message" *ngIf="isSubmitted && !isValidEmail()">
+                ⚠️ Please enter a valid email address.
+              </div>
             </div>
           </div>
 
-          <div class="form-group">
-            <label>Last Name</label>
-            <input type="text" [(ngModel)]="newCustomer.lastName" placeholder="Enter last name" class="form-control">
-          </div>
-
-          <div class="form-group">
-            <label>Email</label>
-            <input type="email" [(ngModel)]="newCustomer.email" placeholder="Enter email address" class="form-control"
-              [ngClass]="{'input-error': isSubmitted && !isValidEmail()}">
-            <div class="error-message" *ngIf="isSubmitted && !isValidEmail()">
-              ⚠️ Please enter a valid email address.
+          <div class="form-row form-row-4">
+            <div class="form-group">
+              <label>Phone Number <span style="color: red;">*</span></label>
+              <input type="text" [(ngModel)]="newCustomer.phone" placeholder="Enter phone number" class="form-control"
+                [ngClass]="{'input-error': isSubmitted && !isValidPhone()}">
+              <div class="error-message" *ngIf="isSubmitted && !isValidPhone()">
+                ⚠️ Please enter a valid Sri Lankan phone number (e.g. 07XXXXXXXX).
+              </div>
             </div>
-          </div>
 
-          <div class="form-group">
-            <label>Phone Number <span style="color: red;">*</span></label>
-            <input type="text" [(ngModel)]="newCustomer.phone" placeholder="Enter phone number" class="form-control"
-              [ngClass]="{'input-error': isSubmitted && !isValidPhone()}">
-            <div class="error-message" *ngIf="isSubmitted && !isValidPhone()">
-              ⚠️ Please enter a valid Sri Lankan phone number (e.g. 07XXXXXXXX).
+            <div class="form-group">
+              <label>Birthday</label>
+              <input type="date" [(ngModel)]="newCustomer.birthday" class="form-control">
             </div>
-          </div>
 
-          <div class="form-group">
-            <label>Birthday</label>
-            <input type="date" [(ngModel)]="newCustomer.birthday" class="form-control">
-          </div>
+            <div class="form-group">
+              <label>Loyalty Points</label>
+              <input type="number" [(ngModel)]="newCustomer.loyaltyPoints" placeholder="0" min="0" class="form-control">
+            </div>
 
-          <div class="form-group">
-            <label>Loyalty Points</label>
-            <input type="number" [(ngModel)]="newCustomer.loyaltyPoints" placeholder="0" min="0" class="form-control">
-          </div>
-
-          <div class="form-group">
-            <label>Preferred Language</label>
-            <select [(ngModel)]="newCustomer.preferredLanguage" class="form-control">
-              <option value="en">English</option>
-              <option value="si">Sinhala</option>
-              <option value="ta">Tamil</option>
-            </select>
+            <div class="form-group">
+              <label>Preferred Language</label>
+              <select [(ngModel)]="newCustomer.preferredLanguage" class="form-control">
+                <option value="en">English</option>
+                <option value="si">Sinhala</option>
+                <option value="ta">Tamil</option>
+              </select>
+            </div>
           </div>
 
           <div class="form-group">
@@ -223,3 +227,10 @@
     </div>
   </div>
 </div>
+
+<app-customers-profile 
+  [customer]="selectedCustomer" 
+  [showModal]="showProfileModal"
+  (closeModal)="closeProfile()">
+</app-customers-profile>
+
