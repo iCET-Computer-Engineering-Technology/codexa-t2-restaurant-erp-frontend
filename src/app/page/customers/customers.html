@@ -227,3 +227,10 @@
     </div>
   </div>
 </div>
+
+<app-customers-profile 
+  [customer]="selectedCustomer" 
+  [showModal]="showProfileModal"
+  (closeModal)="closeProfile()">
+</app-customers-profile>
+

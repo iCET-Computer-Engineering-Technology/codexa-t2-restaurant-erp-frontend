@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
+import { CustomersProfile } from './customers-profile/customers-profile';
 
 @Component({
   selector: 'app-customers',
   standalone: true,
-  imports: [CommonModule, HttpClientModule, FormsModule],
+  imports: [CommonModule, HttpClientModule, FormsModule, CustomersProfile],
   templateUrl: './customers.html',
   styleUrls: ['./customers.css']
 })
@@ -19,7 +20,7 @@ export class Customers implements OnInit {
 
   paginatedCustomers: any[] = [];
   currentPage: number = 1;
-  itemsPerPage: number = 5;
+  itemsPerPage: number = 10;
   totalPages: number = 1;
 
   isUpdateMode: boolean = false;
@@ -101,6 +102,13 @@ closeProfile() {
     this.isUpdateMode = true;
     this.isSubmitted = false;
     this.newCustomer = { ...customer };
+
+    setTimeout(() => {
+      const formSection = document.querySelector('.form-section');
+      if (formSection) {
+        formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 0);
   }
 
   isValidFirstName() { return this.newCustomer.firstName && this.newCustomer.firstName.trim() !== ''; }
@@ -138,7 +146,7 @@ closeProfile() {
   deleteCustomer(phone: string) {
     Swal.fire({ title: "Are you sure?", text: "Delete this customer?", icon: "warning", showCancelButton: true, confirmButtonColor: '#ef4444' }).then((result) => {
       if (result.isConfirmed) {
-        this.http.delete<boolean>('http://localhost:8080/customers/delete/'+phone).subscribe({
+        this.http.delete<boolean>('http://localhost:8080/customers/'+phone).subscribe({
           next: () => { Swal.fire('Deleted!', '', 'success'); this.loadCustomers(); },
           error: () => Swal.fire('Error!', 'Failed to delete', 'error')
         });
