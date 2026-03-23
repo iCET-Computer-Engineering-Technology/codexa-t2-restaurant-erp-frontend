@@ -95,7 +95,7 @@
 
 /* === Active State === */
 .sidebar-item-active {
-  color: #000000 !important;
+  color: #ffffff !important;
   background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.15)) !important;
   box-shadow: inset 3px 0 0 0 #6366f1;
 }

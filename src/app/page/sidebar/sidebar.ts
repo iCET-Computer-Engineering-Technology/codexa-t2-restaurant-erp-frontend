@@ -15,7 +15,7 @@ export class Sidebar {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly authService = inject(AuthService);
 
-  readonly isDarkMode = signal(false);
+  readonly isDarkMode = signal(true);
 
   // Get logged-in user info
   readonly username = signal<string | null>(null);
@@ -33,6 +33,8 @@ export class Sidebar {
     const savedTheme = localStorage.getItem('admin-sidebar-theme');
     if (savedTheme === 'light') {
       this.isDarkMode.set(false);
+    } else if (savedTheme === 'dark') {
+      this.isDarkMode.set(true);
     }
 
     // Load user info
