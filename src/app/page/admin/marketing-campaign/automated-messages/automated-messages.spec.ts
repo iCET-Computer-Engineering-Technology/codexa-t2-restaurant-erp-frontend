@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { AutomatedMessages } from './automated-messages';
+import { AutomatedMessagesComponent } from './automated-messages';
 
-describe('AutomatedMessages', () => {
-  let component: AutomatedMessages;
-  let fixture: ComponentFixture<AutomatedMessages>;
+describe('AutomatedMessagesComponent', () => {
+  let component: AutomatedMessagesComponent;
+  let fixture: ComponentFixture<AutomatedMessagesComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AutomatedMessages]
+      imports: [AutomatedMessagesComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(AutomatedMessages);
+    fixture = TestBed.createComponent(AutomatedMessagesComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });
