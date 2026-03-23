@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { isActive } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-menu-categories',
@@ -63,6 +64,36 @@ updateCategory() : void {
   })
 }
 
+deleteMenuCategory(id: number): void {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#dc2626", 
+      cancelButtonColor: "#6b7280", 
+      confirmButtonText: "Yes, delete it!"
+    }).then((result) => {
+      
+      if (result.isConfirmed) {
+        this.http.delete(`http://localhost:8080/categories/${id}`).subscribe({
+          next: (data) => {
+            
+            Swal.fire({
+              title: "Deleted!",
+              text: "The item has been deleted.",
+              icon: "success"
+            });
+            this.getAll();
+          },
+          error: (err) => {
+            console.error("Delete failed:", err);
+            Swal.fire("Error", "Could not delete the item.", "error");
+          }
+        });
+      }
+    });
+  }
 }
 
 
