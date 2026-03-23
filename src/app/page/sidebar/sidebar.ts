@@ -1,6 +1,7 @@
 import { DOCUMENT, isPlatformBrowser } from '@angular/common';
-import { ChangeDetectionStrategy, Component, PLATFORM_ID, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, PLATFORM_ID, inject, signal, computed } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -12,8 +13,17 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 export class Sidebar {
   private readonly document = inject(DOCUMENT);
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly authService = inject(AuthService);
 
-  readonly isDarkMode = signal(true);
+  readonly isDarkMode = signal(false);
+
+  // Get logged-in user info
+  readonly username = signal<string | null>(null);
+  readonly userRole = signal<string | null>(null);
+  readonly avatarLetter = computed(() => {
+    const user = this.username();
+    return user ? user.charAt(0).toUpperCase() : 'A';
+  });
 
   constructor() {
     if (!isPlatformBrowser(this.platformId)) {
@@ -23,6 +33,17 @@ export class Sidebar {
     const savedTheme = localStorage.getItem('admin-sidebar-theme');
     if (savedTheme === 'light') {
       this.isDarkMode.set(false);
+    }
+
+    // Load user info
+    const storedUsername = this.authService.getUsername();
+    const storedRole = this.authService.getRole();
+    
+    if (storedUsername) {
+      this.username.set(storedUsername);
+    }
+    if (storedRole) {
+      this.userRole.set(storedRole);
     }
 
     this.applyTheme();
