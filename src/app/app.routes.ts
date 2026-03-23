@@ -25,6 +25,10 @@ export const routes: Routes = [
     loadComponent: () => import('./page/cashier/cashier').then((m) => m.Cashier),
   },
   {
+    path: 'manager',
+    loadComponent: () => import('./page/cashier/cashier').then((m) => m.Cashier),
+  },
+  {
     path: 'waiter',
     loadComponent: () => import('./page/waiter/waiter').then((m) => m.Waiter),
   },
