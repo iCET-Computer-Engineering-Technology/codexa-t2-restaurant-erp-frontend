@@ -1,7 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { OrderAssignment } from '../../../model/OrderAssignment';
 
 @Component({
   selector: 'app-waiter',
@@ -11,25 +10,18 @@ import { OrderAssignment } from '../../../model/OrderAssignment';
   styleUrl: './waiter.css',
 })
 export class Waiter implements OnInit {
-
-  orderAssigmentList: Array<OrderAssignment> = [];
-  
-  orderList: Array<any> = []; 
+  orderAssigmentList: Array<any> = [];
  
   private apiUrl = 'http://localhost:8080';
  
   private avatarColors = [
-    '#6366f1', '#8b5cf6', '#d946ef', '#ec4899',
-    '#f43f5e', '#f97316', '#eab308', '#84cc16',
-    '#22c55e', '#10b981', '#14b8a6', '#06b6d4',
-    '#0ea5e9', '#3b82f6'
+    '#6366f1', '#8b5cf6', '#d946ef', '#ec4899', '#f43f5e', '#f97316'
   ];
  
   constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
  
   ngOnInit(): void {
-    this.getAll();             
-    this.getUnservedOrders();  
+    this.getAll();
   }
  
   private getHeaders(): HttpHeaders {
@@ -39,27 +31,14 @@ export class Waiter implements OnInit {
   }
  
   getAll() {
-    this.http.get<OrderAssignment[]>(
-      `${this.apiUrl}/api/kitchen/assignments`,
-      { headers: this.getHeaders() }
-    ).subscribe({
+    this.http.get<any[]>(`${this.apiUrl}/api/kitchen/assignments`)
+    .subscribe({
       next: (data) => {
         this.orderAssigmentList = data;
         this.cdr.detectChanges();
       },
       error: (err) => console.error('Error loading assignments:', err)
     });
-  }
-
-  getUnservedOrders() { 
-    this.http.get<any[]>(`${this.apiUrl}/api/waiter/unserved`) 
-      .subscribe({
-        next: (data) => {
-          this.orderList = data;
-          this.cdr.detectChanges();
-        },
-        error: (err) => console.error('Error loading unserved orders:', err)
-      });
   }
  
   markAsServed(orderId: number, waiterId: number) {
@@ -74,10 +53,9 @@ export class Waiter implements OnInit {
       requestBody,
       { headers: this.getHeaders(), responseType: 'text' }
     ).subscribe({
-      next: () => {
-        alert(`Order #${orderId} marked as served! ✅`);
-        this.getAll();           
-        this.getUnservedOrders();
+      next: (response) => {
+        alert(response); 
+        this.getAll();
       },
       error: (err) => console.error('Error updating status:', err)
     });
