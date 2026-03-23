@@ -22,7 +22,7 @@
 
         <div class="form-footer">
           <button class="cancel-btn" (click)="clearForm()">Clear</button>
-          <button *ngIf="!isEditMode" class="save-btn" (click)="addPortion()">Add</button>
+          <button *ngIf="!isEditMode" class="save-btn" [disabled]="!portionsObj.name" (click)="addPortion()">Add</button>
           <button *ngIf="isEditMode" class="save-btn" style="background-color: #0284c7;"
             (click)="updatePortion()">save</button>
         </div>
@@ -53,7 +53,7 @@
 
       <table>
         <thead>
-          <tr>
+          <tr >
             <th>Id</th>
             <th>Size Name</th>
             <th>Actions</th>
@@ -62,11 +62,12 @@
 
         <tbody>
 
-          <tr *ngFor = "let portions of portionsList">
+          <tr *ngFor = "let portions of portionsList" >
             <td>{{portions.id}}</td>
             <td>
                   <div class="fw-bold">{{portions.name}}</div>
             </td>
+            
             <td>
               <button class="action-btn edit-btn" (click)="onEdit(portions)">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none"
@@ -87,6 +88,11 @@
                   <line x1="14" y1="11" x2="14" y2="17"></line>
                 </svg>
               </button>
+            </td>
+          </tr>
+          <tr *ngIf="portionsList.length === 0">
+            <td colspan="4" style="text-align: center; padding: 40px; color: #6b7280;">
+              No portions found. Start by adding a new one above!
             </td>
           </tr>
 

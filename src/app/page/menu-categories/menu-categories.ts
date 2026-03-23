@@ -2,13 +2,14 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CategoryModel } from '../../../model/type';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
-import { isActive } from '@angular/router';
+import { isActive, RouterOutlet } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
+import { Sidebar } from "../sidebar/sidebar";
 
 @Component({
   selector: 'app-menu-categories',
-  imports: [  ReactiveFormsModule, FormsModule,  CommonModule],
+  imports: [RouterOutlet, ReactiveFormsModule, FormsModule, CommonModule, Sidebar],
   templateUrl: './menu-categories.html',
   styleUrl: './menu-categories.css',
 })
