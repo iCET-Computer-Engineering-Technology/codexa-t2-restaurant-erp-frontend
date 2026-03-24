@@ -10,6 +10,7 @@ import {
     MenuCategoriesDto,
     MenuItemPriceDto,
     MenuItemsDto,
+    OrderTypeDto,
     OrderCartItem,
     OrderCreateRequest,
     PortionDto,
@@ -30,18 +31,21 @@ export class OrderPlacementComponent implements OnInit, OnDestroy {
     tables: TableDto[] = [];
     cartItems: OrderCartItem[] = [];
 
+    orderTypes: OrderTypeDto[] = [];
+
     // Loading states
     loadingCategories = false;
     loadingMenuItems = false;
     loadingTables = false;
     loadingPortions = false;
+    loadingOrderTypes = false;
     loadingPrices: { [key: number]: boolean } = {};
     loadingCustomer = false;
     submittingOrder = false;
 
     // Selected values
     selectedCategoryId: number | null = null;
-    selectedOrderType = 'dine_in';
+    selectedOrderTypeId: number | null = null;
     selectedTableId: number | null = null;
     selectedCustomer: CustomerDto | null = null;
     orderNotes = '';
@@ -68,9 +72,51 @@ export class OrderPlacementComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         console.log('OrderPlacementComponent initialized');
+        this.loadOrderTypes();
         this.loadPortions();
         this.loadCategories();
         this.loadTables();
+    }
+
+    private loadOrderTypes(): void {
+        this.loadingOrderTypes = true;
+        this.orderService
+            .getActiveOrderTypes()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+                next: (types) => {
+                    this.orderTypes = (types ?? []).filter((t) => t.isActive);
+                    this.loadingOrderTypes = false;
+
+                    // default to dine_in if available, otherwise first active
+                    const dineIn = this.orderTypes.find((t) => this.normalizeOrderTypeKey(t.typeName) === 'dine_in');
+                    this.selectedOrderTypeId = dineIn?.id ?? this.orderTypes[0]?.id ?? null;
+
+                    this.onOrderTypeChange();
+                    this.requestRender();
+                },
+                error: () => {
+                    this.loadingOrderTypes = false;
+                    this.requestRender();
+                },
+            });
+    }
+
+    private normalizeOrderTypeKey(name: string | null | undefined): string {
+        return String(name ?? '')
+            .trim()
+            .toLowerCase()
+            .replace(/[\s-]+/g, '_');
+    }
+
+    getSelectedOrderTypeName(): string {
+        const selectedId = this.selectedOrderTypeId;
+        const match = this.orderTypes.find((t) => t.id === selectedId);
+        return match?.typeName ?? '';
+    }
+
+    isDineIn(): boolean {
+        return this.normalizeOrderTypeKey(this.getSelectedOrderTypeName()) === 'dine_in';
     }
 
     private loadPortions(): void {
@@ -369,7 +415,7 @@ export class OrderPlacementComponent implements OnInit, OnDestroy {
     }
 
     onOrderTypeChange(): void {
-        if (this.selectedOrderType !== 'dine_in') {
+        if (!this.isDineIn()) {
             this.selectedTableId = null;
         }
         this.requestRender();
@@ -384,8 +430,14 @@ export class OrderPlacementComponent implements OnInit, OnDestroy {
             return;
         }
 
-        if (this.selectedOrderType === 'dine_in' && !this.selectedTableId) {
+        if (this.isDineIn() && !this.selectedTableId) {
             this.errorMessage = 'Please select a table for dine-in orders.';
+            this.requestRender();
+            return;
+        }
+
+        if (!this.selectedOrderTypeId) {
+            this.errorMessage = 'Please select an order type.';
             this.requestRender();
             return;
         }
@@ -399,9 +451,10 @@ export class OrderPlacementComponent implements OnInit, OnDestroy {
 
         // Build order request
         const orderRequest: OrderCreateRequest = {
-            orderType: this.selectedOrderType,
+            orderTypeId: this.selectedOrderTypeId,
+            orderType: this.getSelectedOrderTypeName(),
             tableId:
-                this.selectedOrderType === 'dine_in'
+                this.isDineIn()
                     ? this.selectedTableId || undefined
                     : undefined,
             customerId: this.selectedCustomer?.id,
@@ -506,7 +559,8 @@ export class OrderPlacementComponent implements OnInit, OnDestroy {
 
     resetOrder(): void {
         this.cartItems = [];
-        this.selectedOrderType = 'dine_in';
+        const dineIn = this.orderTypes.find((t) => this.normalizeOrderTypeKey(t.typeName) === 'dine_in');
+        this.selectedOrderTypeId = dineIn?.id ?? this.orderTypes[0]?.id ?? null;
         this.selectedTableId = null;
         this.selectedCustomer = null;
         this.customerSearchMobile = '';
