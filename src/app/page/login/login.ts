@@ -9,6 +9,7 @@ import { CommonModule } from '@angular/common';
   imports: [FormsModule, CommonModule],
   templateUrl: './login.html',
   styleUrl: './login.css',
+  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class Login {

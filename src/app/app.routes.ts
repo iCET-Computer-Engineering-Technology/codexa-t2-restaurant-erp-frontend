@@ -4,7 +4,6 @@ import { Dashboard } from './page/dashboard/dashboard';
 import { Customers } from './page/customers/customers';
 import { MarketingCampaign } from './page/admin/marketing-campaign/marketing-campaign';
 import { CampaignsComponent } from './page/admin/marketing-campaign/campaigns/campaigns';
-import { AutomatedMessagesComponent } from './page/admin/marketing-campaign/automated-messages/automated-messages';
 import { AnalyticsComponent } from './page/admin/marketing-campaign/analytics/analytics';
 import { Kitchen } from './page/kitchen/kitchen';
 import { KitchenDashboard } from './page/kitchen/kitchen-dashboard/kitchen-dashboard';
@@ -63,7 +62,10 @@ export const routes: Routes = [
           },
           {
             path: 'automated-messages',
-            component: AutomatedMessagesComponent,
+            loadComponent: () =>
+              import('./page/admin/marketing-campaign/automated-messages').then(
+                (m) => m.AutomatedMessagesComponent
+              ),
           },
           {
             path: 'analytics',

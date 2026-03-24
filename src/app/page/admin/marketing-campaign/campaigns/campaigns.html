@@ -101,7 +101,7 @@
               <span *ngIf="c.abTestEnabled" class="ab-badge">A/B</span>
               <span *ngIf="!c.abTestEnabled" class="muted">—</span>
             </td>
-            <td class="mono">{{ (c.sentAt || c.scheduledAt || c.createdAt) | date:'d MMM y' }}</td>
+            <td class="mono">{{ (c.sentAt || c.scheduledAt || c.createdAt) | date:'d MMM y, HH:mm' }}</td>
             <td>
               <div class="actions">
                 <button
@@ -185,10 +185,10 @@
           <label for="segmentId">Target Segment ID (optional)</label>
           <input id="segmentId" formControlName="segmentId" type="number" placeholder="Leave empty for all customers">
         </div>
-        <div class="form-group">
+        <!-- <div class="form-group">
           <label for="scheduledAt">Schedule For (optional)</label>
           <input id="scheduledAt" formControlName="scheduledAt" type="datetime-local">
-        </div>
+        </div> -->
       </div>
 
       <!-- A/B Test Section -->
@@ -230,11 +230,11 @@
           <span *ngIf="confirmAction === 'cancel'">Cancel Campaign</span>
           <span *ngIf="confirmAction === 'delete'">Delete Campaign</span>
         </h2>
-        <button class="modal-close" (click)="closeConfirmModal()" aria-label="Close dialog">×</button>
+        <button class="modal-close" (click)="closeConfirmModal()" aria-label="Close dialog">X</button>
       </div>
     </div>
     <div class="confirm-modal-info">
-      <p><strong>📋 Campaign:</strong> {{ confirmModalCampaign?.campaignName }}</p>
+      <p><strong>Campaign:</strong> {{ confirmModalCampaign?.campaignName }}</p>
       <span class="sub-text">{{ confirmModalCampaign?.subject }}</span>
     </div>
     <div class="confirm-modal-message">
