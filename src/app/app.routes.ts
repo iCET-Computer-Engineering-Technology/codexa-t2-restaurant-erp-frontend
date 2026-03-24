@@ -10,6 +10,7 @@ import { Kitchen } from './page/kitchen/kitchen';
 import { KitchenDashboard } from './page/kitchen/kitchen-dashboard/kitchen-dashboard';
 import { KitchenOrderTable } from './page/kitchen/kitchen-order-table/kitchen-order-table';
 import { OrderAssign } from './page/kitchen/order-assign/order-assign';
+import { OrderPlacementComponent } from './page/order-placement/order-placement.component';
 export const routes: Routes = [
   {
     path: '',
@@ -43,6 +44,10 @@ export const routes: Routes = [
       {
         path: 'admin-customer',
         component: Customers,
+      },
+      {
+        path: 'admin-order',
+        component: OrderPlacementComponent,
       },
       {
         path: 'admin-dashboard',
