@@ -1,0 +1,102 @@
+<div class="modern-container">
+  <!-- Header Section -->
+  <div class="modern-header">
+    <div>
+      <h1 class="modern-title">Waiter Assignments</h1>
+      <p class="modern-subtitle">Manage active waiter assignments and orders</p>
+    </div>
+    <div class="search-wrapper">
+      <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"></circle>
+        <path d="m21 21-4.35-4.35"></path>
+      </svg>
+      <input type="text" placeholder="Search waiter, order ID..." class="modern-search">
+    </div>
+  </div>
+
+  <!-- Modern Table View -->
+  <div class="table-wrapper">
+    <table class="modern-table">
+      <thead>
+        <tr>
+          <th class="col-waiter">
+            <span class="th-content">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              Waiter Name
+            </span>
+          </th>
+          <th class="col-id">
+            <span class="th-content">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M5 17H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1h-1"></path>
+                <path d="M9 12h6"></path>
+              </svg>
+              Order ID
+            </span>
+          </th>
+          <th class="col-assigned">Assigned At</th>
+          <th class="col-status">Status</th>
+          <th class="col-actions">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (ord of orderAssigmentList; track ord.id) {
+          <tr class="table-row">
+            <td class="col-waiter">
+              <div class="waiter-cell">
+                <div class="waiter-avatar" [style.background]="getAvatarColor(ord.id)">
+                  <span>{{ (ord.waiterName || 'W')?.charAt(0)?.toUpperCase() }}</span>
+                </div>
+                <div class="waiter-info">
+                  <div class="waiter-name">{{ ord.waiterName || 'N/A' }}</div>
+                  <div class="waiter-id">ID: {{ ord.waiterId }}</div>
+                </div>
+              </div>
+            </td>
+            <td class="col-id">
+              <span class="order-id-badge">#{{ ord.id }}</span>
+            </td>
+            <td class="col-assigned">
+              <span class="date-value">{{ ord.assignedAt | date: 'short' }}</span>
+            </td>
+            <td class="col-status">
+              <span class="status-badge" [ngClass]="getStatusClass(ord.status)">
+                <span class="status-dot"></span>
+                {{ getStatusLabel(ord.status) }}
+              </span>
+            </td>
+            <td class="col-actions">
+              <div class="action-buttons">
+                <button class="action-btn edit-btn" title="Served" 
+                        (click)="markAsServed(ord.kitechenOrderId, ord.waiterId)">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                  </svg>
+                  <span>Served</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        } @empty {
+          <tr class="empty-row">
+            <td colspan="5" class="empty-cell">
+              <div class="empty-state">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                <h3>No Assignments Yet</h3>
+                <p>No waiter assignments found. Start by creating a new assignment.</p>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
