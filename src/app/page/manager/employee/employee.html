@@ -1,0 +1,111 @@
+<div class="container mx-auto p-4">
+  <h2 class="text-3xl font-bold mb-6 text-gray-800">Employee  Management</h2>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="mb-8 p-6 rounded-lg bg-white shadow-lg border border-gray-200">
+    <h3 class="text-xl font-semibold text-gray-800 mb-6">Add New Employee</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <label for="user_id" class="block text-sm font-semibold text-gray-700 mb-2">Select User</label>
+        <select
+          id="user_id"
+          formControlName="user_id"
+          class="w-full px-4 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-800 font-medium focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">
+
+          <option value="" disabled selected class="text-gray-500">
+            -- Select an User --
+          </option>
+          <option *ngFor="let user of users" [value]="user.id" class="text-gray-800">
+            {{ user.username  }}
+          </option>
+        </select>
+        <div *ngIf="form.get('user_id')?.invalid && form.get('user_id')?.touched" class="text-red-600 text-sm mt-1">Employee is required</div>
+      </div>
+      <div>
+        <label for="firstName" class="block text-sm font-semibold text-gray-700 mb-2">First Name</label>
+        <input id="firstName" formControlName="firstName" type="text" class="w-full px-4 py-2 border-2 border-gray-300 rounded-md bg  -white text-gray-800 font-medium focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" />
+        <div *ngIf="form.get('firstName')?.invalid && form.get('firstName')?.touched" class="text-red-600 text-sm mt-1">First Name is required</div>
+      </div>
+      <div>
+        <label for="lastName" class="block text-sm font-semibold text-gray-700 mb-2">Last Name</label>
+        <input id="lastName" formControlName="lastName" type="text" class="w-full px-4 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-800 font-medium focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" />
+        <div *ngIf="form.get('lastName')?.invalid && form.get('lastName')?.touched" class="text-red-600 text-sm mt-1">Last Name is required</div>
+      </div>
+      <div>
+        <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">Email</label>
+        <input id="email" formControlName="email" type="email" class="w-full px-4 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-800 font-medium focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" />
+        <div *ngIf="form.get('email')?.invalid && form.get('email')?.touched" class="text-red-600 text-sm mt-1">Email is required and must be a valid email address</div>
+      </div>
+      <div>
+        <label for="phone" class="block text-sm font-semibold text-gray-700 mb-2">Phone</label>
+        <input id="phone" formControlName="phone" type="tel" class="w-full px-4 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-800 font-medium focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" />
+        <div *ngIf="form.get('phone')?.invalid && form.get('phone')?.touched" class="text-red-600 text-sm mt-1">Phone is required and must be a valid phone number</div>
+      </div>
+      <div>
+        <label for="basicSalary" class="block text-sm font-semibold text-gray-700 mb-2">Basic Salary</label>
+        <input id="basicSalary" formControlName="basicSalary" type="number" readonly class="w-full px-4 py-2 border-2 border-gray-300 rounded-md bg-gray-100 text-gray-800 font-medium focus:outline-none" />
+      </div>
+      <div>
+        <label for="department" class="block text-sm font-semibold text-gray-700 mb-2">Department</label>
+        <input id="department" formControlName="department" type="text"  class="w-full px-4 py-2 border-2 border-gray-300 rounded-md text-gray-800 font-medium focus:outline-none" />
+      </div>
+      <div>
+        <label for="designation" class="block text-sm font-semibold text-gray-700 mb-2">Designation</label>
+        <input id="designation" formControlName="designation" type="text"  class="w-full px-4 py-2 border-2 border-gray-300 rounded-md text-gray-800 font-medium focus:outline-none" />
+      </div>
+    </div>
+    <div class="flex gap-4 mt-6">
+      <button
+        type="submit"
+        [disabled]="!form.valid"
+        class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md transition disabled:opacity-50 disabled:cursor-not-allowed shadow-md">
+        Save
+      </button>
+
+      <button
+        type="button"
+        (click)="clearForm()"
+        class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-md transition shadow-md">
+        Clear
+      </button>
+    </div>
+  </form>
+
+  <!-- Table Section -->
+  <div class="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
+    <table class="w-full">
+      <thead>
+      <tr class="bg-gradient-to-r from-gray-800 to-gray-700">
+        <th class="py-4 px-6 text-left text-white font-bold text-lg">ID</th>
+        <th class="py-4 px-6 text-left text-white font-bold text-lg">Name</th>
+        <th class="py-4 px-6 text-left text-white font-bold text-lg">Email</th>
+        <th class="py-4 px-6 text-left text-white font-bold text-lg">Phone</th>
+        <th class="py-4 px-6 text-left text-white font-bold text-lg">Basic Salary</th>
+        <th class="py-4 px-6 text-left text-white font-bold text-lg">Department</th>
+        <th class="py-4 px-6 text-center text-white font-bold text-lg">Actions</th>
+      </tr>
+      </thead>
+      <tbody>
+        @for (employee of employees; track employee.id) {
+          <tr class="border-b border-gray-200 hover:bg-blue-50 transition duration-200">
+            <td class="py-4 px-6 text-gray-800 font-semibold">{{ employee.id }}</td>
+            <td class="py-4 px-6 text-gray-800 font-medium">{{ employee.firstName +" "+ employee.lastName }}</td>
+            <td class="py-4 px-6 text-gray-800 font-medium">{{ employee.email }}</td>
+            <td class="py-4 px-6 text-gray-800 font-bold text-lg">{{ employee.phone }}</td>
+            <td class="py-4 px-6 text-gray-800 font-bold text-lg">{{ employee.basicSalary }}</td>
+            <td class="py-4 px-6 text-gray-800 font-bold text-lg">{{ employee.department }}</td>
+            <td class="py-4 px-6 text-center space-x-2">
+              <button (click)="editEmployee(employee.id)" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-md transition shadow-md"> Edit</button>
+              <button (click)="deleteEmployee(employee.id)" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-md transition shadow-md">Delete</button>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="5" class="text-center py-12 text-gray-600 font-medium text-lg">
+              No employees found. Add a new employee to get started.
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -1,0 +1,94 @@
+<div class="container mx-auto p-4">
+  <h2 class="text-3xl font-bold mb-6 text-gray-800">Allowance Management</h2>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="mb-8 p-6 rounded-lg bg-white shadow-lg border border-gray-200">
+    <h3 class="text-xl font-semibold text-gray-800 mb-6">Add New Allowance</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <label for="employeeId" class="block text-sm font-semibold text-gray-700 mb-2">Select Employee</label>
+        <select
+          id="employeeId"
+          formControlName="employeeId"
+          class="w-full px-4 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-800 font-medium focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">
+
+          <option value="" disabled selected class="text-gray-500">
+            -- Select an Employee --
+          </option>
+          <option *ngFor="let employee of employees" [value]="employee.id" class="text-gray-800">
+            {{ employee.firstName + ' ' + employee.lastName }}
+          </option>
+        </select>
+        <div *ngIf="form.get('employeeId')?.invalid && form.get('employeeId')?.touched" class="text-red-600 text-sm mt-1">Employee is required</div>
+      </div>
+      <div>
+        <label for="roleName" class="block text-sm font-semibold text-gray-700 mb-2">Select Type</label>
+        <select id="roleName" formControlName="type" class="w-full px-4 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-800 font-medium focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">
+          <option value="" disabled selected class="text-gray-500">-- Select a Type --</option>
+          <option value="Transport" class="text-gray-800">Transport</option>
+          <option value="Meal" class="text-gray-800">Meal</option>
+          <option value="Other" class="text-gray-800">Other</option>
+        </select>
+        <div *ngIf="form.get('type')?.invalid && form.get('type')?.touched" class="text-red-600 text-sm mt-1">Type is required</div>
+      </div>
+      <div>
+        <label for="amount" class="block text-sm font-semibold text-gray-700 mb-2">Amount (Rs.)</label>
+        <input id="amount" formControlName="amount" type="number" class="w-full px-4 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-800 font-medium focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" />
+        <div *ngIf="form.get('amount')?.invalid && form.get('amount')?.touched" class="text-red-600 text-sm mt-1">Amount is required and must be positive</div>
+      </div>
+      <div *ngIf="form.get('type')?.value === 'Other'">
+        <label for="other" class="block text-sm font-semibold text-gray-700 mb-2">Other</label>
+        <input id="other" formControlName="other" type="number" class="w-full px-4 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-800 font-medium focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" />
+      </div>
+    </div>
+
+    <div class="flex gap-4 mt-6">
+      <button
+        type="submit"
+        [disabled]="!form.valid"
+        class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md transition disabled:opacity-50 disabled:cursor-not-allowed shadow-md">
+        Save
+      </button>
+
+      <button
+        type="button"
+        (click)="clearForm()"
+        class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-md transition shadow-md">
+        Clear
+      </button>
+    </div>  </form>
+
+  <!-- Table Section -->
+  <div class="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
+    <table class="w-full">
+      <thead>
+      <tr class="bg-gradient-to-r from-gray-800 to-gray-700">
+        <th class="py-4 px-6 text-left text-white font-bold text-lg">ID</th>
+        <th class="py-4 px-6 text-left text-white font-bold text-lg">Employee Id</th>
+        <th class="py-4 px-6 text-left text-white font-bold text-lg">Type</th>
+        <th class="py-4 px-6 text-left text-white font-bold text-lg">Amount</th>
+        <th class="py-4 px-6 text-center text-white font-bold text-lg">Actions</th>
+      </tr>
+      </thead>
+      <tbody>
+        @for (allowance of allowancs; track allowance.id) {
+          <tr class="border-b border-gray-200 hover:bg-blue-50 transition duration-200">
+            <td class="py-4 px-6 text-gray-800 font-semibold">{{ allowance.id }}</td>
+            <td class="py-4 px-6 text-gray-800 font-medium">{{ allowance.employeeId }}</td>
+            <td class="py-4 px-6 text-gray-800 font-medium">{{ allowance.type }}</td>
+            <td class="py-4 px-6 text-gray-800 font-bold text-lg">Rs. {{ allowance.amount | number:'1.2-2' }}</td>
+            <td class="py-4 px-6 text-center space-x-2">
+              <button (click)="editAllowance(allowance.id)" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-md transition shadow-md"> Edit</button>
+              <button (click)="deleteAllowance(allowance.id)" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-md transition shadow-md"> Delete</button>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="4" class="text-center py-12 text-gray-600 font-medium text-lg">
+               No salaries found. Add a new allowance to get started.
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

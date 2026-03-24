@@ -1,11 +1,11 @@
-import { DOCUMENT, isPlatformBrowser } from '@angular/common';
+import {DOCUMENT, isPlatformBrowser, NgIf} from '@angular/common';
 import { ChangeDetectionStrategy, Component, PLATFORM_ID, inject, signal, computed } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-sidebar',
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, NgIf],
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -40,14 +40,13 @@ export class Sidebar {
     // Load user info
     const storedUsername = this.authService.getUsername();
     const storedRole = this.authService.getRole();
-    
+
     if (storedUsername) {
       this.username.set(storedUsername);
     }
     if (storedRole) {
       this.userRole.set(storedRole);
     }
-
     this.applyTheme();
   }
 
@@ -62,5 +61,6 @@ export class Sidebar {
     this.document.documentElement.classList.toggle('admin-light-theme', !darkModeEnabled);
     localStorage.setItem('admin-sidebar-theme', darkModeEnabled ? 'dark' : 'light');
   }
+
 
 }
