@@ -108,31 +108,56 @@
                   </div>
                   <span>Menu Item Management</span>
                </button>
-               <!-- Submenu -->
+               <!-- Submenu Aksa -->
                <ul class="marketing-submenu space-y-1 max-h-0 overflow-hidden transition-all duration-300">
+                  
                   <li>
-                     <button type="button" routerLink="admin-marketing/campaigns" routerLinkActive="sidebar-item-active"
+                     <button type="button" routerLink="/admin/menu-items" routerLinkActive="sidebar-submenu-item-active"
                         class="sidebar-submenu-item w-full flex items-center gap-3 px-3 py-2 ml-6 rounded-lg text-xs font-medium transition-all duration-200">
                         <div class="sidebar-item-icon flex items-center justify-center w-7 h-7 rounded-md transition-all duration-200">
                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                               <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 18 4.5h-2.25A2.25 2.25 0 0 0 13.5 6.75v11.25A2.25 2.25 0 0 0 15.75 20.25Z" />
                            </svg>
                         </div>
-                        <span>Campaigns</span>
+                        <span>Menu Items</span>
                      </button>
                   </li>
+
                   <li>
-                     <button type="button" routerLink="admin-marketing/automated-messages" routerLinkActive="sidebar-item-active"
+                     <button type="button" routerLink="/admin/menu-item-prices" routerLinkActive="sidebar-submenu-item-active"
                         class="sidebar-submenu-item w-full flex items-center gap-3 px-3 py-2 ml-6 rounded-lg text-xs font-medium transition-all duration-200">
                         <div class="sidebar-item-icon flex items-center justify-center w-7 h-7 rounded-md transition-all duration-200">
                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.694 48.694 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.692 48.692 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                            </svg>
                         </div>
-                        <span>Automation</span>
+                        <span>Menu Item Price</span>
                      </button>
                   </li>
-               
+
+                  <li>
+                     <button type="button" routerLink="/admin/menu-categories" routerLinkActive="sidebar-submenu-item-active"
+                        class="sidebar-submenu-item w-full flex items-center gap-3 px-3 py-2 ml-6 rounded-lg text-xs font-medium transition-all duration-200">
+                        <div class="sidebar-item-icon flex items-center justify-center w-7 h-7 rounded-md transition-all duration-200">
+                           <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+                           </svg>
+                        </div>
+                        <span>Menu Category</span>
+                     </button>
+                  </li>
+
+                  <li>
+                     <button type="button" routerLink="/admin/portions" routerLinkActive="sidebar-submenu-item-active"
+                        class="sidebar-submenu-item w-full flex items-center gap-3 px-3 py-2 ml-6 rounded-lg text-xs font-medium transition-all duration-200">
+                        <div class="sidebar-item-icon flex items-center justify-center w-7 h-7 rounded-md transition-all duration-200">
+                           <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
+                           </svg>
+                        </div>
+                        <span>Menu Portion</span>
+                     </button>
+                  </li>
                </ul>
             </li>
             <li>

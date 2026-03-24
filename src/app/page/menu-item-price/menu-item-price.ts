@@ -13,13 +13,13 @@ import Swal from 'sweetalert2';
 })
 export class MenuItemPrice {
 
-  isEditMode : boolean = false;
+  isEditMode: boolean = false;
 
   menuItemPriceList: Array<MenuItemPriceModel> = [];
   menuItemPriceObj: MenuItemPriceModel = {
     id: 0,
-    itemId: 0,
-    portionId: 0,
+    itemName: '',
+    portionName: '',
     price: 0.0,
     isActive: true
   }
@@ -31,7 +31,7 @@ export class MenuItemPrice {
   }
 
   getAll() {
-    this.http.get<MenuItemPriceModel[]>("http://localhost:8080/menu-item-price").subscribe(data => {
+    this.http.get<MenuItemPriceModel[]>("http://localhost:8080/menu-item-price/get-full-menu").subscribe(data => {
       this.menuItemPriceList = data;
       this.cdr.detectChanges();
     })
@@ -46,41 +46,41 @@ export class MenuItemPrice {
   clearForm(): void {
     this.menuItemPriceObj = {
       id: 0,
-      itemId: 0,
-      portionId: 0,
+      itemName: '',
+      portionName: '',
       price: 0.0,
       isActive: true
     }
   }
 
   onEdit(menuItemPrice: MenuItemPriceModel): void {
-    this.menuItemPriceObj = { ...menuItemPrice }; 
-    this.isEditMode = true; 
+    this.menuItemPriceObj = { ...menuItemPrice };
+    this.isEditMode = true;
   }
-  
-  updateMenuItemPrice() : void {
-    this.http.put("http://localhost:8080/menu-item-price" , this.menuItemPriceObj).subscribe(data => {
+
+  updateMenuItemPrice(): void {
+    this.http.put("http://localhost:8080/menu-item-price", this.menuItemPriceObj).subscribe(data => {
       this.getAll();
       this.clearForm();
       this.isEditMode = false;
     })
   }
 
-deleteMenuItemPrice(id: number): void {
+  deleteMenuItemPrice(id: number): void {
     Swal.fire({
       title: "Are you sure?",
       text: "You won't be able to revert this!",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#dc2626", 
-      cancelButtonColor: "#6b7280", 
+      confirmButtonColor: "#dc2626",
+      cancelButtonColor: "#6b7280",
       confirmButtonText: "Yes, delete it!"
     }).then((result) => {
-      
+
       if (result.isConfirmed) {
         this.http.delete(`http://localhost:8080/menu-item-price/${id}`).subscribe({
           next: (data) => {
-            
+
             Swal.fire({
               title: "Deleted!",
               text: "The item has been deleted.",

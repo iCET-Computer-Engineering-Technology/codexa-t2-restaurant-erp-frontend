@@ -12,13 +12,13 @@
 
         <div class="form-body">
           <div class="form-group">
-            <label>Item Id</label>
-              <input type="number" [(ngModel)]="menuItemPriceObj.itemId" step="0.01" placeholder="Item Id" class="form-control">
+            <label>Item Name</label>
+              <input type="number" [(ngModel)]="menuItemPriceObj.itemName" step="0.01" placeholder="Item Id" class="form-control">
           </div>
 
           <div class="form-group">
-            <label>Portion Id</label>
-              <input type="number" [(ngModel)]="menuItemPriceObj.portionId" step="0.01" placeholder="Portion Id" class="form-control">
+            <label>Portion Name</label>
+              <input type="number" [(ngModel)]="menuItemPriceObj.portionName" step="0.01" placeholder="Portion Id" class="form-control">
           </div>
 
           <div class="form-group">
@@ -74,8 +74,8 @@
           <tr *ngFor="let menuItemPrice of menuItemPriceList">
             <td class="fw-bold">{{menuItemPrice.id}}</td>
 
-            <td class="fw-bold">{{menuItemPrice.itemId}}</td>
-            <td class="fw-bold">{{menuItemPrice.portionId}}</td>
+            <td class="fw-bold">{{menuItemPrice.itemName}}</td>
+            <td class="fw-bold">{{menuItemPrice.portionName}}</td>
 
             <td class="fw-bold">{{menuItemPrice.price}}</td>
 

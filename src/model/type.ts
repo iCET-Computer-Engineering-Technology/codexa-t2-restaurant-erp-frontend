@@ -1,5 +1,3 @@
-import { Timestamp } from "rxjs";
-
 export interface CategoryModel {
     id : number;
     name : String;
@@ -22,8 +20,8 @@ export interface MenuItemsModel{
 
 export interface MenuItemPriceModel {
     id : number;
-    itemId : number;
-    portionId : number;
+    itemName : String;
+    portionName : String;
     price : number;
     isActive : Boolean;
 }

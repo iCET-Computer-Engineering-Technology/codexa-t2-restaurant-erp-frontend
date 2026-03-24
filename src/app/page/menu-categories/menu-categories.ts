@@ -9,7 +9,7 @@ import { Sidebar } from "../sidebar/sidebar";
 
 @Component({
   selector: 'app-menu-categories',
-  imports: [RouterOutlet, ReactiveFormsModule, FormsModule, CommonModule, Sidebar],
+  imports: [ ReactiveFormsModule, FormsModule, CommonModule],
   templateUrl: './menu-categories.html',
   styleUrl: './menu-categories.css',
 })
