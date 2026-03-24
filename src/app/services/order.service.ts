@@ -20,6 +20,7 @@ import {
     MenuCategoriesDto,
     MenuItemPriceDto,
     MenuItemsDto,
+    OrderTypeDto,
     OrderCreateRequest,
     OrderResponse,
     PortionDto,
@@ -91,6 +92,31 @@ export class OrderService {
             (response) => this.normalizePortions(response),
             []
         );
+    }
+
+    //Order Types
+    getActiveOrderTypes(): Observable<OrderTypeDto[]> {
+        return this.firstSuccessfulGet<OrderTypeDto[]>(
+            [`${this.apiUrl}/order-types/active`, `${this.apiUrl}/order-types`],
+            (response) => this.normalizeOrderTypes(response),
+            []
+        );
+    }
+
+    private normalizeOrderTypes(response: unknown): OrderTypeDto[] {
+        const candidates = this.extractArray<Record<string, unknown>>(response);
+        return candidates
+            .map((raw: any) => {
+                const id = Number(raw?.id ?? raw?.orderTypeId ?? raw?.order_type_id);
+                const typeName = String(raw?.typeName ?? raw?.type_name ?? raw?.orderType ?? raw?.name ?? '').trim();
+                const description = raw?.description != null ? String(raw.description) : undefined;
+                const isActive = Boolean(raw?.isActive ?? raw?.active ?? true);
+                const createdAt = raw?.createdAt != null ? String(raw.createdAt) : undefined;
+                const updatedAt = raw?.updatedAt != null ? String(raw.updatedAt) : undefined;
+
+                return { id, typeName, description, isActive, createdAt, updatedAt } satisfies OrderTypeDto;
+            })
+            .filter((t) => Number.isFinite(t.id) && t.id > 0 && t.typeName.length > 0);
     }
 
     private normalizePortions(response: unknown): PortionDto[] {
@@ -381,6 +407,7 @@ export class OrderService {
 
         return {
             id: Number(raw?.id ?? raw?.orderId ?? 0),
+            orderTypeId: raw?.orderTypeId != null ? Number(raw.orderTypeId) : undefined,
             orderNumber: String(raw?.orderNumber ?? raw?.order_no ?? raw?.number ?? ''),
             orderType: String(raw?.orderType ?? raw?.type ?? ''),
             tableId: raw?.tableId != null ? Number(raw.tableId) : undefined,

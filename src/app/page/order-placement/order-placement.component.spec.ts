@@ -15,6 +15,7 @@ describe('OrderPlacementComponent', () => {
                 {
                     provide: OrderService,
                     useValue: {
+                        getActiveOrderTypes: () => of([{ id: 1, typeName: 'dine_in', isActive: true }]),
                         getAllPortions: () => of([]),
                         getAllCategories: () => of([]),
                         getAllTables: () => of([]),
