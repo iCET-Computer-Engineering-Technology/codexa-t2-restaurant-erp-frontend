@@ -64,7 +64,7 @@ export class OrderPlacementComponent implements OnInit, OnDestroy {
     constructor(
         private readonly orderService: OrderService,
         private readonly cdr: ChangeDetectorRef
-    ) {}
+    ) { }
 
     ngOnInit(): void {
         console.log('OrderPlacementComponent initialized');
@@ -421,34 +421,34 @@ export class OrderPlacementComponent implements OnInit, OnDestroy {
             .subscribe({
                 next: (response) => {
                     this.submittingOrder = false;
-                                        this.showOrderSuccessPopup(response?.orderNumber, placedItems, placedTotal);
-                                        this.resetOrder();
+                    this.showOrderSuccessPopup(response?.orderNumber, placedItems, placedTotal);
+                    this.resetOrder();
                     this.requestRender();
                 },
                 error: (err) => {
                     console.error('Error creating order:', err);
                     this.submittingOrder = false;
-                                        this.errorMessage = 'Order failed. Please try again.';
+                    this.errorMessage = 'Order failed. Please try again.';
                     this.requestRender();
                 },
             });
     }
 
-        private showOrderSuccessPopup(
-                orderNumber: string | number | undefined,
-                items: OrderCartItem[],
-                total: number
-        ): void {
-                const title = orderNumber ? `Order #${orderNumber}` : 'Order Created';
+    private showOrderSuccessPopup(
+        orderNumber: string | number | undefined,
+        items: OrderCartItem[],
+        total: number
+    ): void {
+        const title = orderNumber ? `Order #${orderNumber}` : 'Order Created';
 
-                const rowsHtml = (items ?? [])
-                        .map((i) => {
-                                const itemName = this.escapeHtml(i.menuItemName ?? '');
-                                const portionName = this.escapeHtml(i.portionName ?? '');
-                                const qty = Number(i.quantity) || 0;
-                                const unit = Number(i.price) || 0;
-                                const line = unit * qty;
-                                return `
+        const rowsHtml = (items ?? [])
+            .map((i) => {
+                const itemName = this.escapeHtml(i.menuItemName ?? '');
+                const portionName = this.escapeHtml(i.portionName ?? '');
+                const qty = Number(i.quantity) || 0;
+                const unit = Number(i.price) || 0;
+                const line = unit * qty;
+                return `
                                     <tr class="border-b border-gray-100">
                                         <td class="py-2 pr-2">
                                             <div class="font-semibold text-gray-900">${itemName}</div>
@@ -458,10 +458,10 @@ export class OrderPlacementComponent implements OnInit, OnDestroy {
                                         <td class="py-2 px-2 text-right font-mono text-xs text-gray-700 whitespace-nowrap">${qty}</td>
                                         <td class="py-2 pl-2 text-right font-mono text-xs text-gray-700 whitespace-nowrap">Rs. ${line.toFixed(2)}</td>
                                     </tr>`;
-                        })
-                        .join('');
+            })
+            .join('');
 
-                const html = `
+        const html = `
                     <div class="text-left">
                         <div class="text-sm text-gray-700">Order placed successfully.</div>
                         <div class="mt-4 overflow-x-auto">
@@ -485,24 +485,24 @@ export class OrderPlacementComponent implements OnInit, OnDestroy {
                         </div>
                     </div>`;
 
-                Swal.fire({
-                        icon: 'success',
-                        title,
-                        html,
-                        confirmButtonText: 'OK',
-                        confirmButtonColor: '#3b82f6',
-                        width: 720,
-                });
-        }
+        Swal.fire({
+            icon: 'success',
+            title,
+            html,
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#3b82f6',
+            width: 720,
+        });
+    }
 
-        private escapeHtml(value: string): string {
-                return String(value)
-                        .replace(/&/g, '&amp;')
-                        .replace(/</g, '&lt;')
-                        .replace(/>/g, '&gt;')
-                        .replace(/"/g, '&quot;')
-                        .replace(/'/g, '&#039;');
-        }
+    private escapeHtml(value: string): string {
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
 
     resetOrder(): void {
         this.cartItems = [];
