@@ -1,5 +1,5 @@
 import { DOCUMENT, isPlatformBrowser } from '@angular/common';
-import { ChangeDetectionStrategy, Component, PLATFORM_ID, inject, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, PLATFORM_ID, inject, signal, computed, HostListener } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
@@ -16,6 +16,7 @@ export class Sidebar {
   private readonly authService = inject(AuthService);
 
   readonly isDarkMode = signal(true);
+  readonly isHovered = signal(false);
 
   // Get logged-in user info
   readonly username = signal<string | null>(null);
@@ -49,6 +50,16 @@ export class Sidebar {
     }
 
     this.applyTheme();
+  }
+
+  @HostListener('mouseenter')
+  onMouseEnter(): void {
+    this.isHovered.set(true);
+  }
+
+  @HostListener('mouseleave')
+  onMouseLeave(): void {
+    this.isHovered.set(false);
   }
 
   toggleTheme(): void {

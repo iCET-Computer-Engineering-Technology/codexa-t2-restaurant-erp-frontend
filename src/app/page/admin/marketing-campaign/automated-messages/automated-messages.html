@@ -13,9 +13,10 @@
         <p class="sub">Trigger-based emails and SMS rules for customer engagement</p>
       </div>
       <div class="header-actions">
-        <button class="btn btn-ghost" (click)="openDebugModal()" title="Debug customer status">🐛 Debug</button>
-        <button class="btn btn-ghost" (click)="showTestModal = true">⟐ Test Email</button>
+        <!-- <button class="btn btn-ghost" (click)="openDebugModal()" title="Debug customer status">🐛 Debug</button>
+        <button class="btn btn-ghost" (click)="showTestModal = true">⟐ Test Email</button> -->
         <button class="btn btn-primary" (click)="openCreateModal()">+ New Rule</button>
+        <button class="btn btn-ghost" (click)="openSchedulePanel()">Schedule</button>
       </div>
     </div>
 
@@ -105,6 +106,45 @@
           <button type="button" class="btn btn-ghost btn-sm" (click)="sendToAll()" [disabled]="bulkForm.invalid">⟐ Send to All</button>
           <button type="button" class="btn btn-ghost btn-sm" (click)="sendBirthday()" [disabled]="bulkForm.invalid">🎂 Birthday</button>
           <button type="button" class="btn btn-ghost btn-sm" (click)="sendAnniversary()" [disabled]="bulkForm.invalid">✦ Anniversary</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Email Scheduler Panel -->
+<div class="schedule-overlay" *ngIf="showSchedulePanel">
+  <div class="schedule-panel">
+    <div class="panel-header">
+      <div>
+        <h2>Email Scheduler</h2>
+        <p class="sub">Set email dispatch time</p>
+      </div>
+      <button class="modal-close" (click)="closeSchedulePanel()" aria-label="Close scheduler">×</button>
+    </div>
+
+    <div class="panel-body">
+      <div *ngIf="schedulerLoading" class="loading-container">
+        <div class="spinner"></div>
+        <p>Loading email scheduler configuration...</p>
+      </div>
+
+      <form *ngIf="!schedulerLoading" class="schedule-form" [formGroup]="emailSchedulerForm" (ngSubmit)="saveEmailScheduler()">
+        <div class="form-group">
+          <label for="sendTime">Send Time *</label>
+          <div style="display: flex; gap: 10px; align-items: flex-end;">
+            <input id="sendTime" formControlName="sendTime" type="time" required style="flex: 1;">
+            <button type="button" class="btn btn-ghost" (click)="setQuickTime('08:00')" title="Set 8:00 AM">8:00</button>
+            <button type="button" class="btn btn-ghost" (click)="setQuickTime('12:00')" title="Set 12:00 PM">12:00</button>
+            <button type="button" class="btn btn-ghost" (click)="setQuickTime('17:00')" title="Set 5:00 PM">17:00</button>
+          </div>
+          <span *ngIf="emailSchedulerForm.get('sendTime')?.hasError('required')" class="error-text">Required</span>
+          <small class="sub-text">Select time in HH:MM format</small>
+        </div>
+
+        <div class="modal-actions" style="padding: 0;">
+          <button type="button" class="btn btn-ghost" (click)="closeSchedulePanel()">Cancel</button>
+          <button type="submit" class="btn btn-primary" [disabled]="emailSchedulerForm.invalid">Save Scheduler</button>
         </div>
       </form>
     </div>
