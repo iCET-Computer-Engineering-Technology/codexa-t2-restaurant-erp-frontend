@@ -22,6 +22,12 @@ export const routes: Routes = [
   {
     path: 'cashier',
     loadComponent: () => import('./page/cashier/cashier').then((m) => m.Cashier),
+    children: [
+      {
+        path: '',
+        component: Dashboard,
+      }
+    ]
   },
   {
     path: 'waiter',
