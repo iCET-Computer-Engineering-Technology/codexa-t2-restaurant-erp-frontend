@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { Login } from './page/login/login';
 import { Dashboard } from './page/dashboard/dashboard';
+
 import { Customers } from './page/customers/customers';
 import { MarketingCampaign } from './page/admin/marketing-campaign/marketing-campaign';
 import { CampaignsComponent } from './page/admin/marketing-campaign/campaigns/campaigns';
@@ -9,8 +10,11 @@ import { Kitchen } from './page/kitchen/kitchen';
 import { KitchenDashboard } from './page/kitchen/kitchen-dashboard/kitchen-dashboard';
 import { KitchenOrderTable } from './page/kitchen/kitchen-order-table/kitchen-order-table';
 import { OrderAssign } from './page/kitchen/order-assign/order-assign';
+import { MenuItems } from './page/menu-items/menu-items';
+import { MenuCategories } from './page/menu-categories/menu-categories';
+import { MenuItemPrice } from './page/menu-item-price/menu-item-price';
+import { Portions } from './page/portions/portions';
 import { OrderPlacementComponent } from './page/order-placement/order-placement.component';
-
 import { roleGuard } from './guards/role.guard';
 export const routes: Routes = [
   {
@@ -63,6 +67,22 @@ export const routes: Routes = [
         component: Dashboard,
       },
       {
+        path: 'menu-items',
+        component: MenuItems
+      },
+      {
+        path: "menu-item-prices",
+        component: MenuItemPrice
+      },
+      {
+        path: "menu-categories",
+        component: MenuCategories
+      },
+      {
+        path: "portions",
+        component: Portions
+      },
+      {
         path: 'admin-marketing',
         component: MarketingCampaign,
         children: [
@@ -81,6 +101,7 @@ export const routes: Routes = [
             path: 'analytics',
             component: AnalyticsComponent,
           },
+
         ],
       },
       {
@@ -107,6 +128,7 @@ export const routes: Routes = [
           },
         ],
       },
+
     ],
   },
 ];
