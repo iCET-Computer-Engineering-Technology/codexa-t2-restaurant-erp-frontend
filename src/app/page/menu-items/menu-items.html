@@ -14,8 +14,11 @@
         </div>
 
         <div class="form-group">
-          <label>Category Id</label>
-          <input type="number" [(ngModel)]="menuItemObj.categoryId" placeholder="Enter category ID" class="form-control">
+          <label>Category Name</label>
+          <select [(ngModel)]="menuItemObj.categoryId" class="form-control">
+            <option [ngValue]="0" disabled>Select category</option>
+            <option *ngFor="let category of categoryList" [ngValue]="category.id">{{ category.name }}</option>
+          </select>
         </div>
 
         <div class="form-group">
@@ -72,22 +75,18 @@
       </thead>
 
       <tbody>
-        <tr *ngFor="let menuItems of menuItemList">
-          <td class="text-slate-700 font-medium">{{menuItems.id}}</td>
+        <tr *ngFor="let menuItems of menuItemList; let i = index">
+          <td class="text-slate-700 font-medium">{{i + 1}}</td>
 
           <td>
             <div class="customer-info">
-              <!-- <div class="avatar">
-                  <img *ngIf="menuItems.imageUrl" [src]="menuItems.imageUrl" alt="img" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
-                  <span *ngIf="!menuItems.imageUrl">Img</span>
-              </div> -->
               <div>
                 <div class="fw-bold text-slate-800">{{menuItems.name}}</div>
               </div>
             </div>
           </td>                
           
-          <td class="text-slate-700">{{menuItems.categoryId}}</td>
+          <td class="text-slate-700">{{ getCategoryName(menuItems.categoryId) }}</td>
           <td class="text-slate-700">{{menuItems.description}}</td>
 
           <td>
