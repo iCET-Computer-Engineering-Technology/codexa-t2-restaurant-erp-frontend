@@ -9,6 +9,10 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(mouseenter)': 'onMouseEnter()',
+    '(mouseleave)': 'onMouseLeave()'
+  }
 })
 export class Sidebar {
   private readonly document = inject(DOCUMENT);
@@ -16,6 +20,7 @@ export class Sidebar {
   private readonly authService = inject(AuthService);
 
   readonly isDarkMode = signal(true);
+  readonly isHovered = signal(false);
 
   // Get logged-in user info
   readonly username = signal<string | null>(null);
@@ -50,6 +55,14 @@ export class Sidebar {
     this.applyTheme();
   }
 
+  onMouseEnter(): void {
+    this.isHovered.set(true);
+  }
+
+  onMouseLeave(): void {
+    this.isHovered.set(false);
+  }
+
   toggleTheme(): void {
     this.isDarkMode.update((currentMode) => !currentMode);
     this.applyTheme();
@@ -61,6 +74,5 @@ export class Sidebar {
     this.document.documentElement.classList.toggle('admin-light-theme', !darkModeEnabled);
     localStorage.setItem('admin-sidebar-theme', darkModeEnabled ? 'dark' : 'light');
   }
-
 
 }

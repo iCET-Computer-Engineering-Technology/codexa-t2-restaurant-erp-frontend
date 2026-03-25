@@ -56,12 +56,16 @@ export class AuthService {
         
         const token = response.token;
         const role = response.role || response.user?.role;
+        const userId = response.user?.id;
         
         if (token) {
           localStorage.setItem('authToken', token);
           localStorage.setItem('username', username);
           if (role) {
             localStorage.setItem('userRole', role);
+          }
+          if (userId !== undefined && userId !== null) {
+            localStorage.setItem('userId', String(userId));
           }
           this.isAuthenticatedSubject.next(true);
           console.log('Login successful, token stored, role:', role);
@@ -111,6 +115,7 @@ export class AuthService {
     localStorage.removeItem('authToken');
     localStorage.removeItem('username');
     localStorage.removeItem('userRole');
+    localStorage.removeItem('userId');
     this.isAuthenticatedSubject.next(false);
   }
 
@@ -124,6 +129,13 @@ export class AuthService {
 
   getRole(): string | null {
     return localStorage.getItem('userRole');
+  }
+
+  getUserId(): number | null {
+    const raw = localStorage.getItem('userId');
+    if (!raw) return null;
+    const parsed = Number(raw);
+    return Number.isFinite(parsed) ? parsed : null;
   }
 
   private hasToken(): boolean {
