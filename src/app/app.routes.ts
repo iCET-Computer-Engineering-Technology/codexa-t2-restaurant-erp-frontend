@@ -11,10 +11,10 @@ import { Kitchen } from './page/kitchen/kitchen';
 import { KitchenDashboard } from './page/kitchen/kitchen-dashboard/kitchen-dashboard';
 import { KitchenOrderTable } from './page/kitchen/kitchen-order-table/kitchen-order-table';
 import { OrderAssign } from './page/kitchen/order-assign/order-assign';
-import { MenuItems } from './page/menu-items/menu-items';
 import { MenuCategories } from './page/menu-categories/menu-categories';
 import { MenuItemPrice } from './page/menu-item-price/menu-item-price';
 import { Portions } from './page/portions/portions';
+import { MenuItem } from './page/menu-item/menu-item';
 
 export const routes: Routes = [
   {
@@ -55,8 +55,8 @@ export const routes: Routes = [
         component: Dashboard,
       },
       {
-        path: 'menu-items',
-        component: MenuItems
+        path: 'menu-item',
+        component: MenuItem
       },
       {
         path: "menu-item-prices",

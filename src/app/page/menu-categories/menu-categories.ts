@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { CategoryModel } from '../../../model/type';
+import { CategoryModel, PortionsModel } from '../../../model/type';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { isActive, RouterOutlet } from '@angular/router';
@@ -16,8 +16,10 @@ import { Sidebar } from "../sidebar/sidebar";
 export class MenuCategories {
   
   isEditMode: boolean = false;
+  
 
   categoryList : Array<CategoryModel> = [];
+  porttionList : Array<PortionsModel> = [];
   categoryObj : CategoryModel = {
     id : 0,
     name : '',

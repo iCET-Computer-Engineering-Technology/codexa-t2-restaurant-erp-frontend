@@ -13,6 +13,7 @@ export interface MenuItemsModel{
     id : number;
     name : String;
     categoryId : number;
+    categoryName?: string;
     description : String;
     isAvailable : Boolean;
     imageUrl : String;
@@ -24,4 +25,6 @@ export interface MenuItemPriceModel {
     portionName : String;
     price : number;
     isActive : Boolean;
+    itemId : number;
+    portionId : number;
 }
