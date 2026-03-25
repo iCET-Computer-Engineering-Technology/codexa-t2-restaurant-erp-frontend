@@ -1,5 +1,5 @@
 import { DOCUMENT, isPlatformBrowser } from '@angular/common';
-import { ChangeDetectionStrategy, Component, PLATFORM_ID, inject, signal, computed, HostListener } from '@angular/core';
+import { ChangeDetectionStrategy, Component, PLATFORM_ID, inject, signal, computed } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
@@ -9,6 +9,10 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(mouseenter)': 'onMouseEnter()',
+    '(mouseleave)': 'onMouseLeave()'
+  }
 })
 export class Sidebar {
   private readonly document = inject(DOCUMENT);
@@ -72,12 +76,10 @@ export class Sidebar {
     this.applyTheme();
   }
 
-  @HostListener('mouseenter')
   onMouseEnter(): void {
     this.isHovered.set(true);
   }
 
-  @HostListener('mouseleave')
   onMouseLeave(): void {
     this.isHovered.set(false);
   }

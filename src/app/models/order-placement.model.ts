@@ -1,5 +1,14 @@
 export type OrderType = 'dine_in' | 'takeout' | 'delivery' | 'online';
 
+export interface OrderTypeDto {
+  id: number;
+  typeName: string;
+  description?: string;
+  isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface MenuCategoriesDto {
   id: number;
   name: string;
@@ -68,7 +77,8 @@ export interface OrderItemCreateRequest {
 }
 
 export interface OrderCreateRequest {
-  orderType: string;
+  orderTypeId: number;
+  orderType?: string;
   tableId?: number;
   customerId?: number;
   serverId?: number;
@@ -91,6 +101,7 @@ export interface OrderItemResponse {
 
 export interface OrderResponse {
   id: number;
+  orderTypeId?: number;
   orderNumber: string;
   orderType: string;
   tableId?: number;

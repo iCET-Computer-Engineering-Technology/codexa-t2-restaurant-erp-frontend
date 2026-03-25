@@ -186,17 +186,17 @@
             <!-- Order Type -->
             <div class="mb-4">
               <label class="mb-2 block text-sm font-medium text-gray-700">Order Type</label>
-              <select [(ngModel)]="selectedOrderType" (ngModelChange)="onOrderTypeChange()"
+              <select [(ngModel)]="selectedOrderTypeId" (ngModelChange)="onOrderTypeChange()"
                 class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="dine_in">Dine In</option>
-                <option value="takeout">Takeout</option>
-                <option value="delivery">Delivery</option>
-                <option value="online">Online</option>
+                <option [ngValue]="null" disabled>Select order type...</option>
+                <option *ngFor="let t of orderTypes" [ngValue]="t.id">
+                  {{ t.typeName }}
+                </option>
               </select>
             </div>
 
             <!-- Table Selection -->
-            <div *ngIf="selectedOrderType === 'dine_in'" class="mb-4">
+            <div *ngIf="isDineIn()" class="mb-4">
               <label class="mb-2 block text-sm font-medium text-gray-700">Select Table *</label>
 
               <div *ngIf="loadingTables" class="inline-flex items-center gap-2 text-sm text-gray-600">

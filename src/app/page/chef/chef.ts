@@ -1,10 +1,9 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
 import { Sidebar } from '../sidebar/sidebar';
 
 @Component({
   selector: 'app-chef',
-  imports: [Sidebar, RouterOutlet],
+  imports: [Sidebar],
   templateUrl: './chef.html',
   styleUrl: './chef.css',
 })
