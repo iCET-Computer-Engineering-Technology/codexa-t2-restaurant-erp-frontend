@@ -45,7 +45,7 @@ export const routes: Routes = [
   {
     path: 'waiter',
     canActivate: [roleGuard],
-    data: { roles: ['ROLE_ADMIN', 'ROLE_WAITER'] },
+    data: { roles: ['ROLE_ADMIN', 'ROLE_CASHIER', 'ROLE_WAITER'] },
     loadComponent: () => import('./page/waiter/waiter').then((m) => m.Waiter),
   },
   {

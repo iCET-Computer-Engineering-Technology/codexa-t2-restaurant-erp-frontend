@@ -35,6 +35,7 @@ export class Sidebar {
   readonly showCustomers = computed(() => ['ROLE_ADMIN', 'ROLE_CASHIER'].includes(this.userRole() || ''));
   readonly showOrders = computed(() => ['ROLE_ADMIN', 'ROLE_CASHIER'].includes(this.userRole() || ''));
   readonly showKitchen = computed(() => ['ROLE_ADMIN', 'ROLE_CHEF'].includes(this.userRole() || ''));
+  readonly showWaiter = computed(() => ['ROLE_ADMIN', 'ROLE_CASHIER'].includes(this.userRole() || ''));
   readonly showMarketing = computed(() => this.userRole() === 'ROLE_ADMIN');
   readonly showInbox = computed(() => this.userRole() === 'ROLE_ADMIN');
   readonly showUsers = computed(() => this.userRole() === 'ROLE_ADMIN');
