@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { MenuItemsModel } from '../../../model/type';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
@@ -11,7 +11,7 @@ import Swal from 'sweetalert2';
   templateUrl: './menu-items.html',
   styleUrl: './menu-items.css',
 })
-export class MenuItems {
+export class MenuItems implements OnInit {
 
   isEditMode : boolean = false;
 
@@ -26,21 +26,21 @@ export class MenuItems {
 
   }
 
-  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) { }
+  constructor(private readonly http: HttpClient, private readonly cdr: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     this.getAll();
   }
 
   getAll() {
-    this.http.get<MenuItemsModel[]>("http://localhost:8080/menu-items").subscribe(data => {
+    this.http.get<MenuItemsModel[]>("http://localhost:8080/api/menu-items").subscribe(data => {
       this.menuItemList = data;
       this.cdr.detectChanges();
     })
   }
 
   addMenuItem(): void {
-    this.http.post("http://localhost:8080/menu-items", this.menuItemObj).subscribe(data => {
+    this.http.post("http://localhost:8080/api/menu-items", this.menuItemObj).subscribe(data => {
       this.getAll();
     })
   }
@@ -62,7 +62,7 @@ export class MenuItems {
   }
 
   updateMenuItem() : void {
-  this.http.put("http://localhost:8080/menu-items" , this.menuItemObj).subscribe(data => {
+  this.http.put("http://localhost:8080/api/menu-items" , this.menuItemObj).subscribe(data => {
     this.getAll();
     this.clearForm();
     this.isEditMode = false;
@@ -81,7 +81,7 @@ deleteMenuItem(id: number): void {
     }).then((result) => {
       
       if (result.isConfirmed) {
-        this.http.delete(`http://localhost:8080/menu-items/${id}`).subscribe({
+        this.http.delete(`http://localhost:8080/api/menu-items/${id}`).subscribe({
           next: (data) => {
             
             Swal.fire({

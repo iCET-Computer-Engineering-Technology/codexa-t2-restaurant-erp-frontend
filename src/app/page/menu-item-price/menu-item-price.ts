@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { MenuItemPriceModel } from '../../../model/type';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
@@ -11,7 +11,7 @@ import Swal from 'sweetalert2';
   templateUrl: './menu-item-price.html',
   styleUrl: './menu-item-price.css',
 })
-export class MenuItemPrice {
+export class MenuItemPrice implements OnInit {
 
   isEditMode: boolean = false;
 
@@ -20,25 +20,25 @@ export class MenuItemPrice {
     id: 0,
     itemName: '',
     portionName: '',
-    price: 0.0,
+    price: 0,
     isActive: true
   }
 
-  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) { }
+  constructor(private readonly http: HttpClient, private readonly cdr: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     this.getAll();
   }
 
   getAll() {
-    this.http.get<MenuItemPriceModel[]>("http://localhost:8080/menu-item-price/get-full-menu").subscribe(data => {
+    this.http.get<MenuItemPriceModel[]>("http://localhost:8080/api/menu-item-price/get-full-menu").subscribe(data => {
       this.menuItemPriceList = data;
       this.cdr.detectChanges();
     })
   }
 
   addMenuItemPrice(): void {
-    this.http.post("http://localhost:8080/menu-item-price", this.menuItemPriceObj).subscribe(data => {
+    this.http.post("http://localhost:8080/api/menu-item-price", this.menuItemPriceObj).subscribe(data => {
       this.getAll();
     })
   }
@@ -48,7 +48,7 @@ export class MenuItemPrice {
       id: 0,
       itemName: '',
       portionName: '',
-      price: 0.0,
+      price: 0,
       isActive: true
     }
   }
@@ -59,7 +59,7 @@ export class MenuItemPrice {
   }
 
   updateMenuItemPrice(): void {
-    this.http.put("http://localhost:8080/menu-item-price", this.menuItemPriceObj).subscribe(data => {
+    this.http.put("http://localhost:8080/api/menu-item-price", this.menuItemPriceObj).subscribe(data => {
       this.getAll();
       this.clearForm();
       this.isEditMode = false;
@@ -78,7 +78,7 @@ export class MenuItemPrice {
     }).then((result) => {
 
       if (result.isConfirmed) {
-        this.http.delete(`http://localhost:8080/menu-item-price/${id}`).subscribe({
+        this.http.delete(`http://localhost:8080/api/menu-item-price/${id}`).subscribe({
           next: (data) => {
 
             Swal.fire({
