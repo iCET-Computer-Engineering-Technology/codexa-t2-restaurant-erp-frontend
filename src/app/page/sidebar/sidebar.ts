@@ -26,6 +26,26 @@ export class Sidebar {
     return user ? user.charAt(0).toUpperCase() : 'A';
   });
 
+  // Role-based visibility
+  readonly showDashboard = computed(() => this.userRole() === 'ROLE_ADMIN');
+  readonly showCustomers = computed(() => ['ROLE_ADMIN', 'ROLE_CASHIER'].includes(this.userRole() || ''));
+  readonly showOrders = computed(() => ['ROLE_ADMIN', 'ROLE_CASHIER'].includes(this.userRole() || ''));
+  readonly showMarketing = computed(() => this.userRole() === 'ROLE_ADMIN');
+  readonly showInbox = computed(() => this.userRole() === 'ROLE_ADMIN');
+  readonly showUsers = computed(() => this.userRole() === 'ROLE_ADMIN');
+  readonly showProducts = computed(() => this.userRole() === 'ROLE_ADMIN');
+
+  // Dynamic routes based on role
+  readonly customersRoute = computed(() => {
+    const role = this.userRole();
+    return role === 'ROLE_CASHIER' ? '/cashier/cashier-customer' : '/admin/admin-customer';
+  });
+
+  readonly ordersRoute = computed(() => {
+    const role = this.userRole();
+    return role === 'ROLE_CASHIER' ? '/cashier' : '/admin/admin-order';
+  });
+
   constructor() {
     if (!isPlatformBrowser(this.platformId)) {
       return;

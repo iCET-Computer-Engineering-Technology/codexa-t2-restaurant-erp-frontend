@@ -30,7 +30,11 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        component: Dashboard,
+        component: OrderPlacementComponent,
+      },
+      {
+        path: 'cashier-customer',
+        component: Customers,
       }
     ]
   },

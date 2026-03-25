@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
 import { Sidebar } from "../sidebar/sidebar";
-import { TableReservation } from "./table-reservation/table-reservation";
 
 @Component({
   selector: 'app-cashier',
-  imports: [Sidebar, TableReservation],
+  imports: [Sidebar, RouterOutlet],
   templateUrl: './cashier.html',
   styleUrl: './cashier.css',
 })

@@ -31,8 +31,9 @@
          <p class="sidebar-section-label px-3 mb-2 text-[10px] font-semibold uppercase tracking-wider">Main Menu</p>
 
          <ul class="space-y-1">
+            @if (showDashboard()) {
             <li>
-               <button type="button" routerLink="admin-dashboard" routerLinkActive="sidebar-item-active"
+               <button type="button" routerLink="/admin/admin-dashboard" routerLinkActive="sidebar-item-active"
                   class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group">
                   <div class="sidebar-item-icon flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-200">
                      <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -42,8 +43,10 @@
                   <span>Dashboard</span>
                </button>
             </li>
+            }
+            @if (showCustomers()) {
             <li>
-               <button type="button" routerLink="admin-customer" routerLinkActive="sidebar-item-active"
+               <button type="button" [routerLink]="customersRoute()" routerLinkActive="sidebar-item-active" [routerLinkActiveOptions]="{ exact: true }"
                   class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group">
                   <div class="sidebar-item-icon flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-200">
                      <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -53,8 +56,10 @@
                   <span>Customers</span>
                </button>
             </li>
+            }
+            @if (showOrders()) {
             <li>
-               <button type="button" routerLink="admin-order" routerLinkActive="sidebar-item-active"
+               <button type="button" [routerLink]="ordersRoute()" routerLinkActive="sidebar-item-active" [routerLinkActiveOptions]="{ exact: true }"
                   class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group">
                   <div class="sidebar-item-icon flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-200">
                      <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -64,6 +69,8 @@
                   <span>Orders</span>
                </button>
             </li>
+            }
+            @if (showMarketing()) {
             <li class="marketing-menu-group">
                <button type="button" class="marketing sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group">
                   <div class="sidebar-item-icon flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-200">
@@ -76,7 +83,7 @@
                <!-- Submenu -->
                <ul class="marketing-submenu space-y-1 max-h-0 overflow-hidden transition-all duration-300">
                   <li>
-                     <button type="button" routerLink="admin-marketing/campaigns" routerLinkActive="sidebar-item-active"
+                     <button type="button" routerLink="/admin/admin-marketing/campaigns" routerLinkActive="sidebar-item-active"
                         class="sidebar-submenu-item w-full flex items-center gap-3 px-3 py-2 ml-6 rounded-lg text-xs font-medium transition-all duration-200">
                         <div class="sidebar-item-icon flex items-center justify-center w-7 h-7 rounded-md transition-all duration-200">
                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -87,7 +94,7 @@
                      </button>
                   </li>
                   <li>
-                     <button type="button" routerLink="admin-marketing/automated-messages" routerLinkActive="sidebar-item-active"
+                     <button type="button" routerLink="/admin/admin-marketing/automated-messages" routerLinkActive="sidebar-item-active"
                         class="sidebar-submenu-item w-full flex items-center gap-3 px-3 py-2 ml-6 rounded-lg text-xs font-medium transition-all duration-200">
                         <div class="sidebar-item-icon flex items-center justify-center w-7 h-7 rounded-md transition-all duration-200">
                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -110,6 +117,8 @@
                   </li> -->
                </ul>
             </li>
+            }
+            @if (showInbox()) {
             <li>
                <button type="button" class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group">
                   <div class="sidebar-item-icon flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-200">
@@ -121,11 +130,13 @@
                   <span class="sidebar-badge flex items-center justify-center min-w-5.5 h-5.5 px-1.5 text-[11px] font-bold rounded-full">2</span>
                </button>
             </li>
+            }
          </ul>
 
          <p class="sidebar-section-label px-3 mt-6 mb-2 text-[10px] font-semibold uppercase tracking-wider">Management</p>
 
          <ul class="space-y-1">
+            @if (showUsers()) {
             <li>
                <button type="button" class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group">
                   <div class="sidebar-item-icon flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-200">
@@ -136,6 +147,8 @@
                   <span>Users</span>
                </button>
             </li>
+            }
+            @if (showProducts()) {
             <li>
                <button type="button" class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group">
                   <div class="sidebar-item-icon flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-200">
@@ -146,6 +159,7 @@
                   <span>Products</span>
                </button>
             </li>
+            }
          </ul>
       </nav>
 
