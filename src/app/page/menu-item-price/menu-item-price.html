@@ -13,12 +13,18 @@
         <div class="form-body">
           <div class="form-group">
             <label>Item Name</label>
-              <input type="number" [(ngModel)]="menuItemPriceObj.itemName" step="0.01" placeholder="Item Id" class="form-control">
+            <select class="form-control" [(ngModel)]="selectedItemId">
+              <option [ngValue]="0" disabled>Select item</option>
+              <option *ngFor="let item of menuItemsList" [ngValue]="item.id">{{ item.name }}</option>
+            </select>
           </div>
 
           <div class="form-group">
             <label>Portion Name</label>
-              <input type="number" [(ngModel)]="menuItemPriceObj.portionName" step="0.01" placeholder="Portion Id" class="form-control">
+            <select class="form-control" [(ngModel)]="selectedPortionId">
+              <option [ngValue]="0" disabled>Select portion</option>
+              <option *ngFor="let portion of portionsList" [ngValue]="portion.id">{{ portion.name }}</option>
+            </select>
           </div>
 
           <div class="form-group">
@@ -62,8 +68,8 @@
         <thead>
           <tr>
             <th>Id</th>
-            <th>Item Id</th>
-            <th>Portion Id</th>
+            <th>Item Name</th>
+            <th>Portion Name</th>
             <th>Price</th>
             <th>Status</th>
             <th>Actions</th>
@@ -71,8 +77,8 @@
         </thead>
 
         <tbody>
-          <tr *ngFor="let menuItemPrice of menuItemPriceList">
-            <td class="fw-bold">{{menuItemPrice.id}}</td>
+          <tr *ngFor="let menuItemPrice of menuItemPriceList; let i = index;">
+            <td class="fw-bold">{{i + 1}}</td>
 
             <td class="fw-bold">{{menuItemPrice.itemName}}</td>
             <td class="fw-bold">{{menuItemPrice.portionName}}</td>

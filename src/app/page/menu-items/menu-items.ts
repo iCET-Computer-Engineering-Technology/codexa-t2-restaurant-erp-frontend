@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { MenuItemsModel } from '../../../model/type';
+import { CategoryModel, MenuItemsModel } from '../../../model/type';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
@@ -16,6 +16,7 @@ export class MenuItems implements OnInit {
   isEditMode : boolean = false;
 
   menuItemList: Array<MenuItemsModel> = [];
+  categoryList: Array<CategoryModel> = [];
   menuItemObj: MenuItemsModel = {
     id: 0,
     name: '',
@@ -30,6 +31,7 @@ export class MenuItems implements OnInit {
 
   ngOnInit(): void {
     this.getAll();
+    this.getAllCategories();
   }
 
   getAll() {
@@ -37,6 +39,19 @@ export class MenuItems implements OnInit {
       this.menuItemList = data;
       this.cdr.detectChanges();
     })
+  }
+
+  getAllCategories() {
+    this.http.get<CategoryModel[]>("http://localhost:8080/api/categories/get-all").subscribe(data => {
+      this.categoryList = data;
+      this.cdr.detectChanges();
+    })
+  }
+
+  getCategoryName(categoryId: number | string): string {
+    const normalizedCategoryId = Number(categoryId);
+    const category = this.categoryList.find((item) => Number(item.id) === normalizedCategoryId);
+    return category ? category.name : `Category #${categoryId}`;
   }
 
   addMenuItem(): void {
