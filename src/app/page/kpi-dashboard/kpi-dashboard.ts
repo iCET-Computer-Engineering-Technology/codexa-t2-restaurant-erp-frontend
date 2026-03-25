@@ -1,6 +1,10 @@
 import { CommonModule, DOCUMENT, isPlatformBrowser} from '@angular/common';
-import { ChangeDetectionStrategy, Component, PLATFORM_ID, inject, signal, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, PLATFORM_ID, inject, signal, OnDestroy, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { HttpClient } from '@angular/common/http';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { catchError, forkJoin, of } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 interface OrderMetric {
   title: string;
@@ -29,6 +33,11 @@ interface PopularOrder {
   share: number;
 }
 
+interface IngredientSummary {
+  count: number;
+  lowStockCount: number;
+}
+
 @Component({
   selector: 'app-kpi-dashboard',
   imports: [CommonModule, RouterLink, RouterLinkActive],
@@ -40,10 +49,16 @@ export class KpiDashboard implements OnInit, OnDestroy {
   greeting: string = '';
   today: Date = new Date();
   readonly currencyCode = 'LKR';
+  isLoading = false;
+  loadError = '';
+  ingredientSummary: IngredientSummary = {
+    count: 0,
+    lowStockCount: 0,
+  };
 
   private timerId?: ReturnType<typeof setInterval>;
 
-  readonly orderMetrics: OrderMetric[] = [
+  orderMetrics: OrderMetric[] = [
     {
       title: 'Orders Received',
       value: '284',
@@ -75,7 +90,7 @@ export class KpiDashboard implements OnInit, OnDestroy {
     }
   ];
 
-  readonly revenueMetrics: RevenueMetric[] = [
+  revenueMetrics: RevenueMetric[] = [
     {
       title: 'Revenue Today',
       amount: 423500,
@@ -107,7 +122,7 @@ export class KpiDashboard implements OnInit, OnDestroy {
     }
   ];
 
-  readonly popularOrders: PopularOrder[] = [
+  popularOrders: PopularOrder[] = [
     {
       rank: 1,
       item: 'Chicken Kottu',
@@ -160,6 +175,7 @@ export class KpiDashboard implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.updateGreeting();
+    this.loadDashboardData();
 
     if (!isPlatformBrowser(this.platformId)) {
       return;
@@ -189,8 +205,12 @@ export class KpiDashboard implements OnInit, OnDestroy {
 
   private readonly document = inject(DOCUMENT);
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly http = inject(HttpClient);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly isDarkMode = signal(true);
+
+  private readonly apiRoot = environment.apiUrl.replace(/\/api\/?$/, '');
 
   constructor() {
     if (!isPlatformBrowser(this.platformId)) {
@@ -215,6 +235,271 @@ export class KpiDashboard implements OnInit, OnDestroy {
 
     this.document.documentElement.classList.toggle('admin-light-theme', !darkModeEnabled);
     localStorage.setItem('admin-sidebar-theme', darkModeEnabled ? 'dark' : 'light');
+  }
+
+  loadDashboardData(): void {
+    this.isLoading = true;
+    this.loadError = '';
+
+    forkJoin({
+      orders: this.http
+        .get<unknown>(`${environment.apiUrl}/order/find-all`)
+        .pipe(catchError(() => of([]))),
+      ingredients: this.http
+        .get<unknown>(`${this.apiRoot}/ingredient?page=0&size=10`)
+        .pipe(catchError(() => of([]))),
+    })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(({ orders, ingredients }) => {
+        const parsedOrders = this.extractArray<any>(orders);
+        const parsedIngredients = this.extractArray<any>(ingredients);
+
+        this.ingredientSummary = this.buildIngredientSummary(parsedIngredients);
+        this.orderMetrics = this.buildOrderMetrics(parsedOrders);
+        this.revenueMetrics = this.buildRevenueMetrics(parsedOrders);
+        this.popularOrders = this.buildPopularOrders(parsedOrders);
+
+        this.isLoading = false;
+
+        if (parsedOrders.length === 0 && parsedIngredients.length === 0) {
+          this.loadError = 'Unable to load dashboard data from the API endpoints.';
+        }
+      });
+  }
+
+  private buildIngredientSummary(ingredients: any[]): IngredientSummary {
+    const lowStockCount = ingredients.filter((item) => {
+      const quantity = Number(item?.quantity ?? item?.stockQuantity ?? item?.availableQty ?? 0);
+      const threshold = Number(item?.reorderLevel ?? item?.threshold ?? item?.minStock ?? 10);
+      return Number.isFinite(quantity) && Number.isFinite(threshold) && quantity <= threshold;
+    }).length;
+
+    return {
+      count: ingredients.length,
+      lowStockCount,
+    };
+  }
+
+  private buildOrderMetrics(orders: any[]): OrderMetric[] {
+    const totalOrders = orders.length;
+    const inKitchen = orders.filter((o) => this.matchStatus(o, ['IN_KITCHEN', 'PREPARING', 'COOKING'])).length;
+    const readyToServe = orders.filter((o) => this.matchStatus(o, ['READY', 'READY_TO_SERVE'])).length;
+    const completed = orders.filter((o) => this.matchStatus(o, ['COMPLETED', 'DELIVERED', 'SERVED'])).length;
+
+    const completionRate = totalOrders > 0 ? Math.round((completed / totalOrders) * 100) : 0;
+
+    return [
+      {
+        title: 'Orders Received',
+        value: `${totalOrders}`,
+        change: 'Live',
+        footnote: 'From /api/order/find-all',
+        progress: Math.min(100, totalOrders),
+      },
+      {
+        title: 'In Kitchen',
+        value: `${inKitchen}`,
+        change: 'Live',
+        footnote: 'Active kitchen queue',
+        progress: totalOrders > 0 ? Math.round((inKitchen / totalOrders) * 100) : 0,
+      },
+      {
+        title: 'Ready To Serve',
+        value: `${readyToServe}`,
+        change: 'Live',
+        footnote: 'Orders awaiting handoff',
+        progress: totalOrders > 0 ? Math.round((readyToServe / totalOrders) * 100) : 0,
+      },
+      {
+        title: 'Completed Orders',
+        value: `${completed}`,
+        change: 'Live',
+        footnote: `Completion rate: ${completionRate}%`,
+        progress: completionRate,
+      },
+    ];
+  }
+
+  private buildRevenueMetrics(orders: any[]): RevenueMetric[] {
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const sevenDaysAgo = now.getTime() - 7 * 24 * 60 * 60 * 1000;
+
+    let totalRevenue = 0;
+    let revenueToday = 0;
+    let weeklyRevenue = 0;
+
+    for (const order of orders) {
+      const amount = this.resolveOrderAmount(order);
+      totalRevenue += amount;
+
+      const created = this.resolveOrderDate(order);
+      if (!created) {
+        continue;
+      }
+
+      const createdTime = created.getTime();
+      if (createdTime >= startOfToday) {
+        revenueToday += amount;
+      }
+      if (createdTime >= sevenDaysAgo) {
+        weeklyRevenue += amount;
+      }
+    }
+
+    const averageTicket = orders.length > 0 ? Math.round(totalRevenue / orders.length) : 0;
+    const refunded = orders
+      .filter((o) => this.matchStatus(o, ['REFUNDED', 'CANCELLED']))
+      .reduce((sum, o) => sum + this.resolveOrderAmount(o), 0);
+
+    return [
+      {
+        title: 'Revenue Today',
+        amount: Math.round(revenueToday),
+        change: 'Live',
+        footnote: 'From orders created today',
+        progress: totalRevenue > 0 ? Math.round((revenueToday / totalRevenue) * 100) : 0,
+      },
+      {
+        title: 'Average Ticket',
+        amount: averageTicket,
+        change: 'Live',
+        footnote: 'Average per order',
+        progress: averageTicket > 0 ? 65 : 0,
+      },
+      {
+        title: 'Weekly Revenue',
+        amount: Math.round(weeklyRevenue),
+        change: 'Live',
+        footnote: 'Last 7 days',
+        progress: totalRevenue > 0 ? Math.round((weeklyRevenue / totalRevenue) * 100) : 0,
+      },
+      {
+        title: 'Refunds / Cancellations',
+        amount: Math.round(refunded),
+        change: refunded > 0 ? 'Attention' : 'Healthy',
+        footnote: 'Captured by status',
+        progress: totalRevenue > 0 ? Math.round((refunded / totalRevenue) * 100) : 0,
+        negative: refunded > 0,
+      },
+    ];
+  }
+
+  private buildPopularOrders(orders: any[]): PopularOrder[] {
+    const itemMap = new Map<string, { category: string; ordersSold: number; revenue: number }>();
+
+    for (const order of orders) {
+      const items = this.extractOrderItems(order);
+      for (const item of items) {
+        const name = String(item?.menuItemName ?? item?.itemName ?? item?.name ?? 'Unknown Item').trim();
+        const category = String(item?.categoryName ?? item?.category ?? 'General').trim();
+        const quantity = Number(item?.quantity ?? 1) || 0;
+        const lineTotal = Number(item?.lineTotal ?? item?.total ?? item?.price ?? 0) || 0;
+
+        const current = itemMap.get(name) ?? { category, ordersSold: 0, revenue: 0 };
+        current.ordersSold += quantity;
+        current.revenue += lineTotal;
+        if (!current.category) {
+          current.category = category;
+        }
+        itemMap.set(name, current);
+      }
+    }
+
+    const rows = Array.from(itemMap.entries())
+      .map(([item, stats]) => ({ item, ...stats }))
+      .sort((a, b) => b.ordersSold - a.ordersSold)
+      .slice(0, 10);
+
+    const totalTopOrders = rows.reduce((sum, row) => sum + row.ordersSold, 0);
+
+    return rows.map((row, index) => ({
+      rank: index + 1,
+      item: row.item,
+      category: row.category,
+      ordersSold: row.ordersSold,
+      revenue: Math.round(row.revenue),
+      share: totalTopOrders > 0 ? Math.round((row.ordersSold / totalTopOrders) * 100) : 0,
+    }));
+  }
+
+  private extractOrderItems(order: any): any[] {
+    const candidates = [
+      order?.items,
+      order?.orderItems,
+      order?.orderItemList,
+      order?.details,
+      order?.lineItems,
+    ];
+
+    for (const candidate of candidates) {
+      if (Array.isArray(candidate)) {
+        return candidate;
+      }
+    }
+
+    return [];
+  }
+
+  private resolveOrderAmount(order: any): number {
+    const amount = Number(
+      order?.totalAmount ??
+      order?.grandTotal ??
+      order?.total ??
+      order?.subTotal ??
+      order?.subtotal ??
+      order?.amount
+    );
+
+    if (Number.isFinite(amount)) {
+      return amount;
+    }
+
+    return this.extractOrderItems(order).reduce((sum, item) => {
+      const lineTotal = Number(item?.lineTotal ?? item?.total ?? item?.price ?? 0);
+      const quantity = Number(item?.quantity ?? 1);
+      if (!Number.isFinite(lineTotal)) {
+        return sum;
+      }
+      return sum + (Number.isFinite(quantity) ? lineTotal * quantity : lineTotal);
+    }, 0);
+  }
+
+  private resolveOrderDate(order: any): Date | null {
+    const rawDate =
+      order?.createdAt ??
+      order?.createdDate ??
+      order?.orderDate ??
+      order?.timestamp;
+
+    if (!rawDate) {
+      return null;
+    }
+
+    const parsed = new Date(rawDate);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+
+  private matchStatus(order: any, expected: string[]): boolean {
+    const status = String(order?.status ?? order?.orderStatus ?? '').toUpperCase().replaceAll(' ', '_');
+    return expected.includes(status);
+  }
+
+  private extractArray<T>(response: unknown): T[] {
+    if (Array.isArray(response)) {
+      return response as T[];
+    }
+
+    const obj = response as any;
+    const keys = ['data', 'result', 'results', 'items', 'content', 'payload'];
+
+    for (const key of keys) {
+      if (Array.isArray(obj?.[key])) {
+        return obj[key] as T[];
+      }
+    }
+
+    return [];
   }
 
 }

@@ -110,6 +110,14 @@
          </div>
       </header>
 
+      @if (isLoading) {
+         <p class="kpi-status-note">Loading live KPI data...</p>
+      }
+
+      @if (loadError) {
+         <p class="kpi-error-note">{{ loadError }}</p>
+      }
+
       <section class="kpi-section">
          <div class="kpi-section-head">
             <div>
@@ -136,6 +144,22 @@
                   </div>
                </article>
             }
+
+            <article class="kpi-card">
+               <div class="kpi-card-top">
+                  <p class="kpi-card-title">Ingredients Tracked</p>
+                  <span class="kpi-change-chip" [class.kpi-change-chip-negative]="ingredientSummary.lowStockCount > 0">
+                     {{ ingredientSummary.count }} items
+                  </span>
+               </div>
+
+               <p class="kpi-card-value">{{ ingredientSummary.lowStockCount }}</p>
+               <p class="kpi-card-footnote">Low stock ingredients (from current page)</p>
+
+               <div class="kpi-progress-track">
+                  <span class="kpi-progress-fill" [style.width.%]="ingredientSummary.count > 0 ? (ingredientSummary.lowStockCount / ingredientSummary.count) * 100 : 0"></span>
+               </div>
+            </article>
          </div>
       </section>
 
@@ -189,24 +213,30 @@
                   </tr>
                </thead>
                <tbody>
-                  @for (order of popularOrders; track order.rank) {
+                  @if (popularOrders.length === 0) {
                      <tr>
-                        <td>
-                           <span class="rank-pill">#{{ order.rank }}</span>
-                        </td>
-                        <td class="popular-item">{{ order.item }}</td>
-                        <td>{{ order.category }}</td>
-                        <td>{{ order.ordersSold }}</td>
-                        <td>{{ order.revenue | currency:currencyCode:'symbol':'1.0-0' }}</td>
-                        <td>
-                           <div class="share-cell">
-                              <span>{{ order.share }}%</span>
-                              <div class="share-track">
-                                 <span class="share-fill" [style.width.%]="order.share"></span>
-                              </div>
-                           </div>
-                        </td>
+                        <td colspan="6" class="empty-row">No popular orders available from the current API response.</td>
                      </tr>
+                  } @else {
+                     @for (order of popularOrders; track order.rank) {
+                        <tr>
+                           <td>
+                              <span class="rank-pill">#{{ order.rank }}</span>
+                           </td>
+                           <td class="popular-item">{{ order.item }}</td>
+                           <td>{{ order.category }}</td>
+                           <td>{{ order.ordersSold }}</td>
+                           <td>{{ order.revenue | currency:currencyCode:'symbol':'1.0-0' }}</td>
+                           <td>
+                              <div class="share-cell">
+                                 <span>{{ order.share }}%</span>
+                                 <div class="share-track">
+                                    <span class="share-fill" [style.width.%]="order.share"></span>
+                                 </div>
+                              </div>
+                           </td>
+                        </tr>
+                     }
                   }
                </tbody>
             </table>

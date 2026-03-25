@@ -1,18 +1,6 @@
 import { Routes } from '@angular/router';
 import { Login } from './page/login/login';
 import { Dashboard } from './page/dashboard/dashboard';
-<<<<<<< HEAD
-import { Customers } from './page/customers/customers';
-import { KpiDashboard } from './page/kpi-dashboard/kpi-dashboard';
-export const routes: Routes = [
-    {
-        path: '',
-        component: Login
-    },
-    {
-        path: 'dashboard',
-=======
->>>>>>> 94b8bfe79998b7cd72524ce26c300d8fd7c05c22
 
 import { Customers } from './page/customers/customers';
 import { MarketingCampaign } from './page/admin/marketing-campaign/marketing-campaign';
@@ -28,6 +16,7 @@ import { MenuItemPrice } from './page/menu-item-price/menu-item-price';
 import { Portions } from './page/portions/portions';
 import { OrderPlacementComponent } from './page/order-placement/order-placement.component';
 import { roleGuard } from './guards/role.guard';
+import { KpiDashboard } from './page/kpi-dashboard/kpi-dashboard';
 export const routes: Routes = [
   {
     path: '',
@@ -91,6 +80,10 @@ export const routes: Routes = [
         component: Dashboard,
       },
       {
+        path: 'kpi-dashboard',
+        component: KpiDashboard
+      },
+      {
         path: 'admin-customer',
         component: Customers,
       },
@@ -138,13 +131,6 @@ export const routes: Routes = [
             component: AnalyticsComponent,
           },
         ]
-<<<<<<< HEAD
-    },
-    {
-                path: "kpi-dashboard",
-                component: KpiDashboard
-    }
-=======
       },
       {
         path: 'kitchen',
@@ -169,9 +155,8 @@ export const routes: Routes = [
             component: OrderAssign,
           },
         ],
-      },
+        },
 
     ],
   },
->>>>>>> 94b8bfe79998b7cd72524ce26c300d8fd7c05c22
 ];

@@ -280,8 +280,32 @@ a {
   font-size: 0.95rem;
 }
 
+.api-chip-row {
+  margin-top: 0.8rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.api-chip {
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  background: #0369a1;
+  color: #ffffff;
+  border: 1px solid #075985;
+}
+
 .kpi-main-light .kpi-subtitle {
   color: rgba(51, 65, 85, 0.85);
+}
+
+.kpi-main-light .api-chip {
+  background: #bae6fd;
+  color: #0c4a6e;
+  border: 1px solid #7dd3fc;
 }
 
 .kpi-refresh-chip {
@@ -318,6 +342,39 @@ a {
 
 .kpi-main-light .kpi-refresh-chip strong {
   color: #0f172a;
+}
+
+.kpi-status-note,
+.kpi-error-note {
+  margin: -0.35rem 0 0;
+  padding: 0.7rem 0.9rem;
+  border-radius: 0.75rem;
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.kpi-status-note {
+  background: #0c4a6e;
+  border: 1px solid #0369a1;
+  color: #ffffff;
+}
+
+.kpi-error-note {
+  background: #991b1b;
+  border: 1px solid #b91c1c;
+  color: #ffffff;
+}
+
+.kpi-main-light .kpi-status-note {
+  background: #bae6fd;
+  border: 1px solid #7dd3fc;
+  color: #0c4a6e;
+}
+
+.kpi-main-light .kpi-error-note {
+  background: #fecaca;
+  border: 1px solid #fca5a5;
+  color: #991b1b;
 }
 
 /* === Sections === */
@@ -560,6 +617,16 @@ a {
   height: 100%;
   border-radius: 999px;
   background: linear-gradient(90deg, #22d3ee, #22c55e);
+}
+
+.empty-row {
+  text-align: center;
+  color: rgba(148, 163, 184, 0.95) !important;
+  font-style: italic;
+}
+
+.kpi-main-light .empty-row {
+  color: rgba(71, 85, 105, 0.88) !important;
 }
 
 @media (min-width: 640px) {
