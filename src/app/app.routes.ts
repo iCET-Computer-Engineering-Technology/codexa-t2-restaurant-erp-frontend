@@ -57,6 +57,8 @@ export const routes: Routes = [
 
   {
     path: 'manager',
+    canActivate: [roleGuard],
+    data: { roles: ['ROLE_ADMIN', 'ROLE_MANAGER'] },
     loadComponent: () => import('./page/manager/manager').then((m) => m.Manager),
     children: [
           {
