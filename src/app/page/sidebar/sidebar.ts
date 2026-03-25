@@ -34,6 +34,7 @@ export class Sidebar {
   readonly showDashboard = computed(() => this.userRole() === 'ROLE_ADMIN');
   readonly showCustomers = computed(() => ['ROLE_ADMIN', 'ROLE_CASHIER'].includes(this.userRole() || ''));
   readonly showOrders = computed(() => ['ROLE_ADMIN', 'ROLE_CASHIER'].includes(this.userRole() || ''));
+  readonly showKitchen = computed(() => ['ROLE_ADMIN', 'ROLE_CHEF'].includes(this.userRole() || ''));
   readonly showMarketing = computed(() => this.userRole() === 'ROLE_ADMIN');
   readonly showInbox = computed(() => this.userRole() === 'ROLE_ADMIN');
   readonly showUsers = computed(() => this.userRole() === 'ROLE_ADMIN');
@@ -48,6 +49,21 @@ export class Sidebar {
   readonly ordersRoute = computed(() => {
     const role = this.userRole();
     return role === 'ROLE_CASHIER' ? '/cashier' : '/admin/admin-order';
+  });
+
+  readonly kitchenDashboardRoute = computed(() => {
+    const role = this.userRole();
+    return role === 'ROLE_CHEF' ? '/chef' : '/admin/kitchen/kitchen-dashboard';
+  });
+
+  readonly kitchenOrderTableRoute = computed(() => {
+    const role = this.userRole();
+    return role === 'ROLE_CHEF' ? '/chef/kitchen-oder-table' : '/admin/kitchen/kitchen-order-table';
+  });
+
+  readonly kitchenOrderAssignRoute = computed(() => {
+    const role = this.userRole();
+    return role === 'ROLE_CHEF' ? '/chef/order-assign' : '/admin/kitchen/order-assign';
   });
 
   constructor() {

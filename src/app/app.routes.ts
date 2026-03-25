@@ -53,6 +53,20 @@ export const routes: Routes = [
     canActivate: [roleGuard],
     data: { roles: ['ROLE_ADMIN', 'ROLE_CHEF'] },
     loadComponent: () => import('./page/chef/chef').then((m) => m.Chef),
+    children: [
+      {
+        path: '',
+        component: KitchenDashboard,
+      },
+      {
+        path: 'kitchen-oder-table',
+        component: KitchenOrderTable,
+      },
+      {
+        path: 'order-assign',
+        component: OrderAssign,
+      }
+    ]
   },
   {
     path: 'admin',
@@ -111,8 +125,7 @@ export const routes: Routes = [
             path: 'analytics',
             component: AnalyticsComponent,
           },
-
-        ],
+        ]
       },
       {
         path: 'kitchen',
