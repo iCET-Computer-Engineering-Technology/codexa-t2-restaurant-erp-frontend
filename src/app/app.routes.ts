@@ -31,11 +31,21 @@ export const routes: Routes = [
     canActivate: [roleGuard],
     data: { roles: ['ROLE_ADMIN', 'ROLE_CASHIER'] },
     loadComponent: () => import('./page/cashier/cashier').then((m) => m.Cashier),
+    children: [
+      {
+        path: '',
+        component: OrderPlacementComponent,
+      },
+      {
+        path: 'cashier-customer',
+        component: Customers,
+      }
+    ]
   },
   {
     path: 'waiter',
     canActivate: [roleGuard],
-    data: { roles: ['ROLE_ADMIN', 'ROLE_WAITER'] },
+    data: { roles: ['ROLE_ADMIN', 'ROLE_CASHIER', 'ROLE_WAITER'] },
     loadComponent: () => import('./page/waiter/waiter').then((m) => m.Waiter),
   },
   {
@@ -43,6 +53,20 @@ export const routes: Routes = [
     canActivate: [roleGuard],
     data: { roles: ['ROLE_ADMIN', 'ROLE_CHEF'] },
     loadComponent: () => import('./page/chef/chef').then((m) => m.Chef),
+    children: [
+      {
+        path: '',
+        component: KitchenDashboard,
+      },
+      {
+        path: 'kitchen-oder-table',
+        component: KitchenOrderTable,
+      },
+      {
+        path: 'order-assign',
+        component: OrderAssign,
+      }
+    ]
   },
   {
     path: 'admin',
@@ -101,8 +125,7 @@ export const routes: Routes = [
             path: 'analytics',
             component: AnalyticsComponent,
           },
-
-        ],
+        ]
       },
       {
         path: 'kitchen',

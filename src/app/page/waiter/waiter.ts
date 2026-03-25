@@ -1,15 +1,16 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Sidebar } from "../sidebar/sidebar";
 
 @Component({
   selector: 'app-waiter',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, Sidebar],
   templateUrl: './waiter.html',
   styleUrl: './waiter.css',
 })
-export class Waiter implements OnInit {
+export class Waiter implements OnInit, AfterViewInit {
   orderAssigmentList: Array<any> = [];
  
   private apiUrl = 'http://localhost:8080';
@@ -22,6 +23,12 @@ export class Waiter implements OnInit {
  
   ngOnInit(): void {
     this.getAll();
+  }
+
+  ngAfterViewInit(): void {
+    import('flowbite').then((flowbite) => {
+      flowbite.initFlowbite();
+    });
   }
  
   private getHeaders(): HttpHeaders {
