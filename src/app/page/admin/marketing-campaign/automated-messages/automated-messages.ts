@@ -4,6 +4,8 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { timeout } from 'rxjs';
 import { AutomatedMessageService } from '../../../../services/automated-message.service';
 import { AutomatedMessage, OfferType, SendEmailRequest, TriggerType } from '../../../../models/automated-message.model';
+import { EmailSchedulerService } from '../../../../services/email-scheduler.service';
+import { EmailSchedulerConfig } from '../../../../models/email-scheduler.model';
 
 type TriggerFilter = TriggerType | 'all';
 type StatusFilter = 'all' | 'inactive';
@@ -24,11 +26,13 @@ export class AutomatedMessagesComponent implements OnInit {
 	showModal = false;
 	showTestModal = false;
 	showDebugModal = false;
+	showSchedulePanel = false;
 	modalMode: 'create' | 'edit' = 'create';
 	activeTriggerFilter: TriggerFilter = 'all';
 	statusFilter: StatusFilter = 'all';
 	currentPage = 1;
 	totalPages = 1;
+	schedulerLoading = false;
 
 	metrics = {
 		active: 0,
@@ -54,9 +58,11 @@ export class AutomatedMessagesComponent implements OnInit {
 	messageForm!: FormGroup;
 	bulkForm!: FormGroup;
 	testEmailForm!: FormGroup;
+	emailSchedulerForm!: FormGroup;
 
 	constructor(
 		private readonly automatedMessageService: AutomatedMessageService,
+		private readonly emailSchedulerService: EmailSchedulerService,
 		private readonly fb: FormBuilder,
 		private readonly cdr: ChangeDetectorRef
 	) {}
@@ -86,6 +92,10 @@ export class AutomatedMessagesComponent implements OnInit {
 
 		this.testEmailForm = this.fb.group({
 			toEmail: ['', [Validators.required, Validators.email]],
+		});
+
+		this.emailSchedulerForm = this.fb.group({
+			sendTime: ['', Validators.required],
 		});
 	}
 
@@ -165,9 +175,10 @@ export class AutomatedMessagesComponent implements OnInit {
 	private applyFilter(): void {
 		const base = this.messages || [];
 
-		this.filteredMessages = this.activeTriggerFilter === 'all'
-			? base
-			: base.filter((m) => (m.triggerType || '').toUpperCase() === this.activeTriggerFilter.toUpperCase());
+		this.filteredMessages =
+			this.activeTriggerFilter === 'all'
+				? base
+				: base.filter((m) => (m.triggerType || '').toUpperCase() === this.activeTriggerFilter.toUpperCase());
 
 		this.updatePagination();
 	}
@@ -244,12 +255,66 @@ export class AutomatedMessagesComponent implements OnInit {
 		this.messageForm.reset();
 	}
 
+	// ============== Email Scheduler ==============
+
+	openSchedulePanel(): void {
+		this.showSchedulePanel = true;
+		this.loadEmailSchedulerConfig();
+	}
+
+	closeSchedulePanel(): void {
+		this.showSchedulePanel = false;
+		this.emailSchedulerForm.reset({
+			sendTime: '',
+		});
+	}
+
+	loadEmailSchedulerConfig(): void {
+		this.schedulerLoading = true;
+		this.emailSchedulerService.getConfig().subscribe({
+			next: (config: EmailSchedulerConfig) => {
+				this.emailSchedulerForm.patchValue({
+					sendTime: config.sendTime || '',
+				});
+				this.schedulerLoading = false;
+				this.cdr.detectChanges();
+			},
+			error: (err: any) => {
+				console.error('Failed to load email scheduler config', err);
+				this.schedulerLoading = false;
+				this.showToast('Failed to load email scheduler config', 'error');
+				this.cdr.detectChanges();
+			},
+		});
+	}
+
+	saveEmailScheduler(): void {
+		if (this.emailSchedulerForm.invalid) return;
+
+		const payload: EmailSchedulerConfig = this.emailSchedulerForm.value;
+
+		this.emailSchedulerService.updateConfig(payload).subscribe({
+			next: () => {
+				this.showToast('Email scheduler saved successfully', 'success');
+				this.closeSchedulePanel();
+			},
+			error: (err: any) => {
+				console.error('Failed to save email scheduler config', err);
+				this.showToast('Failed to save email scheduler config', 'error');
+			},
+		});
+	}
+
+	setQuickTime(time: string): void {
+		this.emailSchedulerForm.patchValue({ sendTime: time });
+	}
+
 	submitMessage(): void {
 		if (this.messageForm.invalid) return;
 
 		const formValue = { ...this.messageForm.value } as AutomatedMessage;
 		const payload: AutomatedMessage = {
-			triggerType: formValue.triggerType as TriggerType,
+			triggerType: formValue.triggerType,
 			channel: formValue.channel,
 			templateBody: formValue.templateBody,
 			offerType: formValue.offerType,

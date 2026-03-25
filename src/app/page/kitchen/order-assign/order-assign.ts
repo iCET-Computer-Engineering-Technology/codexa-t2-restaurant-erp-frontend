@@ -1,11 +1,12 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { KitchenService, Order, Waiter } from '../../../services/kitchen.service';
 
 @Component({
   selector: 'app-order-assign',
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './order-assign.html',
   styleUrl: './order-assign.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
