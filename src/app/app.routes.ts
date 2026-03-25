@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { Login } from './page/login/login';
 import { Dashboard } from './page/dashboard/dashboard';
 import { Customers } from './page/customers/customers';
+import { KpiDashboard } from './page/kpi-dashboard/kpi-dashboard';
 export const routes: Routes = [
     {
         path: '',
@@ -42,4 +43,8 @@ export const routes: Routes = [
             }
         ]
     },
+    {
+                path: "kpi-dashboard",
+                component: KpiDashboard
+    }
 ];
