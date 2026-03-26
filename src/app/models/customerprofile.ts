@@ -1,4 +1,5 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnChanges, SimpleChanges, Input, Output, EventEmitter } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 
@@ -17,12 +18,8 @@ interface CustomerProfile {
   lastName: string;
   email: string;
   phone: string;
-  birthday?: string;
-  preferredLanguage: string;
-  dietaryNotes?: string;
-  communicationEmail: number;
-  communicationSms: number;
   loyaltyPoints: number;
+  lifetimeSpend: number;
   recentVisits?: VisitHistory[];
 }
 
@@ -30,8 +27,8 @@ interface CustomerProfile {
   selector: 'app-customers-profile',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './customers-profile.html',
-  styleUrl: './customers-profile.css',
+  template: '<div class="customer-profile"><p>{{ profile?.firstName }} {{ profile?.lastName }}</p></div>',
+  styles: []
 })
 export class CustomersProfile implements OnInit, OnChanges {
   @Input() customer: any = null;
@@ -46,12 +43,18 @@ export class CustomersProfile implements OnInit, OnChanges {
   errorMessage = '';
 
   constructor(
-    private http: HttpClient,
-    private cdr: ChangeDetectorRef
+    private route: ActivatedRoute,
+    private router: Router,
+    private http: HttpClient
   ) { }
 
   ngOnInit(): void {
-    // Initialize if needed
+    const idParam = this.route.snapshot.paramMap.get('id');
+    const customerId = idParam ? +idParam : null;
+
+    if (customerId && customerId > 0) {
+      this.loadFullProfile(customerId);
+    }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -61,19 +64,20 @@ export class CustomersProfile implements OnInit, OnChanges {
   }
 
   loadFullProfile(customerId: number): void {
+    this.isLoading = true;
     this.errorMessage = '';
     this.profile = null;
 
-    this.http.get<CustomerProfile>(`http://localhost:8080/customers/${customerId}/profile`).subscribe({
+    this.http.get<CustomerProfile>(`http://localhost:8080/customers/${customerId}`).subscribe({
       next: (data: CustomerProfile) => {
         this.profile = data;
         this.dataSource = data.recentVisits || [];
-        this.cdr.detectChanges();
+        this.isLoading = false;
       },
       error: (err: any) => {
         console.error('Error loading profile:', err);
-        this.errorMessage = 'ප්‍රොෆයිල් ලබාගැනීමට නොහැකි විය. කරුණාකර නැවත උත්සාහ කරන්න.';
-        this.cdr.detectChanges();
+        this.errorMessage = 'ප්‍රොෆයිල් ලබාගැනීමට නොහැකි විය. නැවත උත්සාහ කරන්න.';
+        this.isLoading = false;
       }
     });
   }
@@ -84,5 +88,9 @@ export class CustomersProfile implements OnInit, OnChanges {
     this.profile = null;
     this.dataSource = [];
     this.errorMessage = '';
+  }
+
+  goBack(): void {
+    this.router.navigate(['/admin/admin-customer']);
   }
 }
