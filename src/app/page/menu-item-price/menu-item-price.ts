@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { MenuItemPriceModel, PortionsModel } from '../../../model/type';
+import { MenuItemPriceModel, MenuItemsModel, PortionsModel } from '../../../model/type';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
@@ -16,10 +16,10 @@ export class MenuItemPrice implements OnInit {
   isEditMode: boolean = false;
 
   menuItemPriceList: Array<MenuItemPriceModel> = [];
-  itemList: any[] = [];
+  itemList: Array<MenuItemsModel> = [];
   portionList: Array<PortionsModel> = [];
   
-  
+  // Pagination
   currentPage: number = 1;
   itemsPerPage: number = 5; 
 
@@ -33,7 +33,7 @@ export class MenuItemPrice implements OnInit {
     portionId: 0
   };
 
-  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) { }
+  constructor(private readonly http: HttpClient, private readonly cdr: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     this.getAll();
@@ -41,22 +41,25 @@ export class MenuItemPrice implements OnInit {
   }
 
   loadDropdownData(): void {
-    this.http.get<any[]>("http://localhost:8080/menu-items").subscribe(data => {
+    // Kept the /api/ paths for dev branch compatibility
+    this.http.get<MenuItemsModel[]>("http://localhost:8080/api/menu-items").subscribe(data => {
       this.itemList = data;
     });
 
-    this.http.get<any[]>("http://localhost:8080/portions").subscribe(data => {
+    this.http.get<PortionsModel[]>("http://localhost:8080/api/portions").subscribe(data => {
       this.portionList = data;
     });
   }
 
   getAll() {
-    this.http.get<MenuItemPriceModel[]>("http://localhost:8080/menu-item-price/get-full-menu").subscribe(data => {
+    this.http.get<MenuItemPriceModel[]>("http://localhost:8080/api/menu-item-price/get-full-menu").subscribe(data => {
+      // Kept YOUR sorting logic!
       this.menuItemPriceList = data.sort((a, b) => Number(b.isActive) - Number(a.isActive));
       this.cdr.detectChanges();
     });
   }
 
+  // --- Pagination Logic ---
   get paginatedData() {
     const start = (this.currentPage - 1) * this.itemsPerPage;
     return this.menuItemPriceList.slice(start, start + this.itemsPerPage);
@@ -76,8 +79,9 @@ export class MenuItemPrice implements OnInit {
     }
   }
 
+  // --- CRUD Operations ---
   addMenuItemPrice(): void {
-    this.http.post("http://localhost:8080/menu-item-price", this.menuItemPriceObj).subscribe(data => {
+    this.http.post("http://localhost:8080/api/menu-item-price", this.menuItemPriceObj).subscribe(data => {
       this.getAll();
       this.clearForm(); 
     });
@@ -102,7 +106,7 @@ export class MenuItemPrice implements OnInit {
   }
 
   updateMenuItemPrice(): void {
-    this.http.put("http://localhost:8080/menu-item-price", this.menuItemPriceObj).subscribe(data => {
+    this.http.put("http://localhost:8080/api/menu-item-price", this.menuItemPriceObj).subscribe(data => {
       this.getAll();
       this.clearForm();
     });
@@ -119,7 +123,7 @@ export class MenuItemPrice implements OnInit {
       confirmButtonText: "Yes, delete it!"
     }).then((result) => {
       if (result.isConfirmed) {
-        this.http.delete(`http://localhost:8080/menu-item-price/${id}`).subscribe({
+        this.http.delete(`http://localhost:8080/api/menu-item-price/${id}`).subscribe({
           next: (data) => {
             Swal.fire("Deleted!", "The price has been deleted.", "success");
             this.getAll();

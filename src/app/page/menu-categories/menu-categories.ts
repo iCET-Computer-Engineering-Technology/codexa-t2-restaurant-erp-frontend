@@ -2,18 +2,17 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CategoryModel, PortionsModel } from '../../../model/type';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
-import { isActive, RouterOutlet } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
 import { Sidebar } from "../sidebar/sidebar";
 
 @Component({
   selector: 'app-menu-categories',
-  imports: [ ReactiveFormsModule, FormsModule, CommonModule],
+  imports: [ReactiveFormsModule, FormsModule, CommonModule, Sidebar],
   templateUrl: './menu-categories.html',
   styleUrl: './menu-categories.css',
 })
-export class MenuCategories {
+export class MenuCategories implements OnInit {
   
   isEditMode: boolean = false;
   
@@ -26,7 +25,7 @@ export class MenuCategories {
     isActive : true
   }
 
-  constructor(private http : HttpClient , private cdr: ChangeDetectorRef) {}
+  constructor(private readonly http : HttpClient , private readonly cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.getAll();
@@ -34,14 +33,14 @@ export class MenuCategories {
   
 
   getAll(){
-    this.http.get<CategoryModel[]>("http://localhost:8080/categories").subscribe(data => {
+    this.http.get<CategoryModel[]>("http://localhost:8080/api/categories/get-all").subscribe(data => {
       this.categoryList = data;
       this.cdr.detectChanges();
     })
   }
 
   addCategory() : void {
-    this.http.post("http://localhost:8080/categories" , this.categoryObj).subscribe(data => {
+    this.http.post("http://localhost:8080/api/categories" , this.categoryObj).subscribe(data => {
       this.getAll();
     })
   }
@@ -60,7 +59,7 @@ export class MenuCategories {
 }
 
 updateCategory() : void {
-  this.http.put("http://localhost:8080/categories" , this.categoryObj).subscribe(data => {
+  this.http.put("http://localhost:8080/api/categories" , this.categoryObj).subscribe(data => {
     this.getAll();
     this.clearForm();
     this.isEditMode = false;
@@ -79,7 +78,7 @@ deleteMenuCategory(id: number): void {
     }).then((result) => {
       
       if (result.isConfirmed) {
-        this.http.delete(`http://localhost:8080/categories/${id}`).subscribe({
+        this.http.delete(`http://localhost:8080/api/categories/${id}`).subscribe({
           next: (data) => {
             
             Swal.fire({

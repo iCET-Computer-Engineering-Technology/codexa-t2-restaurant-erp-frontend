@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { MenuItemsModel } from '../../../model/type';
+import { CategoryModel, MenuItemsModel } from '../../../model/type';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
@@ -16,12 +16,11 @@ export class MenuItem implements OnInit {
   isEditMode : boolean = false;
 
   menuItemList: Array<MenuItemsModel> = [];
-  categoryList: any[] = [];
-  
-  
   currentPage: number = 1;
-  itemsPerPage: number = 5; // Change this to 10 if you want more rows!
+  itemsPerPage: number = 5; 
 
+  categoryList: Array<CategoryModel> = [];
+  
   menuItemObj: MenuItemsModel = {
     id: 0,
     name: '',
@@ -32,7 +31,7 @@ export class MenuItem implements OnInit {
     imageUrl: ''
   }
 
-  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) { }
+  constructor(private readonly http: HttpClient, private readonly cdr: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     this.getAll();
@@ -40,20 +39,18 @@ export class MenuItem implements OnInit {
   }
 
   loadCategories() {
-    this.http.get<any[]>("http://localhost:8080/categories").subscribe(data => {
+    this.http.get<CategoryModel[]>("http://localhost:8080/api/categories/get-all").subscribe(data => {
       this.categoryList = data;
     });
   }
 
   getAll() {
-    this.http.get<MenuItemsModel[]>("http://localhost:8080/menu-items").subscribe(data => {
-      
+    this.http.get<MenuItemsModel[]>("http://localhost:8080/api/menu-items").subscribe(data => {
       this.menuItemList = data.sort((a, b) => Number(b.isAvailable) - Number(a.isAvailable));
       this.cdr.detectChanges();
-    })
+    });
   }
 
- 
   get paginatedData() {
     const start = (this.currentPage - 1) * this.itemsPerPage;
     return this.menuItemList.slice(start, start + this.itemsPerPage);
@@ -72,10 +69,9 @@ export class MenuItem implements OnInit {
       this.currentPage = page;
     }
   }
-  
 
   addMenuItem(): void {
-    this.http.post("http://localhost:8080/menu-items", this.menuItemObj).subscribe(data => {
+    this.http.post("http://localhost:8080/api/menu-items", this.menuItemObj).subscribe(data => {
       this.getAll();
       this.clearForm();
     })
@@ -100,10 +96,9 @@ export class MenuItem implements OnInit {
   }
 
   updateMenuItem() : void {
-    this.http.put("http://localhost:8080/menu-items" , this.menuItemObj).subscribe(data => {
+    this.http.put("http://localhost:8080/api/menu-items" , this.menuItemObj).subscribe(data => {
       this.getAll();
       this.clearForm();
-      this.isEditMode = false;
     })
   }
 
@@ -118,7 +113,7 @@ export class MenuItem implements OnInit {
       confirmButtonText: "Yes, delete it!"
     }).then((result) => {
       if (result.isConfirmed) {
-        this.http.delete(`http://localhost:8080/menu-items/${id}`).subscribe({
+        this.http.delete(`http://localhost:8080/api/menu-items/${id}`).subscribe({
           next: (data) => {
             Swal.fire("Deleted!", "The item has been deleted.", "success");
             this.getAll();

@@ -1,30 +1,32 @@
 export interface CategoryModel {
     id : number;
-    name : String;
-    isActive : Boolean;
+    name : string;
+    isActive : boolean;
 }
 
 export interface PortionsModel {
     id : number;
-    name : String;
+    name : string;
 }
 
 export interface MenuItemsModel{
     id : number;
-    name : String;
+    name : string;
     categoryId : number;
     categoryName?: string;
     description : String;
     isAvailable : Boolean;
     imageUrl : String;
+
 }
 
 export interface MenuItemPriceModel {
     id : number;
-    itemName : String;
-    portionName : String;
+    itemName : string;
+    portionName : string;
     price : number;
     isActive : Boolean;
     itemId : number;
     portionId : number;
+
 }

@@ -12,6 +12,14 @@
   --hover-bg: #f8fafc;
 }
 
+.waiter-layout {
+  background: radial-gradient(135% 100% at 50% 0%, rgba(199, 210, 254, 0.2) 0%, rgba(255, 255, 255, 0) 50%);
+}
+
+:host-context(.admin-light-theme) .waiter-layout {
+  background: radial-gradient(135% 100% at 50% 0%, rgba(253, 224, 71, 0.15) 0%, rgba(255, 255, 255, 0) 50%);
+}
+
 .modern-container {
   padding: 32px;
   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
