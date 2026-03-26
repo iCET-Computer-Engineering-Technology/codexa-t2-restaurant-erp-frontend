@@ -5,11 +5,12 @@ import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
 import { SupplierService } from '../../services/supplier.service';
 import { Supplier } from '../../models/supplier.model';
+import { Sidebar } from "../sidebar/sidebar";
 
 @Component({
   selector: 'app-suppliers',
   standalone: true,
-  imports: [CommonModule, HttpClientModule, FormsModule],
+  imports: [CommonModule, HttpClientModule, FormsModule, Sidebar],
   templateUrl: './supplier.html',
   styleUrls: ['./supplier.css']
 })
