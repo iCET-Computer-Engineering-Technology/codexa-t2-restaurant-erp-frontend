@@ -39,10 +39,14 @@
           <div class="form-row form-row-4">
             <div class="form-group">
               <label>Phone Number <span style="color: red;">*</span></label>
-              <input type="text" [(ngModel)]="newCustomer.phone" placeholder="Enter phone number" class="form-control"
-                [ngClass]="{'input-error': isSubmitted && !isValidPhone()}">
+              <div style="display: flex; gap: 0; align-items: center;">
+                <span style="padding: 9px 12px; background-color: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px 0 0 6px; font-weight: 500; color: #475569; min-width: 50px; text-align: center;">+94</span>
+                <input type="text" [(ngModel)]="phoneLastNineDigits" (input)="onPhoneInput($event)" placeholder="Enter 9 digits" class="form-control" 
+                  style="border-radius: 0 6px 6px 0; margin: 0; border-left: none;" maxlength="9" inputmode="numeric"
+                  [ngClass]="{'input-error': isSubmitted && !isValidPhone()}">
+              </div>
               <div class="error-message" *ngIf="isSubmitted && !isValidPhone()">
-                ⚠️ Please enter a valid Sri Lankan phone number (e.g. 07XXXXXXXX).
+                ⚠️ Please enter a valid 9-digit phone number.
               </div>
             </div>
 

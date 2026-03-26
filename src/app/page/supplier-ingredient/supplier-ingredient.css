@@ -1,0 +1,18 @@
+.container {
+  padding: 20px;
+}
+
+.supplier-card {
+  margin-bottom: 20px;
+}
+
+.supplier-id {
+  font-size: 0.9em;
+  color: gray;
+}
+
+.no-data {
+  padding: 20px;
+  text-align: center;
+  color: #666;
+}

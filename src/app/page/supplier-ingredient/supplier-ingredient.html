@@ -1,0 +1,46 @@
+<div class="container mx-auto p-6">
+  <h1 class="text-3xl font-bold mb-6">Supplier Ingredients</h1>
+
+  <div class="grid gap-4">
+    <div *ngFor="let supplier of suppliersWithIngredients" class="bg-white rounded-lg shadow p-6">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="text-xl font-semibold">
+            {{ supplier.supplierName }}
+            <span class="text-sm text-gray-500">(ID: {{ supplier.supplierId }})</span>
+          </h2>
+          <p class="text-gray-600 text-sm">{{ supplier.ingredients.length }} ingredients supplied</p>
+        </div>
+      </div>
+
+      <details class="border-t pt-4">
+        <summary class="cursor-pointer font-semibold hover:text-blue-600">View Ingredients</summary>
+        
+        <div class="mt-4 overflow-x-auto">
+          <table class="w-full border-collapse border border-gray-300">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="border border-gray-300 px-4 py-2 text-left"> Ingredient Name </th>
+                <th class="border border-gray-300 px-4 py-2 text-left"> Unit </th>
+                <th class="border border-gray-300 px-4 py-2 text-left"> Price </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let ing of supplier.ingredients" class="hover:bg-gray-50">
+                <td class="border border-gray-300 px-4 py-2"> {{ ing.ingredientName }} </td>
+                <td class="border border-gray-300 px-4 py-2"> {{ ing.unit || '-' }} </td>
+                <td class="border border-gray-300 px-4 py-2"> 
+                  {{ ing.price ? (ing.price | currency:'LKR':'symbol-narrow') : '-' }} 
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div *ngIf="supplier.ingredients.length === 0" class="text-center py-8 text-gray-500">
+            No ingredients linked to this supplier yet.
+          </div>
+        </div>
+      </details>
+    </div>
+  </div>
+</div>
