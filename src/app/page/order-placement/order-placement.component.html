@@ -1,0 +1,278 @@
+<div class="min-h-screen bg-gray-50 p-5">
+  <!-- Header -->
+  <div class="mb-5 flex items-start justify-between gap-5">
+    <div>
+      <h1 class="text-3xl font-semibold text-gray-900">Orders</h1>
+      <p class="mt-2 text-sm text-gray-600">Create new restaurant order</p>
+    </div>
+  </div>
+
+  <!-- Alert Messages -->
+  <div *ngIf="errorMessage" class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="successMessage"
+    class="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+    {{ successMessage }}
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loadingCategories" class="flex min-h-70 flex-col items-center justify-center gap-4">
+    <div class="h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-blue-600"></div>
+    <p class="text-base text-gray-600">Loading categories...</p>
+  </div>
+
+  <ng-container *ngIf="!loadingCategories">
+    <div class="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
+      <!-- Left Column: Menu -->
+      <div class="space-y-6 lg:col-span-2">
+        <!-- Category Tabs -->
+        <div class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+          <div class="border-b border-gray-200 px-4 py-4">
+            <h2 class="text-base font-semibold text-gray-900">Categories</h2>
+          </div>
+          <div class="px-4 pb-4">
+            <div class="flex gap-3 overflow-x-auto border-b border-gray-200">
+              <button *ngFor="let category of categories" type="button" (click)="selectCategory(category.id)"
+                class="whitespace-nowrap border-b-[3px] px-5 py-3 text-sm font-medium transition-colors" [ngClass]="
+                  selectedCategoryId === category.id
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-900'
+                ">
+                {{ category.name }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Menu Items -->
+        <div class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+          <div class="border-b border-gray-200 px-4 py-4">
+            <h2 class="text-base font-semibold text-gray-900">Menu Items</h2>
+          </div>
+
+          <div *ngIf="loadingMenuItems" class="flex items-center gap-3 px-4 py-4 text-sm text-gray-600">
+            <div class="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600"></div>
+            <span>Loading menu items...</span>
+          </div>
+
+          <div *ngIf="!loadingMenuItems && menuItems.length === 0" class="px-4 py-10 text-center text-sm text-gray-600">
+            No items available in this category
+          </div>
+
+          <div *ngIf="!loadingMenuItems && menuItems.length > 0"
+            class="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div *ngFor="let item of menuItems"
+              class="flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white transition-shadow hover:shadow-md">
+              <!-- Item Image -->
+              <div class="aspect-square overflow-hidden bg-gray-50">
+                <img *ngIf="item.imageUrl" [src]="item.imageUrl" [alt]="item.name"
+                  class="block h-full w-full object-cover object-center"
+                  onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22%3E%3Crect fill=%22%23ddd%22 height=%2224%22 width=%2224%22/%3E%3C/svg%3E'" />
+                <div *ngIf="!item.imageUrl" class="h-full w-full bg-gray-200" aria-hidden="true"></div>
+              </div>
+
+              <!-- Item Info -->
+              <div class="flex flex-1 flex-col p-3">
+                <h3 class="mb-1 truncate text-sm font-semibold text-gray-900" [title]="item.name">
+                  {{ item.name }}
+                </h3>
+                <p class="mb-3 line-clamp-2 text-xs text-gray-600" [title]="item.description">
+                  {{ item.description }}
+                </p>
+
+                <!-- Loading Prices -->
+                <div *ngIf="isLoadingPrices(item.id)" class="mt-auto flex items-center gap-2 text-xs text-gray-500">
+                  <div class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600"></div>
+                  <span>Loading portions...</span>
+                </div>
+
+                <!-- Portion Buttons -->
+                <div *ngIf="!isLoadingPrices(item.id)" class="mt-auto space-y-2">
+                  <div *ngIf="getItemPrices(item.id).length === 0" class="text-center text-xs text-gray-500">
+                    No portions available
+                  </div>
+
+                  <button *ngFor="let price of getItemPrices(item.id)" type="button" (click)="addToCart(item, price)"
+                    class="w-full rounded-lg bg-blue-600 px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-blue-700">
+                    {{ getDisplayPortionName(price) }} - Rs. {{ price.price.toFixed(2) }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Cart + Order Details -->
+      <div class="space-y-6">
+        <!-- Cart -->
+        <div class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+          <div class="flex items-baseline justify-between gap-3 border-b border-gray-200 px-4 py-4">
+            <h2 class="text-base font-semibold text-gray-900">Order Cart</h2>
+            <span *ngIf="cartItems.length > 0" class="text-xs font-normal text-gray-500">
+              ({{ getCartItemCount() }} items)
+            </span>
+          </div>
+
+          <div *ngIf="cartItems.length === 0" class="px-4 py-10 text-center text-sm text-gray-600">
+            No items added to cart
+          </div>
+
+          <div *ngIf="cartItems.length > 0" class="overflow-x-auto">
+            <table class="w-full border-collapse text-sm">
+              <thead class="bg-gray-100">
+                <tr class="border-b border-gray-200">
+                  <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700" style="width: 28%">Item</th>
+                  <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700" style="width: 12%">Unit</th>
+                  <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700" style="width: 14%">Qty</th>
+                  <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700" style="width: 30%">Notes</th>
+                  <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700" style="width: 12%">Total</th>
+                  <th class="px-4 py-3" style="width: 4%"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of cartItems" class="border-b border-gray-200 transition-colors hover:bg-gray-50">
+                  <td class="px-4 py-3 align-top">
+                    <span class="block font-medium text-gray-900" [title]="item.menuItemName">{{ item.menuItemName
+                      }}</span>
+                    <span class="mt-0.5 block text-xs text-gray-500" [title]="item.portionName">{{ item.portionName
+                      }}</span>
+                  </td>
+                  <td class="px-4 py-3 text-right align-top font-mono text-xs text-gray-600">Rs. {{
+                    item.price.toFixed(2) }}</td>
+                  <td class="px-4 py-3 align-top">
+                    <input type="number" min="1" [(ngModel)]="item.quantity"
+                      (ngModelChange)="updateQuantity(item.menuItemId, item.portionId, item.quantity)"
+                      class="w-20 rounded-md border border-gray-300 bg-white px-2 py-1.5 text-center text-xs text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  </td>
+                  <td class="px-4 py-3 align-top">
+                    <input type="text" [(ngModel)]="item.notes"
+                      (ngModelChange)="updateNotes(item.menuItemId, item.portionId, item.notes || '')"
+                      placeholder="Notes..."
+                      class="w-full min-w-36 rounded-md border border-gray-300 bg-white px-2 py-1.5 text-xs text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  </td>
+                  <td class="px-4 py-3 text-right align-top font-mono text-xs text-gray-600">
+                    Rs. {{ (item.price * item.quantity).toFixed(2) }}
+                  </td>
+                  <td class="px-4 py-3 text-right align-top">
+                    <button type="button" (click)="removeFromCart(item.menuItemId, item.portionId)"
+                      class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+                      aria-label="Remove item" title="Remove">
+                      <span aria-hidden="true" class="text-lg leading-none">×</span>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div *ngIf="cartItems.length > 0" class="border-t border-gray-200 px-4 py-4">
+            <div class="flex items-baseline justify-between text-lg font-bold text-gray-900">
+              <span>Total:</span>
+              <span class="text-blue-600">Rs. {{ getCartTotal().toFixed(2) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Details -->
+        <div class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+          <div class="border-b border-gray-200 px-4 py-4">
+            <h2 class="text-base font-semibold text-gray-900">Order Details</h2>
+          </div>
+
+          <div class="p-4">
+            <!-- Order Type -->
+            <div class="mb-4">
+              <label class="mb-2 block text-sm font-medium text-gray-700">Order Type</label>
+              <select [(ngModel)]="selectedOrderTypeId" (ngModelChange)="onOrderTypeChange()"
+                class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option [ngValue]="null" disabled>Select order type...</option>
+                <option *ngFor="let t of orderTypes" [ngValue]="t.id">
+                  {{ t.typeName }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Table Selection -->
+            <div *ngIf="isDineIn()" class="mb-4">
+              <label class="mb-2 block text-sm font-medium text-gray-700">Select Table *</label>
+
+              <div *ngIf="loadingTables" class="inline-flex items-center gap-2 text-sm text-gray-600">
+                <div class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600"></div>
+                <span>Loading tables...</span>
+              </div>
+
+              <select *ngIf="!loadingTables" [(ngModel)]="selectedTableId"
+                class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option [value]="null">Select table...</option>
+                <option *ngFor="let table of tables" [value]="table.id">
+                  Table {{ table.tableNumber }} (Capacity: {{ table.capacity }})
+                </option>
+              </select>
+            </div>
+
+            <!-- Customer Search -->
+            <div class="mb-4">
+              <label class="mb-2 block text-sm font-medium text-gray-700">Customer (Optional)</label>
+
+              <div *ngIf="!selectedCustomer" class="flex gap-2">
+                <input [(ngModel)]="customerSearchMobile" placeholder="Mobile number"
+                  class="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <button type="button" (click)="searchCustomer()"
+                  [disabled]="loadingCustomer || !customerSearchMobile.trim()"
+                  class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">
+                  <span *ngIf="!loadingCustomer">Search</span>
+                  <span *ngIf="loadingCustomer">Searching...</span>
+                </button>
+              </div>
+
+              <div *ngIf="selectedCustomer"
+                class="mt-2 flex items-start justify-between gap-4 rounded-lg border border-blue-200 bg-blue-50 p-3">
+                <div>
+                  <p class="font-semibold text-gray-900">
+                    {{ selectedCustomer.firstName }} {{ selectedCustomer.lastName }}
+                  </p>
+                  <p class="text-xs text-gray-600">{{ selectedCustomer.phone }}</p>
+                  <p *ngIf="selectedCustomer.loyaltyPoints" class="mt-1 text-xs font-semibold text-blue-600">
+                    Points: {{ selectedCustomer.loyaltyPoints }}
+                  </p>
+                </div>
+                <button type="button" (click)="clearCustomer()"
+                  class="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                  Change
+                </button>
+              </div>
+            </div>
+
+            <!-- Notes -->
+            <div class="mb-4">
+              <label class="mb-2 block text-sm font-medium text-gray-700">Special Notes</label>
+              <textarea [(ngModel)]="orderNotes" rows="3" placeholder="Special instructions..."
+                class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex flex-col gap-3 sm:flex-row sm:justify-end">
+              <button type="button" (click)="submitOrder()" [disabled]="submittingOrder || cartItems.length === 0"
+                class="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50">
+                <span *ngIf="!submittingOrder">Create Order</span>
+                <span *ngIf="submittingOrder" class="inline-flex items-center gap-2">
+                  <span
+                    class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/60 border-t-white"></span>
+                  <span>Creating Order...</span>
+                </span>
+              </button>
+
+              <button *ngIf="cartItems.length > 0" type="button" (click)="resetOrder()" [disabled]="submittingOrder"
+                class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50">
+                Clear Order
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>

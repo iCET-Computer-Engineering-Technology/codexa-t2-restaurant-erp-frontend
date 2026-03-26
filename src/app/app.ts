@@ -1,8 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { initFlowbite } from 'flowbite';
-import { Nav } from "./page/nav/nav";
-import { Sidebar } from "./page/sidebar/sidebar";
 
 @Component({
   selector: 'app-root',
