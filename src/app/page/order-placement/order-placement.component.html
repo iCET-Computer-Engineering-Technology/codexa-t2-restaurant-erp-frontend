@@ -1,20 +1,21 @@
 <div class="min-h-screen bg-gray-50 p-5">
-  <!-- Header -->
+  <!-- Header with Alerts -->
   <div class="mb-5 flex items-start justify-between gap-5">
     <div>
       <h1 class="text-3xl font-semibold text-gray-900">Orders</h1>
       <p class="mt-2 text-sm text-gray-600">Create new restaurant order</p>
     </div>
-  </div>
 
-  <!-- Alert Messages -->
-  <div *ngIf="errorMessage" class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-    {{ errorMessage }}
-  </div>
+    <!-- Alert Messages (Right side, sticky) -->
+    <div class="sticky top-5 z-40 max-w-sm space-y-2">
+      <div *ngIf="errorMessage" class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 shadow-md">
+        {{ errorMessage }}
+      </div>
 
-  <div *ngIf="successMessage"
-    class="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
-    {{ successMessage }}
+      <div *ngIf="successMessage" class="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700 shadow-md">
+        {{ successMessage }}
+      </div>
+    </div>
   </div>
 
   <!-- Loading State -->

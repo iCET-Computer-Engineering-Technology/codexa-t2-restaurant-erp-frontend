@@ -315,18 +315,27 @@ export class OrderService {
     searchCustomer(mobile: string): Observable<CustomerDto> {
         const phone = encodeURIComponent(mobile);
         return this.firstSuccessfulGetOrThrow<CustomerDto>(
-            [`${this.rootUrl}/customers/search/phone/${phone}`, `${this.apiUrl}/customers/search/phone/${phone}`],
-            (response) => this.normalizeCustomer(response)
+            [`${this.rootUrl}/customers/phone/${phone}`, `${this.apiUrl}/customers/phone/${phone}`],
+            (response) => this.normalizeAndValidateCustomer(response)
         );
     }
 
-    private normalizeCustomer(response: unknown): CustomerDto {
+    private normalizeAndValidateCustomer(response: unknown): CustomerDto {
         const raw = (response as any)?.data ?? (response as any)?.result ?? response;
+        
+        const customerId = Number(raw?.id ?? raw?.customerId ?? raw?.customer_id ?? 0);
+        const firstName = String(raw?.firstName ?? raw?.first_name ?? '').trim();
+        const lastName = String(raw?.lastName ?? raw?.last_name ?? '').trim();
+        
+        // Validate that we actually got a valid customer (must have id > 0)
+        if (!Number.isFinite(customerId) || customerId <= 0) {
+            throw new Error('Customer not found');
+        }
 
         return {
-            id: Number(raw?.id ?? raw?.customerId ?? raw?.customer_id ?? 0),
-            firstName: String(raw?.firstName ?? raw?.first_name ?? ''),
-            lastName: String(raw?.lastName ?? raw?.last_name ?? ''),
+            id: customerId,
+            firstName,
+            lastName,
             email: raw?.email != null ? String(raw.email) : undefined,
             phone: String(raw?.phone ?? raw?.mobile ?? raw?.mobileNumber ?? raw?.mobile_number ?? ''),
             address: raw?.address != null ? String(raw.address) : undefined,
@@ -344,7 +353,7 @@ export class OrderService {
     //Submit
     createOrder(orderData: OrderCreateRequest): Observable<OrderResponse> {
         return this.firstSuccessfulPostOrThrow<OrderResponse>(
-            [`${this.apiUrl}/order/create`, `${this.apiUrl}/orders`],
+            [`${this.apiUrl}/order/create`],
             orderData,
             (response) => this.normalizeOrderResponse(response)
         );

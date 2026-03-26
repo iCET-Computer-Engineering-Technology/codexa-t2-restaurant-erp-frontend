@@ -37,7 +37,6 @@ export class OrderPlacementComponent implements OnInit, OnDestroy {
     loadingCategories = false;
     loadingMenuItems = false;
     loadingTables = false;
-    loadingPortions = false;
     loadingOrderTypes = false;
     loadingPrices: { [key: number]: boolean } = {};
     loadingCustomer = false;
@@ -58,9 +57,6 @@ export class OrderPlacementComponent implements OnInit, OnDestroy {
     // Prices cache for menu items
     menuItemPrices: { [key: number]: MenuItemPriceDto[] } = {};
 
-    // Portion name lookup (optional master list)
-    private portionsById: Record<number, string> = {};
-
     // Component lifecycle
     private destroy$ = new Subject<void>();
     private cancelMenuLoads$ = new Subject<void>();
@@ -73,9 +69,7 @@ export class OrderPlacementComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         console.log('OrderPlacementComponent initialized');
         this.loadOrderTypes();
-        this.loadPortions();
         this.loadCategories();
-        this.loadTables();
     }
 
     private loadOrderTypes(): void {
@@ -119,39 +113,15 @@ export class OrderPlacementComponent implements OnInit, OnDestroy {
         return this.normalizeOrderTypeKey(this.getSelectedOrderTypeName()) === 'dine_in';
     }
 
-    private loadPortions(): void {
-        this.loadingPortions = true;
-        this.orderService
-            .getAllPortions()
-            .pipe(takeUntil(this.destroy$))
-            .subscribe({
-                next: (portions: PortionDto[]) => {
-                    this.portionsById = Object.fromEntries(
-                        (portions ?? [])
-                            .filter((p) => p.isActive)
-                            .map((p) => [p.id, p.name])
-                    );
-                    this.loadingPortions = false;
-                    this.requestRender();
-                },
-                error: () => {
-                    this.loadingPortions = false;
-                    this.requestRender();
-                },
-            });
-    }
+
 
     getDisplayPortionName(price: MenuItemPriceDto): string {
         const raw = (price?.portionName ?? '').trim();
-        // If backend returned a real name, prefer it
+        // If backend returned a real name, use it
         if (raw.length > 0 && raw !== 'Default' && !/^Portion\s+\d+$/i.test(raw)) {
             return raw;
         }
-        const mapped = this.portionsById[price.portionId];
-        if (mapped && mapped.trim().length > 0) {
-            return mapped.trim();
-        }
-        // Stable fallback so it's not always "Default"
+        // Stable fallback using portion ID
         if (Number.isFinite(price.portionId) && price.portionId > 0) {
             return `Portion ${price.portionId}`;
         }
@@ -415,7 +385,12 @@ export class OrderPlacementComponent implements OnInit, OnDestroy {
     }
 
     onOrderTypeChange(): void {
-        if (!this.isDineIn()) {
+        if (this.isDineIn()) {
+            // Load tables lazily only when needed
+            if (this.tables.length === 0 && !this.loadingTables) {
+                this.loadTables();
+            }
+        } else {
             this.selectedTableId = null;
         }
         this.requestRender();
