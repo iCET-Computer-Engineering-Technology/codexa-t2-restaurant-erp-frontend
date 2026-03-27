@@ -44,8 +44,8 @@
           <div *ngIf="currentStep === 1" class="step-content">
             <div class="form-group">
               <label for="reservationDate">Select Reservation Date</label>
-              <input type="date" id="reservationDate" [(ngModel)]="reservationForm.reservationDate" 
-                     (change)="onDateSelected()" 
+              <input type="date" id="reservationDate" [(ngModel)]="reservationForm.reservationDate"
+                     (change)="onDateSelected()"
                      [min]="getMinDate()"
                      class="form-control">
             </div>
@@ -53,7 +53,7 @@
             <div *ngIf="reservationForm.reservationDate" class="available-slots">
               <h4 class="slots-title">Available Slots for {{ reservationForm.reservationDate | date:'MMM dd, yyyy' }}</h4>
               <div class="time-slots">
-                <button *ngFor="let slot of availableSlots" 
+                <button *ngFor="let slot of availableSlots"
                         class="time-slot-btn"
                         [class.selected]="reservationForm.reservationTime === slot.time"
                         (click)="selectTime(slot.time)">
@@ -70,8 +70,8 @@
               <label for="guestCount">Guest Count</label>
               <div class="guest-count-selector">
                 <button class="count-btn" (click)="decreaseGuestCount()" [disabled]="reservationForm.guestCount <= 1">−</button>
-                <input type="number" id="guestCount" [(ngModel)]="reservationForm.guestCount" 
-                       min="1" max="20" 
+                <input type="number" id="guestCount" [(ngModel)]="reservationForm.guestCount"
+                       min="1" max="20"
                        class="form-control count-input">
                 <button class="count-btn" (click)="increaseGuestCount()" [disabled]="reservationForm.guestCount >= 20">+</button>
               </div>
@@ -92,26 +92,26 @@
           <div *ngIf="currentStep === 3" class="step-content">
             <div class="form-group">
               <label for="customerName">Customer Name</label>
-              <input type="text" id="customerName" [(ngModel)]="reservationForm.customerName" 
+              <input type="text" id="customerName" [(ngModel)]="reservationForm.customerName"
                      placeholder="Enter full name" class="form-control">
             </div>
 
             <div class="form-group">
               <label for="customerEmail">Email Address</label>
-              <input type="email" id="customerEmail" [(ngModel)]="reservationForm.customerEmail" 
+              <input type="email" id="customerEmail" [(ngModel)]="reservationForm.customerEmail"
                      placeholder="Enter email" class="form-control">
             </div>
 
             <div class="form-group">
               <label for="customerPhone">Phone Number</label>
-              <input type="tel" id="customerPhone" [(ngModel)]="reservationForm.customerPhone" 
+              <input type="tel" id="customerPhone" [(ngModel)]="reservationForm.customerPhone"
                      placeholder="Enter phone number" class="form-control">
             </div>
 
             <div class="form-group">
               <label for="specialRequests">Special Requests (Optional)</label>
-              <textarea id="specialRequests" [(ngModel)]="reservationForm.specialRequests" 
-                        placeholder="Any dietary restrictions or special occasion?" 
+              <textarea id="specialRequests" [(ngModel)]="reservationForm.specialRequests"
+                        placeholder="Any dietary restrictions or special occasion?"
                         class="form-control textarea-control"></textarea>
             </div>
           </div>
@@ -148,12 +148,12 @@
         </div>
 
         <div class="form-footer">
-          <button class="cancel-btn" 
+          <button class="cancel-btn"
                   (click)="previousStep()"
                   [disabled]="currentStep === 1">
             ← Back
           </button>
-          <button class="save-btn" 
+          <button class="save-btn"
                   (click)="currentStep === 4 ? submitReservation() : nextStep()"
                   [disabled]="!isStepValid()">
             {{ currentStep === 4 ? '✓ Confirm Booking' : 'Next →' }}
@@ -208,22 +208,22 @@
               </td>
               <td class="action-cell">
                 <div class="action-buttons">
-                  <button class="action-btn edit-btn" 
+                  <button class="action-btn edit-btn"
                           title="View Details"
                           (click)="viewReservation(reservation)">
-                    👁️
+                    View
                   </button>
-                  <button class="action-btn status-btn" 
+                  <button class="action-btn status-btn"
                           title="Change Status"
                           (click)="openStatusUpdateModal(reservation)"
                           *ngIf="reservation.status !== 'cancelled'">
-                    📝
+                    Status
                   </button>
-                  <button class="action-btn cancel-btn-icon" 
+                  <button class="action-btn cancel-btn-icon"
                           title="Cancel Reservation"
                           (click)="cancelReservation(reservation.id!)"
                           *ngIf="reservation.status !== 'cancelled'">
-                    ✕
+                    Cancel
                   </button>
                 </div>
               </td>
@@ -260,7 +260,7 @@
         <h3>Reservation Details</h3>
         <button class="close-btn" (click)="closeDetailModal()" (keydown.enter)="closeDetailModal()">✕</button>
       </div>
-      
+
       <div *ngIf="selectedReservation" class="modal-body">
         <div class="detail-field">
           <span class="detail-label">Booking Reference:</span>
@@ -277,6 +277,10 @@
         <div class="detail-field">
           <span class="detail-label">Guest Count:</span>
           <span class="detail-value">{{ selectedReservation.guestCount || 0 }} people</span>
+        </div>
+        <div class="detail-field">
+          <span class="detail-label">Table:</span>
+          <span class="detail-value">{{ selectedReservation.tableName || 'N/A' }}</span>
         </div>
         <div class="detail-field">
           <span class="detail-label">Name:</span>
@@ -306,7 +310,7 @@
 
       <div class="modal-footer">
         <button class="cancel-btn" (click)="closeDetailModal()">Close</button>
-        <button class="delete-btn" 
+        <button class="delete-btn"
           (click)="confirmCancelReservation(selectedReservation.id!)"
           *ngIf="selectedReservation && selectedReservation.status !== 'cancelled'">
           Cancel Reservation
@@ -322,7 +326,7 @@
         <h3>Update Reservation Status</h3>
         <button class="close-btn" (click)="closeStatusUpdateModal()" (keydown.enter)="closeStatusUpdateModal()">✕</button>
       </div>
-      
+
       <div class="modal-body">
         <div class="detail-field">
           <span class="detail-label">Booking Reference:</span>

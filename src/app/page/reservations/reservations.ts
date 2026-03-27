@@ -69,7 +69,6 @@ export class ReservationsComponent implements OnInit {
       .get<unknown>(`${this.apiBaseUrl}/api/reservations/upcoming`)
       .subscribe({
         next: (data) => {
-          console.log('API Response from /api/reservations/upcoming:', data);
           this.allReservations = this.extractReservationArray(data).map((item) =>
             this.normalizeReservation(item)
           );
@@ -303,15 +302,24 @@ export class ReservationsComponent implements OnInit {
       .post<ReservationResponse>(`${this.apiBaseUrl}/api/reservations/book`, reservation)
       .subscribe({
         next: (response) => {
+          const responseRecord = response as unknown as Record<string, unknown>;
+          const bookingReference = this.toText(
+            response.bookingReference,
+            responseRecord['confirmationCode'],
+            responseRecord['confirmation_code'],
+            responseRecord['confirmationNumber'],
+            responseRecord['confirmation_number']
+          );
+
           console.log('Reservation response:', response);
           this.showSuccess(
-            `Booking confirmed! Your reference: ${response.bookingReference}`
+            `Booking confirmed! Your reference: ${bookingReference || 'N/A'}`
           );
 
           // Add the new reservation to the list immediately
           const newReservation: ReservationModel = {
             id: response.id || 0,
-            bookingReference: response.bookingReference,
+            bookingReference, // use resolved bookingReference alias value
             customerId: this.reservationForm.customerId,
             customerName: this.reservationForm.customerName,
             customerEmail: this.reservationForm.customerEmail,
@@ -342,7 +350,6 @@ export class ReservationsComponent implements OnInit {
    * View reservation details
    */
   viewReservation(reservation: ReservationModel): void {
-    console.log('Viewing reservation:', reservation);
     const normalizedReservation = this.normalizeReservation(reservation);
 
     this.selectedReservation = {
@@ -351,6 +358,7 @@ export class ReservationsComponent implements OnInit {
       customerName: normalizedReservation.customerName || 'N/A',
       customerEmail: normalizedReservation.customerEmail || 'N/A',
       customerPhone: normalizedReservation.customerPhone || 'N/A',
+      tableName: normalizedReservation.tableName || 'N/A',
       guestCount: normalizedReservation.guestCount || 0,
     };
 
@@ -375,15 +383,55 @@ export class ReservationsComponent implements OnInit {
               customerName: detail.customerName || this.selectedReservation.customerName || 'N/A',
               customerEmail: detail.customerEmail || this.selectedReservation.customerEmail || 'N/A',
               customerPhone: detail.customerPhone || this.selectedReservation.customerPhone || 'N/A',
+              tableName: detail.tableName || this.selectedReservation.tableName || 'N/A',
               guestCount: detail.guestCount || this.selectedReservation.guestCount || 0,
             };
             this.cdr.detectChanges();
+
+            // If we still don't have a proper table name and have a tableId, fetch table details
+            if ((!detail.tableName || detail.tableName.startsWith('Table ')) && detail.tableId && detail.tableId > 0) {
+              this.fetchTableDetails(detail.tableId);
+            }
           },
           error: (error) => {
             console.warn('Reservation detail hydration failed, using list row data:', error);
           },
         });
+    } else if (normalizedReservation.tableId && normalizedReservation.tableId > 0 && !normalizedReservation.tableName) {
+      // If we have tableId but no tableName, fetch table details
+      this.fetchTableDetails(normalizedReservation.tableId);
     }
+  }
+
+  /**
+   * Fetch table details to get the table number/name
+   */
+  private fetchTableDetails(tableId: number): void {
+    this.http.get<any>(`${this.apiBaseUrl}/api/tables/${tableId}`).subscribe({
+      next: (tableData) => {
+        if (!this.showDetailModal || !this.selectedReservation) {
+          return;
+        }
+
+        // Extract table number/name from response
+        const tableName =
+          tableData?.tableNumber ||
+          tableData?.number ||
+          tableData?.name ||
+          tableData?.label ||
+          `Table ${tableId}`;
+
+        this.selectedReservation.tableName = tableName;
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        // Fallback to showing tableId if API fails
+        if (this.selectedReservation && !this.selectedReservation.tableName) {
+          this.selectedReservation.tableName = `Table ${tableId}`;
+          this.cdr.detectChanges();
+        }
+      },
+    });
   }
 
   /**
@@ -563,6 +611,7 @@ export class ReservationsComponent implements OnInit {
       !reservation.customerName ||
       !reservation.customerEmail ||
       !reservation.customerPhone ||
+      !reservation.tableName ||
       !reservation.guestCount
     );
   }
@@ -619,23 +668,171 @@ export class ReservationsComponent implements OnInit {
         customer['phone'],
         customer['mobile']
       ),
-      tableId: this.toNumber(raw['tableId'] ?? raw['table_id']),
-      tableName: this.toText(raw['tableName'], raw['table_name']),
+      tableId: this.toNumber(raw['tableId'] ?? raw['table_id'] ?? this.extractTableId(raw)),
+      tableName: this.normalizeTableName(raw),
       reservationDate: this.toText(raw['reservationDate'], raw['reservation_date'], raw['date']),
       reservationTime: this.toText(raw['reservationTime'], raw['reservation_time'], raw['time']),
       guestCount: this.toNumber(guestCountRaw),
       specialRequests: this.toText(raw['specialRequests'], raw['special_requests'], raw['notes']),
-      status: this.toText(raw['status'], raw['reservationStatus'], raw['reservation_status']) || 'pending',
-      bookingReference: this.toText(raw['bookingReference'], raw['booking_reference'], raw['reference']),
+      status: this.normalizeStatus(raw),
+      bookingReference: this.toText(
+        raw['bookingReference'],
+        raw['booking_reference'],
+        raw['reference'],
+        raw['confirmationCode'],
+        raw['confirmation_code'],
+        raw['confirmationNumber'],
+        raw['confirmation_number']
+      ),
       createdAt: this.toText(raw['createdAt'], raw['created_at']),
       updatedAt: this.toText(raw['updatedAt'], raw['updated_at']),
     };
   }
 
+  private normalizeStatus(raw: Record<string, unknown>): string {
+    const statusObject = raw['status'] as Record<string, unknown> | undefined;
+
+    const directStatus = this.toText(
+      raw['status'],
+      raw['reservationStatus'],
+      raw['reservation_status'],
+      raw['bookingStatus'],
+      raw['booking_status'],
+      raw['statusName'],
+      raw['status_name'],
+      raw['reservationState'],
+      raw['reservation_state'],
+      raw['state'],
+      statusObject?.['name'],
+      statusObject?.['label'],
+      statusObject?.['value']
+    );
+
+    if (directStatus) {
+      return directStatus.toLowerCase();
+    }
+
+    if (this.toBoolean(raw['isCancelled'] ?? raw['cancelled'])) {
+      return 'cancelled';
+    }
+
+    if (this.toBoolean(raw['isCompleted'] ?? raw['completed'])) {
+      return 'completed';
+    }
+
+    if (this.toBoolean(raw['isConfirmed'] ?? raw['confirmed'])) {
+      return 'confirmed';
+    }
+
+    return 'pending';
+  }
+
+  private normalizeTableName(raw: Record<string, unknown>): string {
+    // Try direct fields first - tableNumber, tableName, etc.
+    const directName = this.toText(
+      raw['tableNumber'],
+      raw['table_number'],
+      raw['tableName'],
+      raw['table_name'],
+      raw['tableNo'],
+      raw['table_no'],
+      raw['tblNo'],
+      raw['tbl_no'],
+      raw['tableNum'],
+      raw['table_num'],
+      raw['tblNum'],
+      raw['tbl_num'],
+      raw['tableLabel'],
+      raw['table_label']
+    );
+
+    if (directName) {
+      return directName;
+    }
+
+    // Try nested table object
+    const tableObject = raw['table'] as Record<string, unknown> | undefined;
+    if (tableObject && typeof tableObject === 'object') {
+      const nestedName = this.toText(
+        tableObject['tableNumber'],
+        tableObject['table_number'],
+        tableObject['name'],
+        tableObject['tableName'],
+        tableObject['table_name'],
+        tableObject['tableNo'],
+        tableObject['table_no'],
+        tableObject['tableNum'],
+        tableObject['table_num'],
+        tableObject['label'],
+        tableObject['number']
+      );
+      if (nestedName) {
+        return nestedName;
+      }
+    }
+
+    // Try nested tableDetails
+    const tableDetails = raw['tableDetails'] as Record<string, unknown> | undefined;
+    if (tableDetails && typeof tableDetails === 'object') {
+      const nestedName = this.toText(
+        tableDetails['tableNumber'],
+        tableDetails['table_number'],
+        tableDetails['name'],
+        tableDetails['tableName'],
+        tableDetails['table_name'],
+        tableDetails['tableNo'],
+        tableDetails['table_no']
+      );
+      if (nestedName) {
+        return nestedName;
+      }
+    }
+
+    // If we have a tableId, use it as fallback (will be fetched later if needed)
+    const tableId = raw['tableId'] as unknown;
+    if (tableId) {
+      const tableIdStr = this.toText(tableId);
+      if (tableIdStr) {
+        return `Table ${tableIdStr}`;
+      }
+    }
+
+    return '';
+  }
+
+  private extractTableId(raw: Record<string, unknown>): number {
+    // Try nested table object for ID
+    const tableObject = raw['table'] as Record<string, unknown> | undefined;
+    if (tableObject) {
+      const id = this.toNumber(tableObject['id'] ?? tableObject['tableId']);
+      if (id > 0) return id;
+    }
+
+    // Try nested tableDetails for ID
+    const tableDetails = raw['tableDetails'] as Record<string, unknown> | undefined;
+    if (tableDetails) {
+      const id = this.toNumber(tableDetails['id'] ?? tableDetails['tableId']);
+      if (id > 0) return id;
+    }
+
+    return 0;
+  }
+
   private toText(...values: unknown[]): string {
     for (const value of values) {
+      // Handle strings
       if (typeof value === 'string' && value.trim().length > 0) {
-        return value;
+        return value.trim();
+      }
+
+      // Handle numbers - important for table numbers
+      if (typeof value === 'number' && Number.isFinite(value) && value !== 0) {
+        return String(value);
+      }
+
+      // Handle boolean
+      if (typeof value === 'boolean') {
+        return value ? 'true' : 'false';
       }
     }
 
@@ -645,6 +842,23 @@ export class ReservationsComponent implements OnInit {
   private toNumber(value: unknown): number {
     const parsed = Number(value);
     return Number.isFinite(parsed) ? parsed : 0;
+  }
+
+  private toBoolean(value: unknown): boolean {
+    if (typeof value === 'boolean') {
+      return value;
+    }
+
+    if (typeof value === 'string') {
+      const normalized = value.trim().toLowerCase();
+      return normalized === 'true' || normalized === '1' || normalized === 'yes';
+    }
+
+    if (typeof value === 'number') {
+      return value === 1;
+    }
+
+    return false;
   }
 
   /**

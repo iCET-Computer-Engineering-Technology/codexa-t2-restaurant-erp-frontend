@@ -15,6 +15,7 @@ import { MenuCategories } from './page/menu-categories/menu-categories';
 import { MenuItemPrice } from './page/menu-item-price/menu-item-price';
 import { Portions } from './page/portions/portions';
 import { OrderPlacementComponent } from './page/order-placement/order-placement.component';
+import { ReservationsComponent } from './page/reservations/reservations';
 import { roleGuard } from './guards/role.guard';
 export const routes: Routes = [
   {
@@ -39,6 +40,10 @@ export const routes: Routes = [
       {
         path: 'cashier-customer',
         component: Customers,
+      },
+      {
+        path: "reservations",
+        component: ReservationsComponent
       }
     ]
   },
@@ -105,6 +110,10 @@ export const routes: Routes = [
       {
         path: "portions",
         component: Portions
+      },
+      {
+        path: "reservations",
+        component: ReservationsComponent
       },
       {
         path: 'admin-marketing',
