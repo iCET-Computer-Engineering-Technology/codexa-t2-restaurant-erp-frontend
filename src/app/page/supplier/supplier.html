@@ -156,12 +156,12 @@
           <tr *ngFor="let s of paginatedSuppliers; let i = index" style="border-bottom: 1px solid #f1f5f9; transition: all 0.2s ease; cursor: default;" onmouseover="this.style.background='#f9fafb'; this.style.boxShadow='inset 0 0 0 2px #e2e8f0';" onmouseout="this.style.background='white'; this.style.boxShadow='none';">
 
             <!-- Index -->
-            <td style="padding: 16px 24px; color: #64748b; font-weight: 600;">
+            <td style="padding: 16px 24px; color: #64748b; font-weight: 600;" data-label="#">
               {{ ((currentPage - 1) * itemsPerPage) + i + 1 }}
             </td>
 
             <!-- Supplier Name + Email -->
-            <td style="padding: 16px 24px;">
+            <td style="padding: 16px 24px;" data-label="Supplier Details">
               <div style="display: flex; align-items: center; gap: 12px;">
                 <div *ngIf="s.name"
                   style="width: 44px; height: 44px; border-radius: 10px; background: linear-gradient(135deg, #e0e7ff 0%, #dbeafe 100%); color: #4f46e5; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; flex-shrink: 0; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);">
@@ -177,7 +177,7 @@
             </td>
 
             <!-- Contact Name + Phone -->
-            <td style="padding: 16px 24px;">
+            <td style="padding: 16px 24px;" data-label="Contact">
               <div style="font-weight: 600; color: #0f172a; font-size: 15px;">{{ s.contactName }}</div>
               <div style="color: #64748b; font-size: 13px; margin-top: 4px; display: flex; align-items: center; gap: 4px;">
                 {{ s.phone }}
@@ -185,7 +185,7 @@
             </td>
 
             <!-- Address -->
-            <td style="padding: 16px 24px;">
+            <td style="padding: 16px 24px;" data-label="Address">
               <div
                 style="color: #475569; font-size: 13px; max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 4px; font-weight: 500;"
                 [title]="s.address">
@@ -194,7 +194,7 @@
             </td>
 
             <!-- Actions -->
-            <td style="padding: 16px 24px; text-align: right;">
+            <td style="padding: 16px 24px; text-align: right;" data-label="Actions">
               <div style="display: flex; gap: 8px; justify-content: flex-end;">
 
                 <!-- Edit -->

@@ -317,6 +317,90 @@ tbody tr:last-child td {
   border-bottom: none;
 }
 
+@media (max-width: 768px) {
+  th {
+    padding: 12px 16px;
+    font-size: 11px;
+  }
+
+  td {
+    padding: 12px 16px;
+    font-size: 13px;
+  }
+
+  table {
+    font-size: 13px;
+  }
+
+  /* Stack table horizontally on mobile */
+  thead {
+    display: none;
+  }
+
+  tbody,
+  tr,
+  td {
+    display: block;
+    width: 100%;
+  }
+
+  tr {
+    margin-bottom: 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  td {
+    padding: 12px 16px;
+    border: none;
+    border-bottom: 1px solid #f1f5f9;
+    position: relative;
+    padding-left: 100px;
+  }
+
+  td:last-child {
+    border-bottom: none;
+  }
+
+  td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 12px;
+    font-weight: 700;
+    color: #0f172a;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  td[data-label="Actions"] {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-left: 12px !important;
+  }
+
+  td[data-label="Actions"]::before {
+    display: none;
+  }
+
+  td[data-label="Actions"] > div {
+    display: flex !important;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .edit-btn,
+  .delete-btn {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 10px 12px !important;
+  }
+}
+
 /* ── Action Buttons ───────────────────────────── */
 
 .action-btn {
@@ -435,6 +519,10 @@ tbody tr:last-child td {
 }
 
 @media (max-width: 768px) {
+  .dashboard-container {
+    padding: 16px;
+  }
+
   .form-row-2 {
     grid-template-columns: 1fr;
   }
@@ -446,15 +534,50 @@ tbody tr:last-child td {
   .form-row-4 {
     grid-template-columns: 1fr 1fr;
   }
+
+  .table-header-box {
+    padding: 16px;
+  }
+
+  .table-header-box h3 {
+    font-size: 18px;
+  }
+
+  .badge {
+    font-size: 10px;
+    padding: 4px 8px;
+  }
+
+  .search-container {
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  .pagination-controls {
+    padding: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .pagination-btn {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
 }
 
 @media (max-width: 576px) {
   .dashboard-container {
-    padding: 15px;
+    padding: 12px;
   }
 
   .page-title {
-    margin: 15px 0 10px 15px;
+    font-size: 24px;
+    margin: 0;
+  }
+
+  .form-section {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
   }
 
   .form-body {
@@ -462,7 +585,115 @@ tbody tr:last-child td {
     overflow-y: auto;
   }
 
+  .form-row-2 {
+    grid-template-columns: 1fr;
+  }
+
   .form-row-4 {
     grid-template-columns: 1fr;
+  }
+
+  .form-footer {
+    gap: 10px;
+  }
+
+  .cancel-btn,
+  .save-btn {
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+
+  .form-group label {
+    font-size: 13px;
+  }
+
+  .form-control {
+    font-size: 13px;
+    padding: 8px 10px;
+  }
+
+  textarea.form-control {
+    min-height: 80px;
+  }
+
+  .table-section {
+    border-radius: 8px;
+  }
+
+  .table-header-box {
+    flex-direction: column;
+    padding: 16px;
+  }
+
+  .table-header-box h3 {
+    font-size: 16px;
+  }
+
+  .section-header {
+    margin-bottom: 16px;
+  }
+
+  .section-header h3 {
+    font-size: 18px;
+  }
+
+  .subtitle {
+    font-size: 12px;
+  }
+
+  .edit-btn,
+  .delete-btn {
+    padding: 10px 12px !important;
+    font-size: 13px !important;
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .edit-btn svg,
+  .delete-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  /* Mobile Actions Cell */
+  td[data-label="Actions"] {
+    display: flex !important;
+    padding-left: 12px !important;
+    border: none !important;
+  }
+
+  td[data-label="Actions"]::before {
+    content: "Actions";
+    position: absolute;
+    left: 12px;
+    top: 12px;
+    font-weight: 700;
+    color: #0f172a;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  td[data-label="Actions"] > div {
+    display: flex !important;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    margin-top: 32px;
+  }
+
+  .pagination-controls {
+    padding: 12px;
+    flex-direction: column;
+  }
+
+  .pagination-btn {
+    width: 100%;
+    padding: 10px 12px;
+  }
+
+  tbody tr:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background: #f9fafb;
   }
 }
