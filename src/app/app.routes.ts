@@ -19,6 +19,7 @@ import { MenuItem } from './page/menu-item/menu-item';
 
 import { OrderPlacementComponent } from './page/order-placement/order-placement.component';
 import { roleGuard } from './guards/role.guard';
+import { Suppliers } from './page/supplier/supplier';
 
 export const routes: Routes = [
   {
@@ -81,6 +82,10 @@ export const routes: Routes = [
       {
         path: '',
         component: Dashboard,
+      },
+      {
+        path: 'admin-supplier',
+        component: Suppliers
       },
       {
         path: 'admin-customer',
