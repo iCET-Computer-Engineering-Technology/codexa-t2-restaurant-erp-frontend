@@ -1,33 +1,34 @@
 <div class="main-content-grid">
-
   <div class="left-column">
     <div class="form-section">
       <div class="section-header">
-        <h3 class="page-title">{{ isEditMode ? 'Edit Item' : 'Add New Item' }}</h3>
-        <p class="subtitle">Enter details to save</p>
+        <h3 class="page-title" style="color: #0f172a !important;">{{ isEditMode ? 'Edit Item' : 'Add New Item' }}</h3>
+        <p class="subtitle" style="color: #64748b !important;">Enter details to save</p>
       </div>
 
       <div class="form-body">
         <div class="form-group">
-          <label>Item Name</label>
+          <label style="color: #1e293b !important;">Item Name</label>
           <input type="text" [(ngModel)]="menuItemObj.name" placeholder="Enter item name" class="form-control">
         </div>
 
         <div class="form-group">
-          <label>Category Name</label>
-          <select [(ngModel)]="menuItemObj.categoryId" class="form-control">
-            <option [ngValue]="0" disabled>Select category</option>
-            <option *ngFor="let category of categoryList" [ngValue]="category.id">{{ category.name }}</option>
+          <label style="color: #1e293b !important;">Category</label>
+          <select class="form-control" [(ngModel)]="menuItemObj.categoryId">
+            <option [ngValue]="0" disabled selected>-- Select a Category --</option>
+            <option *ngFor="let cat of categoryList" [ngValue]="cat.id">
+              {{ cat.name }}
+            </option>
           </select>
         </div>
 
         <div class="form-group">
-          <label>Description</label>
+          <label style="color: #1e293b !important;">Description</label>
           <input type="text" [(ngModel)]="menuItemObj.description" placeholder="Enter description" class="form-control">
         </div>
 
         <div class="form-group">
-          <label>Status</label>
+          <label style="color: #1e293b !important;">Status</label>
           <select class="form-control" [(ngModel)]="menuItemObj.isAvailable">
             <option [ngValue]="true">Available</option>
             <option [ngValue]="false">UnAvailable</option>
@@ -35,7 +36,7 @@
         </div>
 
         <div class="form-group">
-          <label>Image URL</label>
+          <label style="color: #1e293b !important;">Image URL</label>
           <input type="text" [(ngModel)]="menuItemObj.imageUrl" placeholder="Enter Image Url" class="form-control">
         </div>
       </div>
@@ -50,7 +51,7 @@
 
   <div class="right-column table-section">
     <div class="table-header-box">
-      <h3>Item List <span class="badge">{{ menuItemList.length }}</span></h3>
+      <h3 style="color: #0f172a !important;">Item List <span class="badge">{{ menuItemList.length }}</span></h3>
 
       <div class="relative w-64">
         <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
@@ -65,18 +66,18 @@
     <table>
       <thead>
         <tr>
-          <th>Id</th>
-          <th>Name</th>
-          <th>Category</th>
-          <th>Description</th>
-          <th>Status</th>
-          <th>Actions</th>
+          <th style="color: #0f172a !important;">Id</th>
+          <th style="color: #0f172a !important;">Name</th>
+          <th style="color: #0f172a !important;">Category</th>
+          <th style="color: #0f172a !important;">Description</th>
+          <th style="color: #0f172a !important;">Status</th>
+          <th style="color: #0f172a !important;">Actions</th>
         </tr>
       </thead>
 
       <tbody>
-        <tr *ngFor="let menuItems of menuItemList; let i = index">
-          <td class="text-slate-700 font-medium">{{i + 1}}</td>
+        <tr *ngFor="let menuItems of paginatedData">
+          <td class="text-slate-700 font-medium">{{menuItems.id}}</td>
 
           <td>
             <div class="customer-info">
@@ -86,7 +87,7 @@
             </div>
           </td>                
           
-          <td class="text-slate-700">{{ getCategoryName(menuItems.categoryId) }}</td>
+          <td class="text-slate-700">{{menuItems.categoryName}}</td>
           <td class="text-slate-700">{{menuItems.description}}</td>
 
           <td>
@@ -118,5 +119,18 @@
         </tr>
       </tbody>
     </table>
+
+    <div class="pagination-container" *ngIf="totalPages > 1">
+      <button class="page-btn" (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1">Prev</button>
+      
+      <button class="page-btn" *ngFor="let page of getPagesArray()" 
+              [class.active]="currentPage === page" 
+              (click)="changePage(page)">
+        {{ page }}
+      </button>
+
+      <button class="page-btn" (click)="changePage(currentPage + 1)" [disabled]="currentPage === totalPages">Next</button>
+    </div>
+
   </div>
 </div>

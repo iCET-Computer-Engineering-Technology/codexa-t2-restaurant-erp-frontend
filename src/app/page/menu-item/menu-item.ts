@@ -8,55 +8,72 @@ import Swal from 'sweetalert2';
 @Component({
   selector: 'app-menu-items',
   imports: [FormsModule, CommonModule],
-  templateUrl: './menu-items.html',
-  styleUrl: './menu-items.css',
+  templateUrl: './menu-item.html',
+  styleUrl: './menu-item.css',
 })
-export class MenuItems implements OnInit {
+export class MenuItem implements OnInit {
 
   isEditMode : boolean = false;
 
   menuItemList: Array<MenuItemsModel> = [];
+  currentPage: number = 1;
+  itemsPerPage: number = 5; 
+
   categoryList: Array<CategoryModel> = [];
+  
   menuItemObj: MenuItemsModel = {
     id: 0,
     name: '',
     categoryId: 0,
+    categoryName: '',
     description: '',
     isAvailable: true,
     imageUrl: ''
-
   }
 
   constructor(private readonly http: HttpClient, private readonly cdr: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     this.getAll();
-    this.getAllCategories();
+    this.loadCategories();
+  }
+
+  loadCategories() {
+    this.http.get<CategoryModel[]>("http://localhost:8080/api/categories/get-all").subscribe(data => {
+      this.categoryList = data;
+    });
   }
 
   getAll() {
     this.http.get<MenuItemsModel[]>("http://localhost:8080/api/menu-items").subscribe(data => {
-      this.menuItemList = data;
+      this.menuItemList = data.sort((a, b) => Number(b.isAvailable) - Number(a.isAvailable));
       this.cdr.detectChanges();
-    })
+    });
   }
 
-  getAllCategories() {
-    this.http.get<CategoryModel[]>("http://localhost:8080/api/categories/get-all").subscribe(data => {
-      this.categoryList = data;
-      this.cdr.detectChanges();
-    })
+  get paginatedData() {
+    const start = (this.currentPage - 1) * this.itemsPerPage;
+    return this.menuItemList.slice(start, start + this.itemsPerPage);
   }
 
-  getCategoryName(categoryId: number | string): string {
-    const normalizedCategoryId = Number(categoryId);
-    const category = this.categoryList.find((item) => Number(item.id) === normalizedCategoryId);
-    return category ? category.name : `Category #${categoryId}`;
+  get totalPages() {
+    return Math.ceil(this.menuItemList.length / this.itemsPerPage);
+  }
+
+  getPagesArray() {
+    return Array(this.totalPages).fill(0).map((x, i) => i + 1);
+  }
+
+  changePage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+    }
   }
 
   addMenuItem(): void {
     this.http.post("http://localhost:8080/api/menu-items", this.menuItemObj).subscribe(data => {
       this.getAll();
+      this.clearForm();
     })
   }
 
@@ -65,26 +82,27 @@ export class MenuItems implements OnInit {
       id: 0,
       name: '',
       categoryId: 0,
+      categoryName: '',
       description: '',
       isAvailable: true,
       imageUrl: ''
     }
+    this.isEditMode = false;
   }
 
   onEdit(menuItem : MenuItemsModel) : void {
     this.menuItemObj = { ...menuItem }; 
-  this.isEditMode = true; 
+    this.isEditMode = true; 
   }
 
   updateMenuItem() : void {
-  this.http.put("http://localhost:8080/api/menu-items" , this.menuItemObj).subscribe(data => {
-    this.getAll();
-    this.clearForm();
-    this.isEditMode = false;
-  })
-}
+    this.http.put("http://localhost:8080/api/menu-items" , this.menuItemObj).subscribe(data => {
+      this.getAll();
+      this.clearForm();
+    })
+  }
 
-deleteMenuItem(id: number): void {
+  deleteMenuItem(id: number): void {
     Swal.fire({
       title: "Are you sure?",
       text: "You won't be able to revert this!",
@@ -94,16 +112,10 @@ deleteMenuItem(id: number): void {
       cancelButtonColor: "#6b7280", 
       confirmButtonText: "Yes, delete it!"
     }).then((result) => {
-      
       if (result.isConfirmed) {
         this.http.delete(`http://localhost:8080/api/menu-items/${id}`).subscribe({
           next: (data) => {
-            
-            Swal.fire({
-              title: "Deleted!",
-              text: "The item has been deleted.",
-              icon: "success"
-            });
+            Swal.fire("Deleted!", "The item has been deleted.", "success");
             this.getAll();
           },
           error: (err) => {
