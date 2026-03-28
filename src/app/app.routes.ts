@@ -18,6 +18,7 @@ import { MenuItem } from './page/menu-item/menu-item';
 
 
 import { OrderPlacementComponent } from './page/order-placement/order-placement.component';
+import { ReservationsComponent } from './page/reservations/reservations';
 import { roleGuard } from './guards/role.guard';
 import { Suppliers } from './page/supplier/supplier';
 
@@ -44,6 +45,10 @@ export const routes: Routes = [
       {
         path: 'cashier-customer',
         component: Customers,
+      },
+      {
+        path: "reservations",
+        component: ReservationsComponent
       }
     ]
   },
@@ -114,6 +119,10 @@ export const routes: Routes = [
       {
         path: "portions",
         component: Portions
+      },
+      {
+        path: "reservations",
+        component: ReservationsComponent
       },
       {
         path: 'admin-marketing',
