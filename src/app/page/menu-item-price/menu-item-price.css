@@ -9,7 +9,7 @@
 .page-title {
   margin: 0 0 24px 0;
   font-size: 24px;
-  color: #0f172a;
+  color: #0f172a !important;
   font-weight: 600;
 }
 
@@ -48,11 +48,11 @@
 .section-title {
   margin: 0;
   font-size: 18px;
-  color: #0f172a;
+  color: #0f172a !important;
 }
 
 .subtitle {
-  color: #64748b;
+  color: #64748b !important;
   font-size: 13px;
   margin-top: 5px;
 }
@@ -67,7 +67,7 @@
   margin-bottom: 8px;
   font-size: 14px;
   font-weight: 500;
-  color: #334155;
+  color: #334155 !important;
 }
 
 .form-control {
@@ -79,7 +79,12 @@
   outline: none;
   box-sizing: border-box;
   transition: border-color 0.2s;
-  background-color: #fff;
+  background-color: #fff !important;
+  color: #1e293b !important;
+}
+
+.form-control::placeholder {
+  color: #94a3b8 !important;
 }
 
 .form-control:focus {
@@ -166,9 +171,9 @@
   display: block;
   width: 100%;
   padding: 10px 10px 10px 36px;
-  background-color: #f8fafc;
+  background-color: #f8fafc !important;
   border: 1px solid #cbd5e1;
-  color: #1e293b;
+  color: #1e293b !important;
   font-size: 14px;
   border-radius: 8px;
   outline: none;
@@ -189,7 +194,7 @@ table {
 th {
   text-align: left;
   padding: 16px;
-  color: #0f172a;
+  color: #0f172a !important;
   font-weight: 600;
   border-bottom: 2px solid #e2e8f0;
   font-size: 14px;
@@ -200,38 +205,12 @@ td {
   border-bottom: 1px solid #f1f5f9;
   font-size: 14px;
   vertical-align: middle;
+  color: #1e293b !important;
 }
-
-.customer-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  font-size: 16px;
-}
-
-.blue-avatar { background: #3b82f6; }
-.green-avatar { background: #10b981; }
 
 .fw-bold {
   font-weight: 600;
-  color: #1e293b;
-}
-
-.text-muted {
-  color: #64748b;
-  font-size: 13px;
-  margin-top: 4px;
+  color: #1e293b !important;
 }
 
 .status-active {
@@ -275,4 +254,42 @@ td {
 .delete-btn:hover {
   background-color: #fecaca;
   transform: scale(1.05);
+}
+
+/* --- PAGINATION CSS --- */
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.page-btn {
+  padding: 6px 14px;
+  border: 1px solid #cbd5e1;
+  background-color: white;
+  color: #1e293b;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.page-btn:hover:not(:disabled) {
+  background-color: #f1f5f9;
+}
+
+.page-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.page-btn.active {
+  background-color: #4f46e5;
+  color: white;
+  border-color: #4f46e5;
 }
