@@ -29,6 +29,8 @@ export class Allowance implements OnInit{
       type: ['', Validators.required],
       other: [''],
       amount: ['',[Validators.required, Validators.min(0)]],
+
+      search: ['']
     })
   }
 
@@ -44,7 +46,6 @@ export class Allowance implements OnInit{
     this.employeeService.getAllEmployee().subscribe({
       next: (data :any) => {
         this.employees = data;
-        console.log(this.employees);
         this.cdr.detectChanges();
       }
     })
@@ -55,6 +56,11 @@ export class Allowance implements OnInit{
   ngOnInit(): void {
     this.getAllowance();
     this.getEmployee();
+  }
+  fillSearch(type: string): void {
+    this.form.get('search')?.setValue(type);
+    this.search();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   onSubmit(): void {
@@ -92,4 +98,28 @@ export class Allowance implements OnInit{
       });
     }
   }
+
+  protected search() {
+    const searchTerm = this.form.get('search')?.value?.trim();
+
+    // If the search is empty and they hit Enter, show the full list again
+    if (!searchTerm) {
+      this.getAllowance();
+      return;
+    }
+
+    this.service.getAllowanceByType(searchTerm).subscribe({
+      next: (data: any) => {
+        // Wrap single result in an array so the table can render it
+        this.allowancs = data;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Search failed', err);
+        this.allowancs = []; // Show empty state
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
 }

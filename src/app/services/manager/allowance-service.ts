@@ -21,4 +21,8 @@ export class AllowanceService {
   deleteAllowance(id: number |undefined) {
     return this.http.delete(`${this.api}/delete/${id}`);
   }
+
+  getAllowanceByType(data: any){
+    return this.http.get(`${this.api}/get-allowance/${data}`);
+  }
 }
