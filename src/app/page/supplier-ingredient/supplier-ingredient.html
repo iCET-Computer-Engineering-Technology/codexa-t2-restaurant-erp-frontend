@@ -1,46 +1,77 @@
-<div class="container mx-auto p-6">
-  <h1 class="text-3xl font-bold mb-6">Supplier Ingredients</h1>
-
-  <div class="grid gap-4">
-    <div *ngFor="let supplier of suppliersWithIngredients" class="bg-white rounded-lg shadow p-6">
-      <div class="flex items-center justify-between mb-4">
-        <div>
-          <h2 class="text-xl font-semibold">
-            {{ supplier.supplierName }}
-            <span class="text-sm text-gray-500">(ID: {{ supplier.supplierId }})</span>
-          </h2>
-          <p class="text-gray-600 text-sm">{{ supplier.ingredients.length }} ingredients supplied</p>
-        </div>
+<div class="inventory-container">
+  <main class="main-content">
+    <header class="header">
+      <div class="header-left">
+        <h1>Inventory</h1>
       </div>
-
-      <details class="border-t pt-4">
-        <summary class="cursor-pointer font-semibold hover:text-blue-600">View Ingredients</summary>
-        
-        <div class="mt-4 overflow-x-auto">
-          <table class="w-full border-collapse border border-gray-300">
-            <thead class="bg-gray-100">
-              <tr>
-                <th class="border border-gray-300 px-4 py-2 text-left"> Ingredient Name </th>
-                <th class="border border-gray-300 px-4 py-2 text-left"> Unit </th>
-                <th class="border border-gray-300 px-4 py-2 text-left"> Price </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let ing of supplier.ingredients" class="hover:bg-gray-50">
-                <td class="border border-gray-300 px-4 py-2"> {{ ing.ingredientName }} </td>
-                <td class="border border-gray-300 px-4 py-2"> {{ ing.unit || '-' }} </td>
-                <td class="border border-gray-300 px-4 py-2"> 
-                  {{ ing.price ? (ing.price | currency:'LKR':'symbol-narrow') : '-' }} 
-                </td>
-              </tr>
-            </tbody>
-          </table>
-
-          <div *ngIf="supplier.ingredients.length === 0" class="text-center py-8 text-gray-500">
-            No ingredients linked to this supplier yet.
+      
+      <div class="header-right">
+        <div class="search-container">
+          <div class="relative">
+            <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+              <svg class="w-4 h-4 text-body" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24"
+                height="24" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" stroke-linecap="round" stroke-width="2"
+                  d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z" />
+              </svg>
+            </div>
+            <input type="text" id="search" [(ngModel)]="searchText" (input)="onSearch()"
+              class="block w-full p-3 ps-9 bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand shadow-xs placeholder:text-body"
+              placeholder="Search" />
           </div>
         </div>
-      </details>
+        
+        <div class="header-actions">
+          <div class="user-avatar">FK</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="flex justify-center items-center py-12">
+      <div class="text-center">
+        <div class="mb-4">Loading...</div>
+      </div>
     </div>
-  </div>
+
+    <!-- Error State -->
+    <div *ngIf="error && !isLoading" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+      {{ error }}
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!isLoading && !error && inventoryItems.length === 0" class="flex justify-center items-center py-12">
+      <div class="text-center text-gray-500">
+        <p>No ingredients found</p>
+      </div>
+    </div>
+
+    <!-- Data Table -->
+    <div *ngIf="!isLoading && inventoryItems.length > 0" class="table-container">
+      <table class="inventory-table">
+        <thead>
+          <tr>
+            <th>Ingredient ID</th>
+            <th>Ingredient Name</th>
+            <th>Supplier SKU</th>
+            <th>Unit Price</th>
+            <th>Min Order Qty</th>
+            <th>Price Date</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of inventoryItems">
+            <td>{{ item.ingredientId }}</td>
+            <td>{{ item.ingredientName }}</td>
+            <td>{{ item.supplierSku }}</td>
+            <td>{{ item.unitPrice }}</td>
+            <td>{{ item.minOrderQty }}</td>
+            <td>{{ item.priceDate }}</td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
 </div>

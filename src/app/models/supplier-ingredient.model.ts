@@ -5,7 +5,10 @@ export interface SupplierWithIngredientsDto {
 }
 
 export interface IngredientDto {
+  ingredientId: number;
   ingredientName: string;
-  unit: string;
-  price: number;
+  supplierSku: string;
+  unitPrice: number;
+  minOrderQty: number;
+  priceDate: string;
 }

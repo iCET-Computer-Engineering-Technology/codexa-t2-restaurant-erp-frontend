@@ -16,6 +16,7 @@ import { MenuItemPrice } from './page/menu-item-price/menu-item-price';
 import { Portions } from './page/portions/portions';
 import { OrderPlacementComponent } from './page/order-placement/order-placement.component';
 import { roleGuard } from './guards/role.guard';
+import { SupplierIngredient } from './page/supplier-ingredient/supplier-ingredient';
 export const routes: Routes = [
   {
     path: '',
@@ -148,10 +149,13 @@ export const routes: Routes = [
           {
             path: 'order-assign',
             component: OrderAssign,
-          },
+          }
         ],
       },
-
+      {
+        path: 'supplier-ingredient',
+        component: SupplierIngredient
+      }
     ],
   },
 ];
