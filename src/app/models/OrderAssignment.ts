@@ -1,6 +1,6 @@
 export interface OrderAssignment {
    id: number;
-   kitechenOrderId: number;
+   kitchenOrderId: number;
    waiterId: number;
    assignedAt: Date;
    waiterName: string;
