@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
 
-
 @Component({
   selector: 'app-login',
   imports: [FormsModule, CommonModule],
@@ -28,7 +27,7 @@ export class Login {
 
   private extractBackendMessage(payload: unknown): string {
     console.log('Extracting message from:', payload, 'Type:', typeof payload);
-    
+
     if (!payload) {
       return '';
     }
@@ -70,7 +69,7 @@ export class Login {
 
   handleAdminLogin(event: Event): void {
     event.preventDefault();
-    
+
     if (!this.username || !this.password) {
       this.errorMessage = 'Please enter username and password';
       return;
@@ -85,10 +84,10 @@ export class Login {
         const token = response.token;
         const role = response.role || response.user?.role;
         const authenticationExceptionMessage = this.extractBackendMessage(response);
-        
+
         if (token) {
           console.log('Token found, user role:', role);
-          
+
           // Navigate based on user role
           if (role) {
             switch (role.toUpperCase()) {
@@ -121,13 +120,13 @@ export class Login {
         const authenticationExceptionMessage =
           this.extractBackendMessage(error?.error) ||
           this.extractBackendMessage(error);
-        
+
         const finalError = authenticationExceptionMessage || 'Invalid username or password';
         console.log('Final error to display:', finalError);
         this.errorMessage = finalError;
         console.log('errorMessage property set to:', this.errorMessage);
         this.cdr.markForCheck();
-        
+
         this.isLoading = false;
         this.cdr.markForCheck();
       }
