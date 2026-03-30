@@ -1,31 +1,28 @@
 import { CommonModule } from '@angular/common';
+import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { SupplierIngredientService } from '../../services/supplier-ingredient.service';
-import { SupplierWithIngredientsDto, IngredientDto } from '../../models/supplier-ingredient.model';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-supplier-ingredient',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, HttpClientModule],
   templateUrl: './supplier-ingredient.html',
   styleUrl: './supplier-ingredient.css',
 })
 export class SupplierIngredient implements OnInit, OnDestroy {
-  inventoryItems: IngredientDto[] = [];
-  allData: SupplierWithIngredientsDto[] = [];
+  supplierList: any[] = [];
+  allSuppliers: any[] = [];
   searchText: string = '';
-  isLoading: boolean = false;
-  error: string | null = null;
-  
+  private apiUrl = 'http://localhost:8080/supplier-ingredient';
   private destroy$ = new Subject<void>();
 
-  constructor(private service: SupplierIngredientService) { }
+  constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
-    this.loadAllIngredients();
+    this.loadSuppliers();
   }
 
   ngOnDestroy(): void {
@@ -33,37 +30,28 @@ export class SupplierIngredient implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  loadAllIngredients(): void {
-    this.isLoading = true;
-    this.service.getAllSuppliersWithIngredients()
+  loadSuppliers(): void {
+    this.http.get<any[]>(this.apiUrl)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (data) => {
-          this.allData = data;
-          this.inventoryItems = data.flatMap(supplier => supplier.ingredients);
-          this.isLoading = false;
+        next: (data: any[]) => {
+          this.supplierList = data;
+          this.allSuppliers = [...data];
         },
         error: (err) => {
-          console.error('Error loading ingredients', err);
-          this.error = "Error occurred while fetching data.";
-          this.isLoading = false;
+          console.error('Error loading suppliers', err);
         }
       });
   }
 
   onSearch(): void {
-    const search = this.searchText.toLowerCase().trim();
-
-    if (search === '') {
-      this.inventoryItems = this.allData.flatMap(supplier => supplier.ingredients);
+    const text = this.searchText.toLowerCase();
+    if (text === '') {
+      this.supplierList = [...this.allSuppliers];
       return;
     }
-
-    this.inventoryItems = this.allData.flatMap(supplier => 
-      supplier.ingredients.filter((ing: IngredientDto) =>
-        ing.ingredientName.toLowerCase().includes(search) ||
-        ing.supplierSku?.toLowerCase().includes(search)
-      )
+    this.supplierList = this.allSuppliers.filter(supplier =>
+      (supplier.supplierName && supplier.supplierName.toLowerCase().includes(text))
     );
   }
 }
