@@ -49,15 +49,15 @@ export class AuthService {
   login(username: string, password: string): Observable<LoginResponse> {
     const loginRequest: LoginRequest = { username, password };
     console.log('Sending login request to:', this.loginApiUrl, loginRequest);
-    
+
     return this.http.post<LoginResponse>(this.loginApiUrl, loginRequest).pipe(
       tap(response => {
         console.log('Login response received:', response);
-        
+
         const token = response.token;
         const role = response.role || response.user?.role;
         const userId = response.user?.id;
-        
+
         if (token) {
           localStorage.setItem('authToken', token);
           localStorage.setItem('username', username);
