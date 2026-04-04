@@ -21,7 +21,6 @@ import {Payroll} from './page/manager/payroll/payroll';
 import {SalaryRequest} from './page/manager/salary-request/salary-request';
 import {SalaryResponse} from './page/manager/salary-response/salary-response';
 import {Bonus} from './page/manager/bonus/bonus';
-import { MenuItems } from './page/menu-items/menu-items';
 import { MenuCategories } from './page/menu-categories/menu-categories';
 import { MenuItemPrice } from './page/menu-item-price/menu-item-price';
 import { Portions } from './page/portions/portions';
@@ -67,6 +66,8 @@ export const routes: Routes = [
 
   {
     path: 'manager',
+    canActivate: [roleGuard],
+    data: { roles: ['ROLE_ADMIN', 'ROLE_MANAGER'] },
     loadComponent: () => import('./page/manager/manager').then((m) => m.Manager),
     children: [
           {

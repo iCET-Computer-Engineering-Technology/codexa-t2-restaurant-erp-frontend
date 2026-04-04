@@ -1,11 +1,11 @@
-import {DOCUMENT, isPlatformBrowser, NgIf} from '@angular/common';
+import {DOCUMENT, isPlatformBrowser, CommonModule} from '@angular/common';
 import { ChangeDetectionStrategy, Component, PLATFORM_ID, inject, signal, computed } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-sidebar',
-  imports: [RouterLink, RouterLinkActive, NgIf],
+  imports: [RouterLink, RouterLinkActive, CommonModule],
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
