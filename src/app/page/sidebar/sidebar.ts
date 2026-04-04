@@ -73,6 +73,56 @@ export class Sidebar {
     return role === 'ROLE_CHEF' ? '/chef/order-assign' : '/admin/kitchen/order-assign';
   });
 
+  // HR Manager routes based on role
+  readonly hrAllowanceRoute = computed(() => {
+    const role = this.userRole();
+    return role === 'ROLE_ADMIN' ? '/admin/manager-allowance' : '/manager/manager-allowance';
+  });
+
+  readonly hrBasicSalaryRoute = computed(() => {
+    const role = this.userRole();
+    return role === 'ROLE_ADMIN' ? '/admin/manager-basic-salary' : '/manager/manager-basic-salary';
+  });
+
+  readonly hrBonusRoute = computed(() => {
+    const role = this.userRole();
+    return role === 'ROLE_ADMIN' ? '/admin/manager-bonus' : '/manager/manager-bonus';
+  });
+
+  readonly hrDeductionRoute = computed(() => {
+    const role = this.userRole();
+    return role === 'ROLE_ADMIN' ? '/admin/manager-deduction' : '/manager/manager-deduction';
+  });
+
+  readonly hrEmployeeRoute = computed(() => {
+    const role = this.userRole();
+    return role === 'ROLE_ADMIN' ? '/admin/manager-employee' : '/manager/manager-employee';
+  });
+
+  readonly hrEmployeeLeaveRoute = computed(() => {
+    const role = this.userRole();
+    return role === 'ROLE_ADMIN' ? '/admin/manager-employee-leave' : '/manager/manager-employee-leave';
+  });
+
+  readonly hrOvertimeRoute = computed(() => {
+    const role = this.userRole();
+    return role === 'ROLE_ADMIN' ? '/admin/manager-overtime' : '/manager/manager-overtime';
+  });
+
+  readonly hrPayrollConfigRoute = computed(() => {
+    const role = this.userRole();
+    return role === 'ROLE_ADMIN' ? '/admin/manager-payroll-config' : '/manager/manager-payroll-config';
+  });
+
+  readonly hrPayrollRoute = computed(() => {
+    const role = this.userRole();
+    return role === 'ROLE_ADMIN' ? '/admin/manager-payroll' : '/manager/manager-payroll';
+  });
+
+
+
+
+
   constructor() {
     if (!isPlatformBrowser(this.platformId)) {
       return;
