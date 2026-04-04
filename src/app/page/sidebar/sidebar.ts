@@ -1,11 +1,11 @@
-import { DOCUMENT, isPlatformBrowser } from '@angular/common';
+import {DOCUMENT, isPlatformBrowser, NgIf} from '@angular/common';
 import { ChangeDetectionStrategy, Component, PLATFORM_ID, inject, signal, computed } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-sidebar',
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, NgIf],
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -95,7 +95,6 @@ export class Sidebar {
     if (storedRole) {
       this.userRole.set(storedRole);
     }
-
     this.applyTheme();
   }
 

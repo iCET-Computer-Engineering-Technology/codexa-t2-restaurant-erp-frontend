@@ -86,13 +86,15 @@ export class Login {
         const authenticationExceptionMessage = this.extractBackendMessage(response);
 
         if (token) {
-          console.log('Token found, user role:', role);
-
+          // console.log('Token found, user role:', role);
           // Navigate based on user role
           if (role) {
             switch (role.toUpperCase()) {
               case 'ROLE_ADMIN':
                 this.router.navigate(['/admin']);
+                break;
+              case 'ROLE_MANAGER':
+                this.router.navigate(['/manager']);
                 break;
               case 'ROLE_CASHIER':
                 this.router.navigate(['/cashier']);

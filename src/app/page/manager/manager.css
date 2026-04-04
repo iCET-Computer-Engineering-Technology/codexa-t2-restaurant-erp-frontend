@@ -1,0 +1,15 @@
+.manager-layout {
+  background:
+    radial-gradient(circle at top right, rgba(99, 102, 241, 0.10), transparent 28%),
+    linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+}
+
+:host-context(.manager-light-theme) .manager-layout {
+  background:
+    radial-gradient(circle at top right, rgba(251, 191, 36, 0.18), transparent 28%),
+    linear-gradient(180deg, #fffdf7 0%, #f8fafc 100%);
+}
+
+.compo {
+  min-height: calc(100vh - 3rem);
+}
