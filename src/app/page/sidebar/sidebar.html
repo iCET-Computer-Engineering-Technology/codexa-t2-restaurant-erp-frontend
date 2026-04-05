@@ -165,9 +165,9 @@
                </button>
                <!-- Submenu Aksa -->
                <ul class="marketing-submenu space-y-1 max-h-0 overflow-hidden transition-all duration-300">
-                  
+
                   <li>
-                     <button type="button" routerLink="/admin/menu-items" routerLinkActive="sidebar-submenu-item-active"
+                     <button type="button" routerLink="/admin/menu-item" routerLinkActive="sidebar-submenu-item-active"
                         class="sidebar-submenu-item w-full flex items-center gap-3 px-3 py-2 ml-6 rounded-lg text-xs font-medium transition-all duration-200">
                         <div class="sidebar-item-icon flex items-center justify-center w-7 h-7 rounded-md transition-all duration-200">
                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -240,6 +240,19 @@
                </button>
             </li>
             }
+            @if (showReservations()) {
+            <li>
+               <button type="button" [routerLink]="reservationsRoute()" routerLinkActive="sidebar-item-active"
+                  class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group">
+                  <div class="sidebar-item-icon flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-200">
+                     <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+                     </svg>
+                  </div>
+                  <span>Reservations</span>
+               </button>
+            </li>
+            }
             @if (showWaiter()) {
             <li>
                <button type="button" routerLink="/waiter" routerLinkActive="sidebar-item-active"
@@ -253,6 +266,18 @@
                </button>
             </li>
             }
+
+             <li>
+               <button type="button" routerLink="/admin/admin-supplier" routerLinkActive="sidebar-item-active"
+                  class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group">
+                  <div class="sidebar-item-icon flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-200">
+                     <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25a2.25 2.25 0 0 1-2.25-2.25v-2.25Z" />
+                     </svg>
+                  </div>
+                  <span>Supplier</span>
+               </button>
+            </li>
          </ul>
 
          <!-- <p class="sidebar-section-label px-3 mt-6 mb-2 text-[10px] font-semibold uppercase tracking-wider">Management</p>
