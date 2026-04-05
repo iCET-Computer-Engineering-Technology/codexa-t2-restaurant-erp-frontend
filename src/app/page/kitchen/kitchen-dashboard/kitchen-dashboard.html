@@ -1,13 +1,14 @@
 <div class="kitchen-dashboard">
+<h1 class="text-2xl font-bold text-gray-900 mb-4">Kitchen Dashboard</h1>
 <div class="grid grid-cols-4 gap-4 mb-6">
 
     <!-- Total Orders -->
-    <div class="p-5 bg-white border border-gray-200 rounded-base hover:shadow-sm transition">
+    <div class="p-5 bg-white border border-gray-200 rounded-2xl hover:shadow-sm transition">
         <div class="flex items-center justify-between">
 
             <div>
                 <p class="text-sm text-gray-600">Total Orders</p>
-                <p class="text-2xl font-semibold text-gray-900 mt-1">24</p>
+                <p class="text-2xl font-semibold text-gray-900 mt-1">{{ totalOrders() }}</p>
             </div>
 
             <div class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100">
@@ -21,12 +22,12 @@
 
 
     <!-- Received -->
-    <div class="p-5 bg-white border border-gray-200 rounded-base hover:shadow-sm transition">
+    <div class="p-5 bg-white border border-gray-200 rounded-2xl hover:shadow-sm transition">
         <div class="flex items-center justify-between">
 
             <div>
                 <p class="text-sm text-gray-600">Received</p>
-                <p class="text-2xl font-semibold text-yellow-600 mt-1">6</p>
+                <p class="text-2xl font-semibold text-yellow-600 mt-1">{{ receivedCount() }}</p>
             </div>
 
             <div class="w-10 h-10 flex items-center justify-center rounded-full bg-yellow-100">
@@ -38,12 +39,12 @@
 
 
     <!-- Preparing -->
-    <div class="p-5 bg-white border border-gray-200 rounded-base hover:shadow-sm transition">
+    <div class="p-5 bg-white border border-gray-200 rounded-2xl hover:shadow-sm transition">
         <div class="flex items-center justify-between">
 
             <div>
                 <p class="text-sm text-gray-600">Preparing</p>
-                <p class="text-2xl font-semibold text-blue-600 mt-1">10</p>
+                <p class="text-2xl font-semibold text-blue-600 mt-1">{{ preparingCount() }}</p>
             </div>
 
             <div class="w-10 h-10 flex items-center justify-center rounded-full bg-blue-100">
@@ -55,12 +56,12 @@
 
 
     <!-- Ready -->
-    <div class="p-5 bg-white border border-gray-200 rounded-base hover:shadow-sm transition">
+    <div class="p-5 bg-white border border-gray-200 rounded-2xl hover:shadow-sm transition">
         <div class="flex items-center justify-between">
 
             <div>
                 <p class="text-sm text-gray-600">Ready</p>
-                <p class="text-2xl font-semibold text-green-600 mt-1">8</p>
+                <p class="text-2xl font-semibold text-green-600 mt-1">{{ readyCount() }}</p>
             </div>
 
             <div class="w-10 h-10 flex items-center justify-center rounded-full bg-green-100">
@@ -76,7 +77,7 @@
 
 <!-- Recent Orders -->
 
-<div class="bg-white border border-gray-200 rounded-base p-5">
+<div class="bg-white border border-gray-200 rounded-2xl p-5">
 
     <div class="flex items-center justify-between mb-4">
 
@@ -92,49 +93,57 @@
 
 
     <div class="space-y-3">
-
-        <!-- Order Row -->
-
+        @if (loading()) {
+        <p class="text-sm text-gray-600">Loading kitchen orders...</p>
+        } @else if (hasLoadError()) {
+        <p class="text-sm text-red-600">Failed to load kitchen orders.</p>
+        } @else {
+        @for (order of recentOrders(); track order.id) {
         <div
             class="flex items-center justify-between border-b border-gray-200 pb-3 hover:bg-gray-50 px-2 py-2 rounded transition">
 
             <div>
-                <p class="font-medium text-gray-900">ORD-001</p>
-                <p class="text-xs text-gray-600">Table 01</p>
+                <p class="font-medium text-gray-900">{{ order.orderNumber }}</p>
+                <p class="text-xs text-gray-600">Table {{ order.tableId }}</p>
+                <div class="mt-2 grid grid-cols-2 gap-1">
+                    @for (item of order.items; track item.id + '-' + $index) {
+                    <span class="inline-block px-2 py-1 text-xs bg-gray-100 rounded text-gray-700">
+                        {{ item.menuItemName || ('Item ' + item.menuItemId) }} x{{ item.quantity }}
+                    </span>
+                    }
+                    @if (order.items.length === 0) {
+                    <span class="text-xs text-gray-500">No items</span>
+                    }
+                </div>
             </div>
 
             <div class="flex items-center gap-2">
 
-                <span class="w-2 h-2 bg-blue-500 rounded-full"></span>
+                @if (!order.isSentToKitchen) {
+                <button
+                    type="button"
+                    (click)="sendToKitchen(order)"
+                    [disabled]="isSending(order.id)"
+                    class="inline-flex items-center justify-center bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs px-3 py-1.5 rounded-lg transition disabled:opacity-60 disabled:cursor-not-allowed">
+                    {{ isSending(order.id) ? 'Sending...' : 'Send to Kitchen' }}
+                </button>
+                } @else {
+                <span class="px-3 py-1 text-xs rounded-full bg-emerald-100 text-emerald-700">Sent</span>
+                }
 
-                <span class="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded-full">
-                    Preparing
+                <span class="w-2 h-2 rounded-full" [class]="'w-2 h-2 rounded-full ' + dotClass(order.status)"></span>
+
+                <span class="px-3 py-1 text-xs rounded-full" [class]="'px-3 py-1 text-xs rounded-full ' + statusClass(order.status)">
+                    {{ order.status }}
                 </span>
 
             </div>
 
         </div>
-
-
-        <div
-            class="flex items-center justify-between border-b border-gray-200 pb-3 hover:bg-gray-50 px-2 py-2 rounded transition">
-
-            <div>
-                <p class="font-medium text-gray-900">ORD-002</p>
-                <p class="text-xs text-gray-600">Table 03</p>
-            </div>
-
-            <div class="flex items-center gap-2">
-
-                <span class="w-2 h-2 bg-green-500 rounded-full"></span>
-
-                <span class="px-3 py-1 text-xs bg-green-100 text-green-700 rounded-full">
-                    Ready
-                </span>
-
-            </div>
-
-        </div>
+        } @empty {
+        <p class="text-sm text-gray-600">No recent orders available.</p>
+        }
+        }
 
     </div>
 

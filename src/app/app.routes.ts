@@ -59,7 +59,7 @@ export const routes: Routes = [
         component: KitchenDashboard,
       },
       {
-        path: 'kitchen-oder-table',
+        path: 'kitchen-order-table',
         component: KitchenOrderTable,
       },
       {

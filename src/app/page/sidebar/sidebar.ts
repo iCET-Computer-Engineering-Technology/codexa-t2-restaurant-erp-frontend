@@ -59,7 +59,7 @@ export class Sidebar {
 
   readonly kitchenOrderTableRoute = computed(() => {
     const role = this.userRole();
-    return role === 'ROLE_CHEF' ? '/chef/kitchen-oder-table' : '/admin/kitchen/kitchen-order-table';
+    return role === 'ROLE_CHEF' ? '/chef/kitchen-order-table' : '/admin/kitchen/kitchen-order-table';
   });
 
   readonly kitchenOrderAssignRoute = computed(() => {
