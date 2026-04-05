@@ -15,13 +15,13 @@ import { MenuItemPrice } from './page/menu-item-price/menu-item-price';
 import { Portions } from './page/portions/portions';
 
 import { MenuItem } from './page/menu-item/menu-item';
-
+import { Suppliers } from './page/supplier/supplier';
+import { SupplierIngredient } from './page/supplier-ingredient/supplier-ingredient';
 
 import { OrderPlacementComponent } from './page/order-placement/order-placement.component';
 import { ReservationsComponent } from './page/reservations/reservations';
 import { roleGuard } from './guards/role.guard';
 import { Suppliers } from './page/supplier/supplier';
-import { KpiDashboard } from './page/kpi-dashboard/kpi-dashboard';
 
 export const routes: Routes = [
   {
@@ -171,9 +171,9 @@ export const routes: Routes = [
           {
             path: 'order-assign',
             component: OrderAssign,
-          },
+          }
         ],
-        },
+      },
 
     ],
   },

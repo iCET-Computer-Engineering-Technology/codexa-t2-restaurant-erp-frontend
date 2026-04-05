@@ -1,0 +1,83 @@
+<div class="p-6 bg-slate-50 min-h-screen">
+  <div class="flex justify-between items-center mb-8">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Inventory</h1>
+      <p class="text-sm text-slate-500">Manage your suppliers and their ingredient stocks</p>
+    </div>
+    <div class="relative min-w-[300px]">
+      <input type="text" placeholder="Search by supplier..." 
+             [(ngModel)]="searchText"
+             (input)="onSearch()"
+             class="w-full border border-slate-200 rounded-xl px-4 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all bg-white">
+    </div>
+  </div>
+
+  <div class="bg-white rounded-b-2xl border border-slate-200 border-t-0 shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-slate-50/50 text-slate-400 text-[11px] uppercase tracking-wider border-b border-slate-100">
+            <th class="p-5 font-semibold">Supplier Name</th>
+            <th class="p-5 font-semibold">ID / SKU</th>
+            <th class="p-5 font-semibold">Status</th>
+            <th class="p-5 font-semibold">Ingredients Count</th>
+            <th class="p-5 font-semibold">Current Stock Level</th>
+          </tr>
+        </thead>
+        <tbody class="text-sm text-slate-700 divide-y divide-slate-100">
+          <tr *ngFor="let item of supplierList" class="hover:bg-slate-50/80 transition-colors group">
+            <td class="p-5 flex items-center gap-3">
+              <div class="w-10 h-10 bg-gradient-to-br from-slate-100 to-slate-200 rounded-xl flex items-center justify-center font-bold text-slate-500 border border-slate-200 group-hover:from-orange-50 group-hover:to-orange-100 group-hover:text-orange-600 group-hover:border-orange-200 transition-all">
+                {{ item.supplierName?.charAt(0) || 'S' }}
+              </div>
+              <div>
+                <span class="font-bold text-slate-900 block">{{ item.supplierName }}</span>
+                <span class="text-[11px] text-slate-400 uppercase">Supplier Partner</span>
+              </div>
+            </td>
+            
+            <td class="p-5">
+              <span class="font-mono text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-md">SUP-{{ item.supplierId }}</span>
+            </td>
+            
+            <td class="p-5">
+              <span class="bg-emerald-50 text-emerald-600 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border border-emerald-100">
+                Active
+              </span>
+            </td>
+            
+            <td class="p-5 font-medium text-slate-600">
+              {{ item.ingredients?.length || 0 }} Ingredients
+            </td>
+            
+            <td class="p-5">
+              <div class="flex items-center justify-between gap-3">
+                <div class="flex flex-col gap-1.5 flex-1">
+                  <div class="w-32 h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-50">
+                    <div class="h-full rounded-full transition-all duration-1000"
+                         [class.bg-emerald-500]="(item.ingredients?.length || 0) > 2"
+                         [class.bg-orange-400]="(item.ingredients?.length || 0) <= 2"
+                         [style.width.%]="(item.ingredients?.length || 0) * 20">
+                    </div>
+                  </div>
+                </div>
+                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border whitespace-nowrap" [class.bg-emerald-50]="(item.ingredients?.length || 0) > 2" [class.bg-orange-50]="(item.ingredients?.length || 0) <= 2" [class.text-emerald-600]="(item.ingredients?.length || 0) > 2" [class.text-orange-600]="(item.ingredients?.length || 0) <= 2" [class.border-emerald-100]="(item.ingredients?.length || 0) > 2" [class.border-orange-100]="(item.ingredients?.length || 0) <= 2">
+                  {{ (item.ingredients?.length || 0) > 2 ? 'High' : 'Low' }}
+                </span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <div *ngIf="supplierList.length === 0" class="py-20 flex flex-col items-center justify-center text-slate-400">
+      <div class="bg-slate-50 p-4 rounded-full mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+        </svg>
+      </div>
+      <p class="text-sm font-medium">No suppliers found in the records.</p>
+    </div>
+  </div>
+</div>
