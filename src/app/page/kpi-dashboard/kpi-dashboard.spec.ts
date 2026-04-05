@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
 
 import { KpiDashboard } from './kpi-dashboard';
 
@@ -12,7 +13,7 @@ describe('KpiDashboard', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [KpiDashboard],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
     })
     .compileComponents();
 
@@ -21,11 +22,11 @@ describe('KpiDashboard', () => {
     component = fixture.componentInstance;
     fixture.detectChanges();
 
-    const orderRequest = httpMock.expectOne('http://localhost:8080/api/order/find-all');
+    const orderRequest = httpMock.expectOne('http://localhost:8080/api/order/find-all-with-item-names');
     orderRequest.flush([]);
 
-    const ingredientRequest = httpMock.expectOne('http://localhost:8080/ingredient?page=0&size=10');
-    ingredientRequest.flush([]);
+    const tableRequest = httpMock.expectOne('http://localhost:8080/api/tables');
+    tableRequest.flush([]);
 
     await fixture.whenStable();
   });

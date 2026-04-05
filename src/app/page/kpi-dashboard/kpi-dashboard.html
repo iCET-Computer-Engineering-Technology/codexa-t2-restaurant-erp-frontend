@@ -110,131 +110,150 @@
          </div>
       </header>
 
-      @if (isLoading) {
+      @if (isLoading()) {
          <p class="kpi-status-note">Loading live KPI data...</p>
       }
 
-      @if (loadError) {
-         <p class="kpi-error-note">{{ loadError }}</p>
+      @if (loadError()) {
+         <p class="kpi-error-note">{{ loadError() }}</p>
       }
 
-      <section class="kpi-section">
-         <div class="kpi-section-head">
+      <section class="rounded-2xl border border-slate-700/40 bg-slate-900/50 p-5 shadow-xl backdrop-blur">
+         <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
             <div>
-               <h3>Orders Panel</h3>
-               <p>Measure kitchen and service throughput in real-time.</p>
+               <h3 class="text-lg font-semibold text-white">Orders By Status</h3>
+               <p class="text-sm text-slate-300">Live status distribution from order API.</p>
+            </div>
+            <div class="text-right">
+               <p class="text-xs uppercase tracking-wider text-slate-400">Total Orders</p>
+               <p class="text-2xl font-bold text-emerald-300">{{ orders().length }}</p>
             </div>
          </div>
 
-         <div class="kpi-card-grid">
-            @for (metric of orderMetrics; track metric.title) {
-               <article class="kpi-card">
-                  <div class="kpi-card-top">
-                     <p class="kpi-card-title">{{ metric.title }}</p>
-                     <span class="kpi-change-chip" [class.kpi-change-chip-negative]="metric.negative">
-                        {{ metric.change }}
-                     </span>
-                  </div>
-
-                  <p class="kpi-card-value">{{ metric.value }}</p>
-                  <p class="kpi-card-footnote">{{ metric.footnote }}</p>
-
-                  <div class="kpi-progress-track">
-                     <span class="kpi-progress-fill" [style.width.%]="metric.progress"></span>
-                  </div>
+         <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            @for (summary of orderStatusSummary(); track summary.status) {
+               <article class="rounded-xl border border-slate-600/50 bg-slate-800/60 p-4">
+                  <p class="text-xs uppercase tracking-wider text-slate-400">{{ summary.status }}</p>
+                  <p class="mt-1 text-3xl font-semibold text-white">{{ summary.count }}</p>
                </article>
             }
 
-            <article class="kpi-card">
-               <div class="kpi-card-top">
-                  <p class="kpi-card-title">Ingredients Tracked</p>
-                  <span class="kpi-change-chip" [class.kpi-change-chip-negative]="ingredientSummary.lowStockCount > 0">
-                     {{ ingredientSummary.count }} items
-                  </span>
-               </div>
-
-               <p class="kpi-card-value">{{ ingredientSummary.lowStockCount }}</p>
-               <p class="kpi-card-footnote">Low stock ingredients (from current page)</p>
-
-               <div class="kpi-progress-track">
-                  <span class="kpi-progress-fill" [style.width.%]="ingredientSummary.count > 0 ? (ingredientSummary.lowStockCount / ingredientSummary.count) * 100 : 0"></span>
-               </div>
-            </article>
-         </div>
-      </section>
-
-      <section class="kpi-section">
-         <div class="kpi-section-head">
-            <div>
-               <h3>Revenue Panel</h3>
-               <p>Monitor sales performance and transaction quality.</p>
-            </div>
-         </div>
-
-         <div class="kpi-card-grid">
-            @for (metric of revenueMetrics; track metric.title) {
-               <article class="kpi-card">
-                  <div class="kpi-card-top">
-                     <p class="kpi-card-title">{{ metric.title }}</p>
-                     <span class="kpi-change-chip" [class.kpi-change-chip-negative]="metric.negative">
-                        {{ metric.change }}
-                     </span>
-                  </div>
-
-                  <p class="kpi-card-value">{{ metric.amount | currency:currencyCode:'symbol':'1.0-0' }}</p>
-                  <p class="kpi-card-footnote">{{ metric.footnote }}</p>
-
-                  <div class="kpi-progress-track">
-                     <span class="kpi-progress-fill" [style.width.%]="metric.progress"></span>
-                  </div>
+            @if (orderStatusSummary().length === 0) {
+               <article class="rounded-xl border border-dashed border-slate-600 bg-slate-800/40 p-4 sm:col-span-2 xl:col-span-4">
+                  <p class="text-sm text-slate-300">No order status data available.</p>
                </article>
             }
          </div>
       </section>
 
-      <section class="popular-orders-section">
-         <div class="kpi-section-head">
+      <section class="mt-6 rounded-2xl border border-slate-700/40 bg-slate-900/50 p-5 shadow-xl backdrop-blur">
+         <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
             <div>
-               <h3>Most Popular Orders</h3>
-               <p>Top-selling menu items by quantity and revenue contribution.</p>
+               <h3 class="text-lg font-semibold text-white">All Orders</h3>
+               <p class="text-sm text-slate-300">Complete order list from /api/order/find-all-with-item-names.</p>
+            </div>
+            <div class="text-right">
+               <p class="text-xs uppercase tracking-wider text-slate-400">Total Order Value</p>
+               <p class="text-xl font-bold text-cyan-300">{{ totalOrderAmount() | currency:currencyCode:'symbol':'1.0-2' }}</p>
             </div>
          </div>
 
-         <div class="popular-orders-table-wrap">
-            <table class="popular-orders-table">
-               <thead>
+         <div class="overflow-x-auto rounded-xl border border-slate-700">
+            <table class="min-w-full divide-y divide-slate-700 text-sm">
+               <thead class="bg-slate-800/80 text-left text-slate-300">
                   <tr>
-                     <th>Rank</th>
-                     <th>Order Item</th>
-                     <th>Category</th>
-                     <th>Orders Sold</th>
-                     <th>Revenue</th>
-                     <th>Share</th>
+                     <th class="px-4 py-3 font-medium">Order #</th>
+                     <th class="px-4 py-3 font-medium">Type</th>
+                     <th class="px-4 py-3 font-medium">Table</th>
+                     <th class="px-4 py-3 font-medium">Status</th>
+                     <th class="px-4 py-3 font-medium">Items</th>
+                     <th class="px-4 py-3 font-medium">Total</th>
+                     <th class="px-4 py-3 font-medium">Created</th>
                   </tr>
                </thead>
-               <tbody>
-                  @if (popularOrders.length === 0) {
+               <tbody class="divide-y divide-slate-800 text-slate-100">
+                  @if (orders().length === 0) {
                      <tr>
-                        <td colspan="6" class="empty-row">No popular orders available from the current API response.</td>
+                        <td colspan="7" class="px-4 py-6 text-center text-slate-400">No orders found.</td>
                      </tr>
                   } @else {
-                     @for (order of popularOrders; track order.rank) {
-                        <tr>
-                           <td>
-                              <span class="rank-pill">#{{ order.rank }}</span>
+                     @for (order of orders(); track order.id) {
+                        <tr class="bg-slate-900/20 hover:bg-slate-800/40">
+                           <td class="px-4 py-3 font-medium">{{ order.orderNumber || ('ORD-' + order.id) }}</td>
+                           <td class="px-4 py-3">{{ order.orderType }}</td>
+                           <td class="px-4 py-3">{{ order.tableId }}</td>
+                           <td class="px-4 py-3">
+                              <span
+                                 class="inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold"
+                                 [class.border-emerald-400]="formatStatus(order.status) === 'Completed'"
+                                 [class.bg-emerald-500/15]="formatStatus(order.status) === 'Completed'"
+                                 [class.text-emerald-300]="formatStatus(order.status) === 'Completed'"
+                                 [class.border-amber-400]="formatStatus(order.status) === 'Pending' || formatStatus(order.status) === 'In Progress'"
+                                 [class.bg-amber-500/15]="formatStatus(order.status) === 'Pending' || formatStatus(order.status) === 'In Progress'"
+                                 [class.text-amber-200]="formatStatus(order.status) === 'Pending' || formatStatus(order.status) === 'In Progress'"
+                                 [class.border-sky-400]="formatStatus(order.status) === 'Served'"
+                                 [class.bg-sky-500/15]="formatStatus(order.status) === 'Served'"
+                                 [class.text-sky-200]="formatStatus(order.status) === 'Served'"
+                                 [class.border-slate-500]="formatStatus(order.status) !== 'Completed' && formatStatus(order.status) !== 'Pending' && formatStatus(order.status) !== 'In Progress' && formatStatus(order.status) !== 'Served'"
+                                 [class.bg-slate-500/15]="formatStatus(order.status) !== 'Completed' && formatStatus(order.status) !== 'Pending' && formatStatus(order.status) !== 'In Progress' && formatStatus(order.status) !== 'Served'"
+                                 [class.text-slate-200]="formatStatus(order.status) !== 'Completed' && formatStatus(order.status) !== 'Pending' && formatStatus(order.status) !== 'In Progress' && formatStatus(order.status) !== 'Served'">
+                                 {{ formatStatus(order.status) }}
+                              </span>
                            </td>
-                           <td class="popular-item">{{ order.item }}</td>
-                           <td>{{ order.category }}</td>
-                           <td>{{ order.ordersSold }}</td>
-                           <td>{{ order.revenue | currency:currencyCode:'symbol':'1.0-0' }}</td>
-                           <td>
-                              <div class="share-cell">
-                                 <span>{{ order.share }}%</span>
-                                 <div class="share-track">
-                                    <span class="share-fill" [style.width.%]="order.share"></span>
-                                 </div>
-                              </div>
-                           </td>
+                           <td class="px-4 py-3">{{ itemCount(order) }}</td>
+                           <td class="px-4 py-3 font-semibold text-cyan-200">{{ order.totalAmount | currency:currencyCode:'symbol':'1.0-2' }}</td>
+                           <td class="px-4 py-3 text-slate-300">{{ order.createdAt | date:'MMM d, y h:mm a' }}</td>
+                        </tr>
+                     }
+                  }
+               </tbody>
+            </table>
+         </div>
+      </section>
+
+      <section class="mt-6 rounded-2xl border border-slate-700/40 bg-slate-900/50 p-5 shadow-xl backdrop-blur">
+         <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
+            <div>
+               <h3 class="text-lg font-semibold text-white">Table Details</h3>
+               <p class="text-sm text-slate-300">Current table inventory and status from /api/tables.</p>
+            </div>
+            <div class="text-right">
+               <p class="text-xs uppercase tracking-wider text-slate-400">Total Tables</p>
+               <p class="text-2xl font-bold text-indigo-300">{{ tables().length }}</p>
+            </div>
+         </div>
+
+         <div class="mb-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            @for (summary of tableStatusSummary(); track summary.status) {
+               <article class="rounded-xl border border-slate-600/50 bg-slate-800/60 p-4">
+                  <p class="text-xs uppercase tracking-wider text-slate-400">{{ summary.status }}</p>
+                  <p class="mt-1 text-2xl font-semibold text-white">{{ summary.count }}</p>
+               </article>
+            }
+         </div>
+
+         <div class="overflow-x-auto rounded-xl border border-slate-700">
+            <table class="min-w-full divide-y divide-slate-700 text-sm">
+               <thead class="bg-slate-800/80 text-left text-slate-300">
+                  <tr>
+                     <th class="px-4 py-3 font-medium">ID</th>
+                     <th class="px-4 py-3 font-medium">Table Number</th>
+                     <th class="px-4 py-3 font-medium">Capacity</th>
+                     <th class="px-4 py-3 font-medium">Status</th>
+                  </tr>
+               </thead>
+               <tbody class="divide-y divide-slate-800 text-slate-100">
+                  @if (tables().length === 0) {
+                     <tr>
+                        <td colspan="4" class="px-4 py-6 text-center text-slate-400">No table details found.</td>
+                     </tr>
+                  } @else {
+                     @for (table of tables(); track table.id) {
+                        <tr class="bg-slate-900/20 hover:bg-slate-800/40">
+                           <td class="px-4 py-3">{{ table.id }}</td>
+                           <td class="px-4 py-3 font-medium">{{ table.tableNumber }}</td>
+                           <td class="px-4 py-3">{{ table.capacity }}</td>
+                           <td class="px-4 py-3">{{ formatStatus(table.status) }}</td>
                         </tr>
                      }
                   }
