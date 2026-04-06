@@ -10,11 +10,16 @@ import { Kitchen } from './page/kitchen/kitchen';
 import { KitchenDashboard } from './page/kitchen/kitchen-dashboard/kitchen-dashboard';
 import { KitchenOrderTable } from './page/kitchen/kitchen-order-table/kitchen-order-table';
 import { OrderAssign } from './page/kitchen/order-assign/order-assign';
-import { MenuItems } from './page/menu-items/menu-items';
 import { MenuCategories } from './page/menu-categories/menu-categories';
 import { MenuItemPrice } from './page/menu-item-price/menu-item-price';
 import { Portions } from './page/portions/portions';
+
+import { MenuItem } from './page/menu-item/menu-item';
+import { Suppliers } from './page/supplier/supplier';
+import { SupplierIngredient } from './page/supplier-ingredient/supplier-ingredient';
+
 import { OrderPlacementComponent } from './page/order-placement/order-placement.component';
+import { ReservationsComponent } from './page/reservations/reservations';
 import { roleGuard } from './guards/role.guard';
 export const routes: Routes = [
   {
@@ -31,11 +36,25 @@ export const routes: Routes = [
     canActivate: [roleGuard],
     data: { roles: ['ROLE_ADMIN', 'ROLE_CASHIER'] },
     loadComponent: () => import('./page/cashier/cashier').then((m) => m.Cashier),
+    children: [
+      {
+        path: '',
+        component: OrderPlacementComponent,
+      },
+      {
+        path: 'cashier-customer',
+        component: Customers,
+      },
+      {
+        path: "reservations",
+        component: ReservationsComponent
+      }
+    ]
   },
   {
     path: 'waiter',
     canActivate: [roleGuard],
-    data: { roles: ['ROLE_ADMIN', 'ROLE_WAITER'] },
+    data: { roles: ['ROLE_ADMIN', 'ROLE_CASHIER', 'ROLE_WAITER'] },
     loadComponent: () => import('./page/waiter/waiter').then((m) => m.Waiter),
   },
   {
@@ -43,6 +62,20 @@ export const routes: Routes = [
     canActivate: [roleGuard],
     data: { roles: ['ROLE_ADMIN', 'ROLE_CHEF'] },
     loadComponent: () => import('./page/chef/chef').then((m) => m.Chef),
+    children: [
+      {
+        path: '',
+        component: KitchenDashboard,
+      },
+      {
+        path: 'kitchen-oder-table',
+        component: KitchenOrderTable,
+      },
+      {
+        path: 'order-assign',
+        component: OrderAssign,
+      }
+    ]
   },
   {
     path: 'admin',
@@ -53,6 +86,10 @@ export const routes: Routes = [
       {
         path: '',
         component: Dashboard,
+      },
+      {
+        path: 'admin-supplier',
+        component: Suppliers
       },
       {
         path: 'admin-customer',
@@ -67,8 +104,8 @@ export const routes: Routes = [
         component: Dashboard,
       },
       {
-        path: 'menu-items',
-        component: MenuItems
+        path: 'menu-item',
+        component: MenuItem
       },
       {
         path: "menu-item-prices",
@@ -81,6 +118,10 @@ export const routes: Routes = [
       {
         path: "portions",
         component: Portions
+      },
+      {
+        path: "reservations",
+        component: ReservationsComponent
       },
       {
         path: 'admin-marketing',
@@ -101,8 +142,7 @@ export const routes: Routes = [
             path: 'analytics',
             component: AnalyticsComponent,
           },
-
-        ],
+        ]
       },
       {
         path: 'kitchen',
@@ -125,10 +165,13 @@ export const routes: Routes = [
           {
             path: 'order-assign',
             component: OrderAssign,
-          },
+          }
         ],
       },
-
+      {
+        path: 'supplier-ingredient',
+        component: SupplierIngredient
+      }
     ],
   },
 ];

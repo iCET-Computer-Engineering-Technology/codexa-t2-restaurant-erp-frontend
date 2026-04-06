@@ -30,6 +30,49 @@ export class Sidebar {
     return user ? user.charAt(0).toUpperCase() : 'A';
   });
 
+  // Role-based visibility
+  readonly showDashboard = computed(() => this.userRole() === 'ROLE_ADMIN');
+  readonly showCustomers = computed(() => ['ROLE_ADMIN', 'ROLE_CASHIER'].includes(this.userRole() || ''));
+  readonly showOrders = computed(() => ['ROLE_ADMIN', 'ROLE_CASHIER'].includes(this.userRole() || ''));
+  readonly showKitchen = computed(() => ['ROLE_ADMIN', 'ROLE_CHEF'].includes(this.userRole() || ''));
+  readonly showWaiter = computed(() => ['ROLE_ADMIN', 'ROLE_CASHIER'].includes(this.userRole() || ''));
+  readonly showMarketing = computed(() => this.userRole() === 'ROLE_ADMIN');
+  readonly showInbox = computed(() => this.userRole() === 'ROLE_ADMIN');
+  readonly showUsers = computed(() => this.userRole() === 'ROLE_ADMIN');
+  readonly showProducts = computed(() => this.userRole() === 'ROLE_ADMIN');
+  readonly showReservations = computed(() => ['ROLE_ADMIN', 'ROLE_CASHIER'].includes(this.userRole() || ''));
+
+  // Dynamic routes based on role
+  readonly customersRoute = computed(() => {
+    const role = this.userRole();
+    return role === 'ROLE_CASHIER' ? '/cashier/cashier-customer' : '/admin/admin-customer';
+  });
+
+  readonly ordersRoute = computed(() => {
+    const role = this.userRole();
+    return role === 'ROLE_CASHIER' ? '/cashier' : '/admin/admin-order';
+  });
+
+  readonly reservationsRoute = computed(() => {
+    const role = this.userRole();
+    return role === 'ROLE_CASHIER' ? '/cashier/reservations' : '/admin/reservations';
+  });
+
+  readonly kitchenDashboardRoute = computed(() => {
+    const role = this.userRole();
+    return role === 'ROLE_CHEF' ? '/chef' : '/admin/kitchen/kitchen-dashboard';
+  });
+
+  readonly kitchenOrderTableRoute = computed(() => {
+    const role = this.userRole();
+    return role === 'ROLE_CHEF' ? '/chef/kitchen-oder-table' : '/admin/kitchen/kitchen-order-table';
+  });
+
+  readonly kitchenOrderAssignRoute = computed(() => {
+    const role = this.userRole();
+    return role === 'ROLE_CHEF' ? '/chef/order-assign' : '/admin/kitchen/order-assign';
+  });
+
   constructor() {
     if (!isPlatformBrowser(this.platformId)) {
       return;
@@ -45,7 +88,7 @@ export class Sidebar {
     // Load user info
     const storedUsername = this.authService.getUsername();
     const storedRole = this.authService.getRole();
-    
+
     if (storedUsername) {
       this.username.set(storedUsername);
     }
