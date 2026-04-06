@@ -16,6 +16,7 @@ import {
     PortionDto,
     TableDto,
 } from '../../models/order-placement.model';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'app-order-placement',
@@ -67,7 +68,8 @@ export class OrderPlacementComponent implements OnInit, OnDestroy {
 
     constructor(
         private readonly orderService: OrderService,
-        private readonly cdr: ChangeDetectorRef
+        private readonly cdr: ChangeDetectorRef,
+        private readonly router: Router
     ) { }
 
     ngOnInit(): void {
@@ -545,6 +547,13 @@ export class OrderPlacementComponent implements OnInit, OnDestroy {
             confirmButtonText: 'OK',
             confirmButtonColor: '#3b82f6',
             width: 720,
+            allowOutsideClick: false
+            }).then((result) => {
+           
+            if (result.isConfirmed) {
+                
+                this.router.navigate(['/admin/payment-checkout'], { queryParams: { orderId: orderNumber } });
+            }
         });
     }
 

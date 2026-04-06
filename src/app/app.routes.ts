@@ -21,6 +21,7 @@ import { SupplierIngredient } from './page/supplier-ingredient/supplier-ingredie
 import { OrderPlacementComponent } from './page/order-placement/order-placement.component';
 import { ReservationsComponent } from './page/reservations/reservations';
 import { roleGuard } from './guards/role.guard';
+import { PaymentCheckout } from './page/payment-checkout/payment-checkout';
 export const routes: Routes = [
   {
     path: '',
@@ -98,6 +99,10 @@ export const routes: Routes = [
       {
         path: 'admin-order',
         component: OrderPlacementComponent,
+      },
+      {
+        path : 'payment-checkout',
+        component : PaymentCheckout,
       },
       {
         path: 'admin-dashboard',
