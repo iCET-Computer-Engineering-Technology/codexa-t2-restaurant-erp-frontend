@@ -250,6 +250,50 @@ export const routes: Routes = [
       {
         path: 'supplier-ingredient',
         component: SupplierIngredient
+      },
+      {
+        path: 'manager-allowance',
+        component: Allowance,
+      },
+      {
+        path: 'manager-basic-salary',
+        component: BasicSalary
+      },
+      {
+        path: 'manager-deduction',
+        component: Deduction
+      },
+      {
+        path: 'manager-employee',
+        component: Employee
+      },
+      {
+        path: 'manager-employee-leave',
+        component: EmployeeLeave
+      },
+      {
+        path: 'manager-overtime',
+        component: Overtime
+      },
+      {
+        path: 'manager-payroll-config',
+        component: PayrollConfig
+      },
+      {
+        path: 'manager-payroll',
+        component: Payroll
+      },
+      {
+        path: 'manager-bonus',
+        component: Bonus
+      },
+      {
+        path: 'manager-salary-request',
+        component: SalaryRequest
+      },
+      {
+        path: 'manager-salary-response',
+        component: SalaryResponse
       }
     ],
   },

@@ -30,100 +30,96 @@ export class Sidebar {
     return user ? user.charAt(0).toUpperCase() : 'A';
   });
 
-  // Role-based visibility
-  readonly showDashboard = computed(() => this.userRole() === 'ROLE_ADMIN');
-  readonly showCustomers = computed(() => ['ROLE_ADMIN', 'ROLE_CASHIER'].includes(this.userRole() || ''));
-  readonly showOrders = computed(() => ['ROLE_ADMIN', 'ROLE_CASHIER'].includes(this.userRole() || ''));
-  readonly showKitchen = computed(() => ['ROLE_ADMIN', 'ROLE_CHEF'].includes(this.userRole() || ''));
-  readonly showWaiter = computed(() => ['ROLE_ADMIN', 'ROLE_CASHIER'].includes(this.userRole() || ''));
-  readonly showMarketing = computed(() => this.userRole() === 'ROLE_ADMIN');
-  readonly showInbox = computed(() => this.userRole() === 'ROLE_ADMIN');
-  readonly showUsers = computed(() => this.userRole() === 'ROLE_ADMIN');
-  readonly showProducts = computed(() => this.userRole() === 'ROLE_ADMIN');
-  readonly showReservations = computed(() => ['ROLE_ADMIN', 'ROLE_CASHIER'].includes(this.userRole() || ''));
+  private normalizeRole(role: string | null): string {
+    const upper = (role ?? '').trim().toUpperCase();
+    if (!upper) return '';
+    return upper.startsWith('ROLE_') ? upper : `ROLE_${upper}`;
+  }
 
-  readonly showHR = computed(() => ['ROLE_ADMIN', 'ROLE_MANAGER'].includes(this.userRole() || ''));
+  private hasRole(role: string): boolean {
+    return this.normalizeRole(this.userRole()) === this.normalizeRole(role);
+  }
+
+  private hasAnyRole(roles: string[]): boolean {
+    const currentRole = this.normalizeRole(this.userRole());
+    return roles.map((r) => this.normalizeRole(r)).includes(currentRole);
+  }
+
+  // Role-based visibility
+  readonly showDashboard = computed(() => this.hasRole('ROLE_ADMIN'));
+  readonly showCustomers = computed(() => this.hasAnyRole(['ROLE_ADMIN', 'ROLE_CASHIER']));
+  readonly showOrders = computed(() => this.hasAnyRole(['ROLE_ADMIN', 'ROLE_CASHIER']));
+  readonly showKitchen = computed(() => this.hasAnyRole(['ROLE_ADMIN', 'ROLE_CHEF']));
+  readonly showWaiter = computed(() => this.hasAnyRole(['ROLE_ADMIN', 'ROLE_CASHIER']));
+  readonly showMarketing = computed(() => this.hasRole('ROLE_ADMIN'));
+  readonly showInbox = computed(() => this.hasRole('ROLE_ADMIN'));
+  readonly showUsers = computed(() => this.hasRole('ROLE_ADMIN'));
+  readonly showProducts = computed(() => this.hasRole('ROLE_ADMIN'));
+  readonly showReservations = computed(() => this.hasAnyRole(['ROLE_ADMIN', 'ROLE_CASHIER']));
+
+  readonly showHR = computed(() => this.hasAnyRole(['ROLE_ADMIN', 'ROLE_MANAGER']));
 
   // Dynamic routes based on role
   readonly customersRoute = computed(() => {
-    const role = this.userRole();
-    return role === 'ROLE_CASHIER' ? '/cashier/cashier-customer' : '/admin/admin-customer';
+    return this.hasRole('ROLE_CASHIER') ? '/cashier/cashier-customer' : '/admin/admin-customer';
   });
 
   readonly ordersRoute = computed(() => {
-    const role = this.userRole();
-    return role === 'ROLE_CASHIER' ? '/cashier' : '/admin/admin-order';
+    return this.hasRole('ROLE_CASHIER') ? '/cashier' : '/admin/admin-order';
   });
 
   readonly reservationsRoute = computed(() => {
-    const role = this.userRole();
-    return role === 'ROLE_CASHIER' ? '/cashier/reservations' : '/admin/reservations';
+    return this.hasRole('ROLE_CASHIER') ? '/cashier/reservations' : '/admin/reservations';
   });
 
   readonly kitchenDashboardRoute = computed(() => {
-    const role = this.userRole();
-    return role === 'ROLE_CHEF' ? '/chef' : '/admin/kitchen/kitchen-dashboard';
+    return this.hasRole('ROLE_CHEF') ? '/chef' : '/admin/kitchen/kitchen-dashboard';
   });
 
   readonly kitchenOrderTableRoute = computed(() => {
-    const role = this.userRole();
-    return role === 'ROLE_CHEF' ? '/chef/kitchen-oder-table' : '/admin/kitchen/kitchen-order-table';
+    return this.hasRole('ROLE_CHEF') ? '/chef/kitchen-oder-table' : '/admin/kitchen/kitchen-order-table';
   });
 
   readonly kitchenOrderAssignRoute = computed(() => {
-    const role = this.userRole();
-    return role === 'ROLE_CHEF' ? '/chef/order-assign' : '/admin/kitchen/order-assign';
+    return this.hasRole('ROLE_CHEF') ? '/chef/order-assign' : '/admin/kitchen/order-assign';
   });
 
   // HR Manager routes based on role
   readonly hrAllowanceRoute = computed(() => {
-    const role = this.userRole();
-    return role === 'ROLE_ADMIN' ? '/admin/manager-allowance' : '/manager/manager-allowance';
+    return this.hasRole('ROLE_ADMIN') ? '/admin/manager-allowance' : '/manager/manager-allowance';
   });
 
   readonly hrBasicSalaryRoute = computed(() => {
-    const role = this.userRole();
-    return role === 'ROLE_ADMIN' ? '/admin/manager-basic-salary' : '/manager/manager-basic-salary';
+    return this.hasRole('ROLE_ADMIN') ? '/admin/manager-basic-salary' : '/manager/manager-basic-salary';
   });
 
   readonly hrBonusRoute = computed(() => {
-    const role = this.userRole();
-    return role === 'ROLE_ADMIN' ? '/admin/manager-bonus' : '/manager/manager-bonus';
+    return this.hasRole('ROLE_ADMIN') ? '/admin/manager-bonus' : '/manager/manager-bonus';
   });
 
   readonly hrDeductionRoute = computed(() => {
-    const role = this.userRole();
-    return role === 'ROLE_ADMIN' ? '/admin/manager-deduction' : '/manager/manager-deduction';
+    return this.hasRole('ROLE_ADMIN') ? '/admin/manager-deduction' : '/manager/manager-deduction';
   });
 
   readonly hrEmployeeRoute = computed(() => {
-    const role = this.userRole();
-    return role === 'ROLE_ADMIN' ? '/admin/manager-employee' : '/manager/manager-employee';
+    return this.hasRole('ROLE_ADMIN') ? '/admin/manager-employee' : '/manager/manager-employee';
   });
 
   readonly hrEmployeeLeaveRoute = computed(() => {
-    const role = this.userRole();
-    return role === 'ROLE_ADMIN' ? '/admin/manager-employee-leave' : '/manager/manager-employee-leave';
+    return this.hasRole('ROLE_ADMIN') ? '/admin/manager-employee-leave' : '/manager/manager-employee-leave';
   });
 
   readonly hrOvertimeRoute = computed(() => {
-    const role = this.userRole();
-    return role === 'ROLE_ADMIN' ? '/admin/manager-overtime' : '/manager/manager-overtime';
+    return this.hasRole('ROLE_ADMIN') ? '/admin/manager-overtime' : '/manager/manager-overtime';
   });
 
   readonly hrPayrollConfigRoute = computed(() => {
-    const role = this.userRole();
-    return role === 'ROLE_ADMIN' ? '/admin/manager-payroll-config' : '/manager/manager-payroll-config';
+    return this.hasRole('ROLE_ADMIN') ? '/admin/manager-payroll-config' : '/manager/manager-payroll-config';
   });
 
   readonly hrPayrollRoute = computed(() => {
-    const role = this.userRole();
-    return role === 'ROLE_ADMIN' ? '/admin/manager-payroll' : '/manager/manager-payroll';
+    return this.hasRole('ROLE_ADMIN') ? '/admin/manager-payroll' : '/manager/manager-payroll';
   });
-
-
-
-
 
   constructor() {
     if (!isPlatformBrowser(this.platformId)) {
@@ -169,5 +165,4 @@ export class Sidebar {
     this.document.documentElement.classList.toggle('admin-light-theme', !darkModeEnabled);
     localStorage.setItem('admin-sidebar-theme', darkModeEnabled ? 'dark' : 'light');
   }
-
 }
