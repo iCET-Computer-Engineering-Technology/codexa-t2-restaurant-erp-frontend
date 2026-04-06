@@ -7,9 +7,6 @@ import { MarketingCampaign } from './page/admin/marketing-campaign/marketing-cam
 import { CampaignsComponent } from './page/admin/marketing-campaign/campaigns/campaigns';
 import { AnalyticsComponent } from './page/admin/marketing-campaign/analytics/analytics';
 import { Kitchen } from './page/kitchen/kitchen';
-import { KitchenDashboard } from './page/kitchen/kitchen-dashboard/kitchen-dashboard';
-import { KitchenOrderTable } from './page/kitchen/kitchen-order-table/kitchen-order-table';
-import { OrderAssign } from './page/kitchen/order-assign/order-assign';
 import { MenuCategories } from './page/menu-categories/menu-categories';
 import { MenuItemPrice } from './page/menu-item-price/menu-item-price';
 import { Portions } from './page/portions/portions';
@@ -65,15 +62,7 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        component: KitchenDashboard,
-      },
-      {
-        path: 'kitchen-order-table',
-        component: KitchenOrderTable,
-      },
-      {
-        path: 'order-assign',
-        component: OrderAssign,
+        component: Kitchen,
       }
     ]
   },
@@ -147,26 +136,6 @@ export const routes: Routes = [
       {
         path: 'kitchen',
         component: Kitchen,
-
-        children: [
-          {
-            path: '',
-            redirectTo: 'kitchen-dashboard',
-            pathMatch: 'full',
-          },
-          {
-            path: 'kitchen-dashboard',
-            component: KitchenDashboard,
-          },
-          {
-            path: 'kitchen-order-table',
-            component: KitchenOrderTable,
-          },
-          {
-            path: 'order-assign',
-            component: OrderAssign,
-          }
-        ],
       },
       {
         path: 'supplier-ingredient',
