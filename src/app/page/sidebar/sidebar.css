@@ -211,9 +211,21 @@ aside {
   overflow: hidden;
   transition: max-height 0.3s ease-in-out, padding 0.3s ease-in-out;
 }
+.manager-submenu {
+  padding: 0;
+  margin: 0;
+  background: rgba(255, 255, 255, 0.02);
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-in-out, padding 0.3s ease-in-out;
+}
 
 .marketing-menu-group:hover .marketing-submenu {
   max-height: 300px;
+  padding: 8px 0 12px 0;
+}
+.manager-submenu-group:hover .manager-submenu {
+  max-height: 450px;
   padding: 8px 0 12px 0;
 }
 

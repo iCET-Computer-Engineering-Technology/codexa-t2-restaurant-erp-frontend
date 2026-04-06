@@ -4,18 +4,17 @@ import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
-import { Sidebar } from "../sidebar/sidebar";
 
 @Component({
   selector: 'app-menu-categories',
-  imports: [ReactiveFormsModule, FormsModule, CommonModule, Sidebar],
+  imports: [ReactiveFormsModule, FormsModule, CommonModule],
   templateUrl: './menu-categories.html',
   styleUrl: './menu-categories.css',
 })
 export class MenuCategories implements OnInit {
-  
+
   isEditMode: boolean = false;
-  
+
 
   categoryList : Array<CategoryModel> = [];
   porttionList : Array<PortionsModel> = [];
@@ -30,7 +29,7 @@ export class MenuCategories implements OnInit {
   ngOnInit(): void {
     this.getAll();
   }
-  
+
 
   getAll(){
     this.http.get<CategoryModel[]>("http://localhost:8080/api/categories/get-all").subscribe(data => {
@@ -46,16 +45,16 @@ export class MenuCategories implements OnInit {
   }
 
   clearForm(): void {
-    this.categoryObj = { 
-      id: 0, 
-      name: '', 
-      isActive: true 
+    this.categoryObj = {
+      id: 0,
+      name: '',
+      isActive: true
     };
   }
 
   onEdit(category: CategoryModel): void {
-  this.categoryObj = { ...category }; 
-  this.isEditMode = true; 
+  this.categoryObj = { ...category };
+  this.isEditMode = true;
 }
 
 updateCategory() : void {
@@ -72,15 +71,15 @@ deleteMenuCategory(id: number): void {
       text: "You won't be able to revert this!",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#dc2626", 
-      cancelButtonColor: "#6b7280", 
+      confirmButtonColor: "#dc2626",
+      cancelButtonColor: "#6b7280",
       confirmButtonText: "Yes, delete it!"
     }).then((result) => {
-      
+
       if (result.isConfirmed) {
         this.http.delete(`http://localhost:8080/api/categories/${id}`).subscribe({
           next: (data) => {
-            
+
             Swal.fire({
               title: "Deleted!",
               text: "The item has been deleted.",
