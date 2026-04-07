@@ -8,6 +8,7 @@ import { Sidebar } from "../sidebar/sidebar";
 
 @Component({
   selector: 'app-menu-categories',
+  standalone: true,
   imports: [ReactiveFormsModule, FormsModule, CommonModule, Sidebar],
   templateUrl: './menu-categories.html',
   styleUrl: './menu-categories.css',

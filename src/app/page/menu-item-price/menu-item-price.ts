@@ -7,6 +7,7 @@ import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-menu-item-price',
+  standalone: true,
   imports: [FormsModule, CommonModule],
   templateUrl: './menu-item-price.html',
   styleUrl: './menu-item-price.css',
@@ -93,7 +94,7 @@ export class MenuItemPrice implements OnInit {
 
   addMenuItemPrice(): void {
     this.syncPayloadFromSelections();
-    this.http.post("http://localhost:8080/api/menu-item-price", this.menuItemPriceObj).subscribe(data => {
+    this.http.post("http://localhost:8080/api/menu-item-price", this.menuItemPriceObj).subscribe(() => {
       this.getAll();
     })
   }
@@ -118,7 +119,7 @@ export class MenuItemPrice implements OnInit {
 
   updateMenuItemPrice(): void {
     this.syncPayloadFromSelections();
-    this.http.put("http://localhost:8080/api/menu-item-price", this.menuItemPriceObj).subscribe(data => {
+    this.http.put("http://localhost:8080/api/menu-item-price", this.menuItemPriceObj).subscribe(() => {
       this.getAll();
       this.clearForm();
       this.isEditMode = false;
@@ -138,7 +139,7 @@ export class MenuItemPrice implements OnInit {
 
       if (result.isConfirmed) {
         this.http.delete(`http://localhost:8080/api/menu-item-price/${id}`).subscribe({
-          next: (data) => {
+          next: () => {
 
             Swal.fire({
               title: "Deleted!",

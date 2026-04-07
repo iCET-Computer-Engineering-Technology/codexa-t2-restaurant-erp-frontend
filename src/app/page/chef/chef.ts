@@ -4,6 +4,7 @@ import { Sidebar } from '../sidebar/sidebar';
 
 @Component({
   selector: 'app-chef',
+  standalone: true,
   imports: [Sidebar, RouterOutlet],
   templateUrl: './chef.html',
   styleUrl: './chef.css',

@@ -4,6 +4,7 @@ import { Sidebar } from '../sidebar/sidebar';
 
 @Component({
   selector: 'app-admin',
+  standalone: true,
   imports: [Sidebar, RouterOutlet],
   templateUrl: './admin.html',
   styleUrl: './admin.css',

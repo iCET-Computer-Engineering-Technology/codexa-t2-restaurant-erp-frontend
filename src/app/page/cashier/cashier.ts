@@ -4,6 +4,7 @@ import { Sidebar } from "../sidebar/sidebar";
 
 @Component({
   selector: 'app-cashier',
+  standalone: true,
   imports: [Sidebar, RouterOutlet],
   templateUrl: './cashier.html',
   styleUrl: './cashier.css',

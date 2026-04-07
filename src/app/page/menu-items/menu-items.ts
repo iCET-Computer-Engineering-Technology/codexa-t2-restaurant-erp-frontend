@@ -7,6 +7,7 @@ import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-menu-items',
+  standalone: true,
   imports: [FormsModule, CommonModule],
   templateUrl: './menu-items.html',
   styleUrl: './menu-items.css',
@@ -55,7 +56,7 @@ export class MenuItems implements OnInit {
   }
 
   addMenuItem(): void {
-    this.http.post("http://localhost:8080/api/menu-items", this.menuItemObj).subscribe(data => {
+    this.http.post("http://localhost:8080/api/menu-items", this.menuItemObj).subscribe(() => {
       this.getAll();
     })
   }
@@ -72,12 +73,12 @@ export class MenuItems implements OnInit {
   }
 
   onEdit(menuItem : MenuItemsModel) : void {
-    this.menuItemObj = { ...menuItem }; 
-  this.isEditMode = true; 
+    this.menuItemObj = { ...menuItem };
+  this.isEditMode = true;
   }
 
   updateMenuItem() : void {
-  this.http.put("http://localhost:8080/api/menu-items" , this.menuItemObj).subscribe(data => {
+  this.http.put("http://localhost:8080/api/menu-items" , this.menuItemObj).subscribe(() => {
     this.getAll();
     this.clearForm();
     this.isEditMode = false;
@@ -90,15 +91,15 @@ deleteMenuItem(id: number): void {
       text: "You won't be able to revert this!",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#dc2626", 
-      cancelButtonColor: "#6b7280", 
+      confirmButtonColor: "#dc2626",
+      cancelButtonColor: "#6b7280",
       confirmButtonText: "Yes, delete it!"
     }).then((result) => {
-      
+
       if (result.isConfirmed) {
         this.http.delete(`http://localhost:8080/api/menu-items/${id}`).subscribe({
-          next: (data) => {
-            
+          next: () => {
+
             Swal.fire({
               title: "Deleted!",
               text: "The item has been deleted.",

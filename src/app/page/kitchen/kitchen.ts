@@ -22,6 +22,7 @@ interface WaiterAssignmentOption {
 
 @Component({
   selector: 'app-kitchen',
+  standalone: true,
   imports: [],
   templateUrl: './kitchen.html',
   styleUrl: './kitchen.css',

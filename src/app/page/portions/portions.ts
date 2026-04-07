@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { PortionsModel } from '../../../model/type';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -7,11 +7,12 @@ import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-portions',
+  standalone: true,
   imports: [FormsModule ,  CommonModule],
   templateUrl: './portions.html',
   styleUrl: './portions.css',
 })
-export class Portions {
+export class Portions implements OnInit {
 
   isEditMode : boolean = false;
 
@@ -26,7 +27,7 @@ export class Portions {
 
   ngOnInit() : void {
     this.getAll();
-  } 
+  }
 
   getAll(){
     this.http.get<PortionsModel[]>("http://localhost:8080/portions").subscribe(data => {
@@ -36,7 +37,7 @@ export class Portions {
   }
 
   addPortion() : void {
-    this.http.post("http://localhost:8080/portions" , this.portionsObj).subscribe(data => {
+    this.http.post("http://localhost:8080/portions" , this.portionsObj).subscribe(() => {
       this.getAll();
     })
   }
@@ -49,12 +50,12 @@ export class Portions {
   }
 
   onEdit(portions : PortionsModel) : void {
-    this.portionsObj = { ...portions }; 
+    this.portionsObj = { ...portions };
     this.isEditMode = true;
   }
 
   updatePortion() : void {
-  this.http.put("http://localhost:8080/portions" , this.portionsObj).subscribe(data => {
+  this.http.put("http://localhost:8080/portions" , this.portionsObj).subscribe(() => {
     this.getAll();
     this.clearForm();
     this.isEditMode = false;
@@ -67,15 +68,15 @@ deletePortion(id: number): void {
       text: "You won't be able to revert this!",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#dc2626", 
-      cancelButtonColor: "#6b7280", 
+      confirmButtonColor: "#dc2626",
+      cancelButtonColor: "#6b7280",
       confirmButtonText: "Yes, delete it!"
     }).then((result) => {
-      
+
       if (result.isConfirmed) {
         this.http.delete(`http://localhost:8080/portions/${id}`).subscribe({
-          next: (data) => {
-            
+          next: () => {
+
             Swal.fire({
               title: "Deleted!",
               text: "The item has been deleted.",

@@ -38,14 +38,12 @@ export class Sidebar {
   readonly showKitchen = computed(() => ['ROLE_ADMIN', 'ROLE_CHEF'].includes(this.userRole() || ''));
   readonly showWaiter = computed(() => ['ROLE_ADMIN', 'ROLE_CASHIER'].includes(this.userRole() || ''));
   readonly showMarketing = computed(() => this.userRole() === 'ROLE_ADMIN');
-  readonly showInbox = computed(() => this.userRole() === 'ROLE_ADMIN');
-  readonly showUsers = computed(() => this.userRole() === 'ROLE_ADMIN');
-  readonly showProducts = computed(() => this.userRole() === 'ROLE_ADMIN');
-
-  // HR Manager visibility
-  readonly showReservations = computed(() => this.hasAnyRole(['ROLE_ADMIN', 'ROLE_CASHIER']));
-
   readonly showHR = computed(() => this.hasAnyRole(['ROLE_ADMIN', 'ROLE_MANAGER']));
+
+  private hasAnyRole(roles: readonly string[]): boolean {
+    const currentRole = this.userRole();
+    return !!currentRole && roles.includes(currentRole);
+  }
 
   // Dynamic routes based on role
   readonly customersRoute = computed(() => {
@@ -58,22 +56,7 @@ export class Sidebar {
     return role === 'ROLE_CASHIER' ? '/cashier' : '/admin/admin-order';
   });
 
-  readonly reservationsRoute = computed(() => {
-    const role = this.userRole();
-    return role === 'ROLE_CASHIER' ? '/cashier/reservations' : '/admin/reservations';
-  });
-
   readonly kitchenDashboardRoute = computed(() => {
-    const role = this.userRole();
-    return role === 'ROLE_CHEF' ? '/chef' : '/admin/kitchen';
-  });
-
-  readonly kitchenOrderTableRoute = computed(() => {
-    const role = this.userRole();
-    return role === 'ROLE_CHEF' ? '/chef' : '/admin/kitchen';
-  });
-
-  readonly kitchenOrderAssignRoute = computed(() => {
     const role = this.userRole();
     return role === 'ROLE_CHEF' ? '/chef' : '/admin/kitchen';
   });
@@ -150,10 +133,6 @@ export class Sidebar {
     this.isHovered.set(false);
   }
 
-  toggleTheme(): void {
-    this.isDarkMode.update((currentMode) => !currentMode);
-    this.applyTheme();
-  }
 
   private applyTheme(): void {
     const darkModeEnabled = this.isDarkMode();
