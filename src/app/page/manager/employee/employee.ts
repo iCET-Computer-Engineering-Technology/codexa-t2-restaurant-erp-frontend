@@ -1,13 +1,15 @@
 import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
-import {NgForOf, NgIf} from '@angular/common';
+import {CommonModule, NgForOf, NgIf} from '@angular/common';
 import {EmployeeService} from '../../../services/manager/employee-service';
 import {EmployeeModel, UserModel} from '../../../models/salary.model';
 import {BasicSalaryService} from '../../../services/manager/basic-salary-service';
 
 @Component({
   selector: 'app-employee',
+  standalone: true,
   imports: [
+    CommonModule,
     FormsModule,
     NgForOf,
     NgIf,

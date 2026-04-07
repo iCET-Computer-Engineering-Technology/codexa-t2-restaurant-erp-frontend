@@ -21,4 +21,7 @@ export class BonusService {
   deleteBonus(id: number |undefined) {
     return this.http.delete(`${this.api}/delete/${id}`);
   }
+  searchBonusById(data: any){
+    return this.http.get(`${this.api}/search/${data}`);
+  }
 }

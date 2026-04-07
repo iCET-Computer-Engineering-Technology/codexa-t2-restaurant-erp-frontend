@@ -15,76 +15,87 @@ export class MenuItemPrice implements OnInit {
 
   isEditMode: boolean = false;
 
-  menuItemPriceList: Array<MenuItemPriceModel> = [];
-  itemList: Array<MenuItemsModel> = [];
-  portionList: Array<PortionsModel> = [];
-  
-  // Pagination
-  currentPage: number = 1;
-  itemsPerPage: number = 5; 
+  menuItemsList: Array<MenuItemsModel> = [];
+  portionsList: Array<PortionsModel> = [];
+  selectedItemId: number = 0;
+  selectedPortionId: number = 0;
 
+  menuItemPriceList: Array<MenuItemPriceModel> = [];
   menuItemPriceObj: MenuItemPriceModel = {
     id: 0,
     itemName: '',
     portionName: '',
-    price: 0.0,
-    isActive: true,
-    itemId: 0,
-    portionId: 0
-  };
+    price: 0,
+    isActive: true
+  }
 
   constructor(private readonly http: HttpClient, private readonly cdr: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     this.getAll();
-    this.loadDropdownData();
-  }
-
-  loadDropdownData(): void {
-    // Kept the /api/ paths for dev branch compatibility
-    this.http.get<MenuItemsModel[]>("http://localhost:8080/api/menu-items").subscribe(data => {
-      this.itemList = data;
-    });
-
-    this.http.get<PortionsModel[]>("http://localhost:8080/api/portions").subscribe(data => {
-      this.portionList = data;
-    });
+    this.getAllMenuItems();
+    this.getAllPortions();
   }
 
   getAll() {
     this.http.get<MenuItemPriceModel[]>("http://localhost:8080/api/menu-item-price/get-full-menu").subscribe(data => {
-      // Kept YOUR sorting logic!
-      this.menuItemPriceList = data.sort((a, b) => Number(b.isActive) - Number(a.isActive));
+      this.menuItemPriceList = data;
       this.cdr.detectChanges();
-    });
+    })
   }
 
-  // --- Pagination Logic ---
-  get paginatedData() {
-    const start = (this.currentPage - 1) * this.itemsPerPage;
-    return this.menuItemPriceList.slice(start, start + this.itemsPerPage);
+  getAllMenuItems() {
+    this.http.get<MenuItemsModel[]>("http://localhost:8080/api/menu-items").subscribe(data => {
+      this.menuItemsList = data;
+      if (this.isEditMode) {
+        this.syncSelectionsFromPayload();
+      }
+      this.cdr.detectChanges();
+    })
   }
 
-  get totalPages() {
-    return Math.ceil(this.menuItemPriceList.length / this.itemsPerPage);
+  getAllPortions() {
+    this.http.get<PortionsModel[]>("http://localhost:8080/portions").subscribe(data => {
+      this.portionsList = data;
+      if (this.isEditMode) {
+        this.syncSelectionsFromPayload();
+      }
+      this.cdr.detectChanges();
+    })
   }
 
-  getPagesArray() {
-    return Array(this.totalPages).fill(0).map((x, i) => i + 1);
+  private syncPayloadFromSelections(): void {
+    this.menuItemPriceObj.itemName = this.selectedItemId ? String(this.selectedItemId) : '';
+    this.menuItemPriceObj.portionName = this.selectedPortionId ? String(this.selectedPortionId) : '';
   }
 
-  changePage(page: number) {
-    if (page >= 1 && page <= this.totalPages) {
-      this.currentPage = page;
+  private syncSelectionsFromPayload(): void {
+    const parsedItemId = Number(this.menuItemPriceObj.itemName);
+    if (!Number.isNaN(parsedItemId) && parsedItemId > 0) {
+      this.selectedItemId = parsedItemId;
+    } else {
+      const matchedItem = this.menuItemsList.find(
+        (item) => item.name.toLowerCase() === String(this.menuItemPriceObj.itemName).toLowerCase()
+      );
+      this.selectedItemId = matchedItem ? matchedItem.id : 0;
+    }
+
+    const parsedPortionId = Number(this.menuItemPriceObj.portionName);
+    if (!Number.isNaN(parsedPortionId) && parsedPortionId > 0) {
+      this.selectedPortionId = parsedPortionId;
+    } else {
+      const matchedPortion = this.portionsList.find(
+        (portion) => portion.name.toLowerCase() === String(this.menuItemPriceObj.portionName).toLowerCase()
+      );
+      this.selectedPortionId = matchedPortion ? matchedPortion.id : 0;
     }
   }
 
-  // --- CRUD Operations ---
   addMenuItemPrice(): void {
+    this.syncPayloadFromSelections();
     this.http.post("http://localhost:8080/api/menu-item-price", this.menuItemPriceObj).subscribe(data => {
       this.getAll();
-      this.clearForm(); 
-    });
+    })
   }
 
   clearForm(): void {
@@ -92,24 +103,26 @@ export class MenuItemPrice implements OnInit {
       id: 0,
       itemName: '',
       portionName: '',
-      price: 0.0,
-      isActive: true,
-      itemId: 0,
-      portionId: 0
+      price: 0,
+      isActive: true
     };
-    this.isEditMode = false;
+    this.selectedItemId = 0;
+    this.selectedPortionId = 0;
   }
 
   onEdit(menuItemPrice: MenuItemPriceModel): void {
     this.menuItemPriceObj = { ...menuItemPrice };
+    this.syncSelectionsFromPayload();
     this.isEditMode = true;
   }
 
   updateMenuItemPrice(): void {
+    this.syncPayloadFromSelections();
     this.http.put("http://localhost:8080/api/menu-item-price", this.menuItemPriceObj).subscribe(data => {
       this.getAll();
       this.clearForm();
-    });
+      this.isEditMode = false;
+    })
   }
 
   deleteMenuItemPrice(id: number): void {
@@ -122,15 +135,21 @@ export class MenuItemPrice implements OnInit {
       cancelButtonColor: "#6b7280",
       confirmButtonText: "Yes, delete it!"
     }).then((result) => {
+
       if (result.isConfirmed) {
         this.http.delete(`http://localhost:8080/api/menu-item-price/${id}`).subscribe({
           next: (data) => {
-            Swal.fire("Deleted!", "The price has been deleted.", "success");
+
+            Swal.fire({
+              title: "Deleted!",
+              text: "The item has been deleted.",
+              icon: "success"
+            });
             this.getAll();
           },
           error: (err) => {
             console.error("Delete failed:", err);
-            Swal.fire("Error", "Could not delete the price.", "error");
+            Swal.fire("Error", "Could not delete the item.", "error");
           }
         });
       }

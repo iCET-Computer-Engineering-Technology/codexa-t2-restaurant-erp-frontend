@@ -1,95 +1,140 @@
-<div class="container mx-auto p-4">
-  <h2 class="text-3xl font-bold mb-6 text-gray-800">Overtime Management</h2>
+<div class="dashboard-container">
+  <h2 class="page-title">Overtime Management</h2>
 
-  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="mb-8 p-6 rounded-lg bg-white shadow-lg border border-gray-200">
-    <h3 class="text-xl font-semibold text-gray-800 mb-6">Add New Overtime</h3>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div>
-        <label for="employeeId" class="block text-sm font-semibold text-gray-700 mb-2">Select Employee</label>
-        <select
-          id="employeeId"
-          formControlName="employeeId"
-          class="w-full px-4 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-800 font-medium focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">
+  <div class="main-content-grid">
+    <div class="form-section">
+      <div class="section-header">
+        <h3>Add New Overtime Record</h3>
+        <p class="subtitle">Record extra working hours and calculate the total payout based on hourly rates.</p>
+      </div>
 
-          <option value="" disabled selected class="text-gray-500">
-            -- Select an Employee --
-          </option>
-          <option *ngFor="let employee of employees" [value]="employee.id" class="text-gray-800">
-            {{ employee.firstName + ' ' + employee.lastName }}
-          </option>
-        </select>
-        <div *ngIf="form.get('employeeId')?.invalid && form.get('employeeId')?.touched" class="text-red-600 text-sm mt-1">Employee is required</div>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="employeeId">Select Employee</label>
+            <select
+              id="employeeId"
+              formControlName="employeeId"
+              class="form-control"
+              [class.input-error]="form.get('employeeId')?.invalid && form.get('employeeId')?.touched">
+              <option value="" disabled selected>-- Select an Employee --</option>
+              <option *ngFor="let employee of employees" [value]="employee.id">
+                {{ employee.firstName + ' ' + employee.lastName }}
+              </option>
+            </select>
+            <div *ngIf="form.get('employeeId')?.invalid && form.get('employeeId')?.touched" class="error-message">
+              Employee is required
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="date">Overtime Date</label>
+            <input
+              id="date"
+              formControlName="date"
+              type="date"
+              class="form-control"
+              [class.input-error]="form.get('date')?.invalid && form.get('date')?.touched" />
+          </div>
+        </div>
+
+        <div class="form-row-3">
+          <div class="form-group">
+            <label for="hours">Hours Worked</label>
+            <input
+              id="hours"
+              formControlName="hours"
+              type="number"
+              placeholder="0"
+              class="form-control"
+              [class.input-error]="form.get('hours')?.invalid && form.get('hours')?.touched" />
+          </div>
+
+          <div class="form-group">
+            <label for="ratePerHour">Rate Per Hour (Rs.)</label>
+            <input
+              id="ratePerHour"
+              formControlName="ratePerHour"
+              type="text"
+              placeholder="500.00"
+              class="form-control"
+              [class.input-error]="form.get('ratePerHour')?.invalid && form.get('ratePerHour')?.touched" />
+          </div>
+
+          <div class="form-group">
+            <label for="totalAmount">Total Payout</label>
+            <input
+              id="totalAmount"
+              formControlName="totalAmount"
+              type="number"
+              readonly
+              class="form-control"
+              style="background-color: #f1f5f9; font-weight: 700; color: #10b981;" />
+          </div>
+        </div>
+
+        <div class="form-footer">
+          <button type="button" (click)="clearForm()" class="cancel-btn">Reset</button>
+          <button type="submit" [disabled]="!form.valid" class="save-btn">Save Overtime</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="table-section">
+      <div class="table-header-box">
+        <h3>Overtime Records <span class="badge" style="background: #ecfdf5; color: #059669;">{{ overtimes.length }} Logs</span></h3>
+        <input type="text" placeholder="Search by Employee..." class="search-box">
       </div>
-      <div>
-        <label for="hours" class="block text-sm font-semibold text-gray-700 mb-2">Hours</label>
-        <input id="hours" formControlName="hours" type="number" class="w-full px-4 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-800 font-medium focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" />
-        <div *ngIf="form.get('hours')?.invalid && form.get('hours')?.touched" class="text-red-600 text-sm mt-1">Rate Per Hour is required</div>
-      </div>
-      <div>
-        <label for="date" class="block text-sm font-semibold text-gray-700 mb-2">Date</label>
-        <input id="date" formControlName="date" type="date" class="w-full px-4 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-800 font-medium focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" />
-        <div *ngIf="form.get('date')?.invalid && form.get('date')?.touched" class="text-red-600 text-sm mt-1">Date is required</div>
-      </div>
-      <div>
-        <label for="ratePerHour" class="block text-sm font-semibold text-gray-700 mb-2">Rate Per Hour</label>
-        <input id="ratePerHour" formControlName="ratePerHour" type="text" class="w-full px-4 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-800 font-medium focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" />
-        <div *ngIf="form.get('ratePerHour')?.invalid && form.get('ratePerHour')?.touched" class="text-red-600 text-sm mt-1">Rate Per Hour is required</div>
-      </div>
-      <div>
-        <label for="totalAmount" class="block text-sm font-semibold text-gray-700 mb-2">Total Amount</label>
-        <input id="totalAmount" formControlName="totalAmount" type="number" readonly class="w-full px-4 py-2 border-2 border-gray-300 rounded-md bg-gray-100 text-gray-800 font-medium focus:outline-none" />
+
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+          <tr>
+            <th>#</th>
+            <th>Employee</th>
+            <th>Date</th>
+            <th>Hours</th>
+            <th>Total Amount</th>
+            <th style="text-align: center;">Actions</th>
+          </tr>
+          </thead>
+          <tbody>
+            @for (ot of overtimes; track ot.id; let i = $index) {
+              <tr>
+                <td class="fw-bold">{{ i +1 }}</td>
+                <td>
+                  <div class="customer-info">
+                    <div class="avatar" style="background: #f59e0b;">{{ ot.employeeId.toString().substring(0,1) }}</div>
+                    <div class="fw-bold">ID: {{ ot.employeeId }}</div>
+                    <div>
+                      @for (employee of employees; track employee.id) {
+                        <div class="text-muted" *ngIf="employee.id === ot.employeeId">{{employee.firstName +' ' +employee.lastName}}</div>}
+                    </div>
+                  </div>
+                </td>
+                <td>{{ ot.date }}</td>
+                <td>
+                  <span class="badge" style="background: #fef3c7; color: #d97706;">{{ ot.hours }} Hrs</span>
+                </td>
+                <td class="fw-bold" style="font-size: 16px; color: #0f172a;">
+                  Rs. {{ ot.totalAmount | number:'1.2-2' }}
+                </td>
+                <td style="text-align: center;">
+                  <button (click)="editOvertime(ot.id)" class="action-btn edit-btn">Edit</button>
+                  <button (click)="deleteOvertime(ot.id)" class="action-btn delete-btn">Delete</button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="6" style="text-align: center; padding: 60px; color: #64748b;">
+                  <div style="font-size: 40px; margin-bottom: 10px;">⏰</div>
+                  <p>No overtime logs found. Start by adding one above.</p>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
       </div>
     </div>
-    <div class="flex gap-4 mt-6">
-      <button
-        type="submit"
-        [disabled]="!form.valid"
-        class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md transition disabled:opacity-50 disabled:cursor-not-allowed shadow-md">
-        Save
-      </button>
-
-      <button
-        type="button"
-        (click)="clearForm()"
-        class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-md transition shadow-md">
-        Clear
-      </button>
-    </div>  </form>
-
-  <!-- Table Section -->
-  <div class="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
-    <table class="w-full">
-      <thead>
-      <tr class="bg-gradient-to-r from-gray-800 to-gray-700">
-        <th class="py-4 px-6 text-left text-white font-bold text-lg">ID</th>
-        <th class="py-4 px-6 text-left text-white font-bold text-lg">Employee</th>
-        <th class="py-4 px-6 text-left text-white font-bold text-lg">Date</th>
-        <th class="py-4 px-6 text-left text-white font-bold text-lg">Hours</th>
-        <th class="py-4 px-6 text-left text-white font-bold text-lg">Total Amount</th>
-        <th class="py-4 px-6 text-center text-white font-bold text-lg">Actions</th>
-      </tr>
-      </thead>
-      <tbody>
-        @for (overtime of overtimes; track overtime.id) {
-          <tr class="border-b border-gray-200 hover:bg-blue-50 transition duration-200">
-            <td class="py-4 px-6 text-gray-800 font-semibold">{{ overtime.id }}</td>
-            <td class="py-4 px-6 text-gray-800 font-medium">{{ overtime.employeeId }}</td>
-            <td class="py-4 px-6 text-gray-800 font-medium">{{ overtime.date }}</td>
-            <td class="py-4 px-6 text-gray-800 font-medium">{{ overtime.hours }}</td>
-            <td class="py-4 px-6 text-gray-800 font-bold text-lg">{{ overtime.totalAmount }}</td>
-            <td class="py-4 px-6 text-center space-x-2">
-              <button (click)="editOvertime(overtime.id)" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-md transition shadow-md"> Edit</button>
-              <button (click)="deleteOvertime(overtime.id)" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-md transition shadow-md">Delete</button>
-            </td>
-          </tr>
-        } @empty {
-          <tr>
-            <td colspan="5" class="text-center py-12 text-gray-600 font-medium text-lg">
-               No overtimes found. Add a new overtime to get started.
-            </td>
-          </tr>
-        }
-      </tbody>
-    </table>
   </div>
 </div>

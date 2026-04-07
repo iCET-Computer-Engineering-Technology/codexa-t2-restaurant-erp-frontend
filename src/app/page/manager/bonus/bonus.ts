@@ -31,6 +31,8 @@ export class Bonus implements OnInit{
         id: [null],
         employeeId: [null],
         amount: [''],
+
+        search: ['']
       })
 
     }
@@ -58,6 +60,39 @@ export class Bonus implements OnInit{
     this.getBonus();
     this.getEmployee();
   }
+
+  employeeSearchByName(): void {
+    const searchTerm = this.form.get('search')?.value?.toLowerCase() || '';
+
+    if (searchTerm) {
+      for (const employee of this.employees) {
+
+        if (searchTerm === employee.firstName.toLowerCase()) {
+          this.service.searchBonusById(employee.id).subscribe({
+            next: (data: any) => {
+              this.bonus = data;
+              this.cdr.detectChanges();
+            }
+          });
+          break;
+        }
+
+        else if (searchTerm === employee.lastName.toLowerCase()) {
+          this.service.searchBonusById(employee.id).subscribe({
+            next: (data: any) => {
+              this.bonus = data;
+              this.cdr.detectChanges();
+            }
+          });
+          break;
+        }
+
+      }
+    } else {
+      this.getBonus();
+    }
+  }
+
 
   onSubmit(): void {
     if (this.form.valid) {

@@ -1,13 +1,15 @@
 import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
-import {NgForOf, NgIf} from "@angular/common";
+import {CommonModule, NgForOf, NgIf} from "@angular/common";
 import {OvertimeModel, EmployeeModel} from '../../../models/salary.model';
 import {EmployeeService} from '../../../services/manager/employee-service';
 import {OvertimeService} from '../../../services/manager/overtime-service';
 
 @Component({
   selector: 'app-overtime',
+  standalone: true,
     imports: [
+        CommonModule,
         FormsModule,
         NgForOf,
         NgIf,

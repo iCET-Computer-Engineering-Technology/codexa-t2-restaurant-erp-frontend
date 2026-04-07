@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { KitchenOrderTable } from './kitchen-order-table';
+import { MenuItems } from './menu-items';
 
-describe('KitchenOrderTable', () => {
-  let component: KitchenOrderTable;
-  let fixture: ComponentFixture<KitchenOrderTable>;
+describe('MenuItems', () => {
+  let component: MenuItems;
+  let fixture: ComponentFixture<MenuItems>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [KitchenOrderTable]
+      imports: [MenuItems]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(KitchenOrderTable);
+    fixture = TestBed.createComponent(MenuItems);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

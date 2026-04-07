@@ -24,6 +24,7 @@ export class Payroll implements OnInit {
     private readonly cdr: ChangeDetectorRef,
     private readonly fb: FormBuilder
   ) {
+    const today = this.getTodayDateString();
     this.form = this.fb.group({
       id: [null],
       employeeId: [null, [Validators.required]],
@@ -40,7 +41,7 @@ export class Payroll implements OnInit {
       totalDeduction: [null, [Validators.required, Validators.min(0)]],
       netSalary: [null, [Validators.required, Validators.min(0)]],
       employerCost: [null, [Validators.required, Validators.min(0)]],
-      payrollDate: [null, [Validators.required]],
+      payrollDate: [today, [Validators.required]],
     });
   }
 
@@ -52,6 +53,19 @@ export class Payroll implements OnInit {
     this.form.get('employeeId')?.valueChanges.subscribe(() => {
       this.populatePayrollForEmployee();
     });
+
+    this.form.get('payrollDate')?.valueChanges.subscribe((value) => {
+      if (value) {
+        this.getTodayDateString();
+      }
+    });
+  }
+  private getTodayDateString(): string {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   getEmployees(): void {
@@ -109,6 +123,9 @@ export class Payroll implements OnInit {
   }
     clearForm(): void {
       this.form.reset();
+      this.form.patchValue({
+        payrollDate: this.getTodayDateString()
+      });
     }
 
   editPayroll(id: number | undefined): void {
