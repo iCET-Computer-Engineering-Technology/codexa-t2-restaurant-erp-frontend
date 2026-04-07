@@ -35,7 +35,6 @@ export class Customers implements OnInit {
     birthday: '', preferredLanguage: 'en', dietaryNotes: '',
     communicationEmail: 1, communicationSms: 1, loyaltyPoints: 0
   };
-  phoneLastNineDigits: string = '';
 
   constructor(private http: HttpClient, private cdr: ChangeDetectorRef) { }
 
@@ -92,7 +91,6 @@ closeProfile() {
   resetForm() {
     this.isUpdateMode = false;
     this.isSubmitted = false;
-    this.phoneLastNineDigits = '';
     this.newCustomer = { 
       id: 0, firstName: '', lastName: '', email: '', phone: '', 
       birthday: '', preferredLanguage: 'en', dietaryNotes: '', 
@@ -104,7 +102,6 @@ closeProfile() {
     this.isUpdateMode = true;
     this.isSubmitted = false;
     this.newCustomer = { ...customer };
-    this.phoneLastNineDigits = customer.phone.replace('+94', '');
 
     setTimeout(() => {
       const formSection = document.querySelector('.form-section');
@@ -120,20 +117,11 @@ closeProfile() {
     if (!this.newCustomer.email || this.newCustomer.email.trim() === '') return true;
     return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/.test(this.newCustomer.email);
   }
-  isValidPhone() { return /^\d{9}$/.test(this.phoneLastNineDigits.trim()); }
-  
-  onPhoneInput(event: any) {
-    let value = event.target.value.replace(/\D/g, '');
-    if (value.length > 9) {
-      value = value.substring(0, 9);
-    }
-    this.phoneLastNineDigits = value;
-    this.newCustomer.phone = '+94' + value;
-  }
+  isValidPhone() { return /^07[01245678]\d{7}$/.test(this.newCustomer.phone.trim()); }
 
   saveCustomer() {
     this.isSubmitted = true;
-    if (!this.isValidFirstName() || !this.isValidEmail() || !this.isValidPhone()) return;
+    if (!this.isValidFirstName() || !this.isValidLastName() || !this.isValidEmail() || !this.isValidPhone()) return;
 
     const url = this.isUpdateMode ? 'http://localhost:8080/customers' : 'http://localhost:8080/customers';
     const request = this.isUpdateMode ? this.http.put<boolean>(url, this.newCustomer) : this.http.post<boolean>(url, this.newCustomer);

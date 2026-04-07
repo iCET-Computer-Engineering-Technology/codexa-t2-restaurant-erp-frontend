@@ -6,28 +6,24 @@
     <div class="left-column">
       <div class="form-section">
         <div class="section-header">
-          <h3 class="section-title">{{ isEditMode ? 'Edit Price' : 'Add New Price' }}</h3>
+          <h3 class="section-title">Add New Price</h3>
           <p class="subtitle">Set a price for an item's portion</p>
         </div>
 
         <div class="form-body">
           <div class="form-group">
-            <label>Menu Item</label>
-            <select class="form-control" [(ngModel)]="menuItemPriceObj.itemId">
-              <option [ngValue]="0" disabled selected>-- Select an Item --</option>
-              <option *ngFor="let item of itemList" [ngValue]="item.id">
-                {{ item.name }}
-              </option>
+            <label>Item Name</label>
+            <select class="form-control" [(ngModel)]="selectedItemId">
+              <option [ngValue]="0" disabled>Select item</option>
+              <option *ngFor="let item of menuItemsList" [ngValue]="item.id">{{ item.name }}</option>
             </select>
           </div>
 
           <div class="form-group">
-            <label>Portion Size</label>
-            <select class="form-control" [(ngModel)]="menuItemPriceObj.portionId">
-              <option [ngValue]="0" disabled selected>-- Select a Portion --</option>
-              <option *ngFor="let portion of portionList" [ngValue]="portion.id">
-                {{ portion.name }} 
-              </option>
+            <label>Portion Name</label>
+            <select class="form-control" [(ngModel)]="selectedPortionId">
+              <option [ngValue]="0" disabled>Select portion</option>
+              <option *ngFor="let portion of portionsList" [ngValue]="portion.id">{{ portion.name }}</option>
             </select>
           </div>
 
@@ -39,8 +35,8 @@
           <div class="form-group">
             <label>Status</label>
             <select class="form-control" [(ngModel)]="menuItemPriceObj.isActive">
-              <option [ngValue]="true">Active</option>
-              <option [ngValue]="false">Inactive</option>
+              <option value="true" [ngValue]="true">Active</option>
+              <option value="false" [ngValue]="false">Inactive</option>
             </select>
           </div>
         </div>
@@ -48,14 +44,15 @@
         <div class="form-footer">
           <button class="cancel-btn" (click)="clearForm()">Clear</button>
           <button *ngIf="!isEditMode" class="save-btn" (click)="addMenuItemPrice()">Add</button>
-          <button *ngIf="isEditMode" class="save-btn" style="background-color: #0284c7;" (click)="updateMenuItemPrice()">Save</button>
+          <button *ngIf="isEditMode" class="save-btn" style="background-color: #0284c7;"
+            (click)="updateMenuItemPrice()">save</button>
         </div>
       </div>
     </div>
 
     <div class="right-column table-section">
       <div class="table-header-box">
-        <h3 class="section-title">Pricing List <span class="badge">{{ menuItemPriceList.length }}</span></h3>
+        <h3 class="section-title">Pricing List <span class="badge">Total: 1</span></h3>
 
         <div class="search-container">
           <div class="search-icon-wrapper">
@@ -80,10 +77,12 @@
         </thead>
 
         <tbody>
-          <tr *ngFor="let menuItemPrice of paginatedData">
-            <td class="fw-bold">{{menuItemPrice.id}}</td>
+          <tr *ngFor="let menuItemPrice of menuItemPriceList; let i = index;">
+            <td class="fw-bold">{{i + 1}}</td>
+
             <td class="fw-bold">{{menuItemPrice.itemName}}</td>
             <td class="fw-bold">{{menuItemPrice.portionName}}</td>
+
             <td class="fw-bold">{{menuItemPrice.price}}</td>
 
             <td>
@@ -94,39 +93,24 @@
             </td>
 
             <td>
-              <div style="display: flex; gap: 8px; align-items: center; white-space: nowrap;">
-                <button class="action-btn edit-btn" title="Edit" (click)="onEdit(menuItemPrice)">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                  </svg>
-                </button>
-                <button class="action-btn delete-btn" title="Delete" (click)="deleteMenuItemPrice(menuItemPrice.id)">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="3 6 5 6 21 6"></polyline>
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                    <line x1="10" y1="11" x2="10" y2="17"></line>
-                    <line x1="14" y1="11" x2="14" y2="17"></line>
-                  </svg>
-                </button>
-              </div>
+              <button class="action-btn edit-btn" title="Edit" (click)="onEdit(menuItemPrice)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+              </button>
+              <button class="action-btn delete-btn" title="Delete" (click)="deleteMenuItemPrice(menuItemPrice.id)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  <line x1="10" y1="11" x2="10" y2="17"></line>
+                  <line x1="14" y1="11" x2="14" y2="17"></line>
+                </svg>
+              </button>
             </td>
           </tr>
         </tbody>
       </table>
-
-      <div class="pagination-container" *ngIf="totalPages > 1">
-        <button class="page-btn" (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1">Prev</button>
-        
-        <button class="page-btn" *ngFor="let page of getPagesArray()" 
-                [class.active]="currentPage === page" 
-                (click)="changePage(page)">
-          {{ page }}
-        </button>
-
-        <button class="page-btn" (click)="changePage(currentPage + 1)" [disabled]="currentPage === totalPages">Next</button>
-      </div>
-
     </div>
   </div>
 </div>

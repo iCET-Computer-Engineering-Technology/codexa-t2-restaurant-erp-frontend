@@ -13,11 +13,9 @@ export interface MenuItemsModel{
     id : number;
     name : string;
     categoryId : number;
-    categoryName?: string;
-    description : String;
-    isAvailable : Boolean;
-    imageUrl : String;
-
+    description : string;
+    isAvailable : boolean;
+    imageUrl : string;
 }
 
 export interface MenuItemPriceModel {
@@ -25,8 +23,5 @@ export interface MenuItemPriceModel {
     itemName : string;
     portionName : string;
     price : number;
-    isActive : Boolean;
-    itemId : number;
-    portionId : number;
-
+    isActive : boolean;
 }

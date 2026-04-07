@@ -48,4 +48,3 @@ export const roleGuard: CanActivateFn = (route) => {
 
   return requiredRoles.includes(userRole) ? true : router.parseUrl('/');
 };
-

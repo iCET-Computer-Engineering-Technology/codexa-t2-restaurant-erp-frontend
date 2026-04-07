@@ -1,10 +1,11 @@
-import { DOCUMENT, isPlatformBrowser } from '@angular/common';
+import {DOCUMENT, isPlatformBrowser} from '@angular/common';
 import { ChangeDetectionStrategy, Component, PLATFORM_ID, inject, signal, computed } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-sidebar',
+  standalone: true,
   imports: [RouterLink, RouterLinkActive],
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.css',
@@ -40,7 +41,9 @@ export class Sidebar {
   readonly showInbox = computed(() => this.userRole() === 'ROLE_ADMIN');
   readonly showUsers = computed(() => this.userRole() === 'ROLE_ADMIN');
   readonly showProducts = computed(() => this.userRole() === 'ROLE_ADMIN');
-  readonly showReservations = computed(() => ['ROLE_ADMIN', 'ROLE_CASHIER'].includes(this.userRole() || ''));
+
+  // HR Manager visibility
+  readonly showHR = computed(() => ['ROLE_ADMIN', 'ROLE_MANAGER'].includes(this.userRole() || ''));
 
   // Dynamic routes based on role
   readonly customersRoute = computed(() => {
@@ -71,6 +74,52 @@ export class Sidebar {
   readonly kitchenOrderAssignRoute = computed(() => {
     const role = this.userRole();
     return role === 'ROLE_CHEF' ? '/chef' : '/admin/kitchen';
+  });
+
+  // HR Manager routes based on role
+  readonly hrAllowanceRoute = computed(() => {
+    const role = this.userRole();
+    return role === 'ROLE_ADMIN' ? '/admin/manager-allowance' : '/manager/manager-allowance';
+  });
+
+  readonly hrBasicSalaryRoute = computed(() => {
+    const role = this.userRole();
+    return role === 'ROLE_ADMIN' ? '/admin/manager-basic-salary' : '/manager/manager-basic-salary';
+  });
+
+  readonly hrBonusRoute = computed(() => {
+    const role = this.userRole();
+    return role === 'ROLE_ADMIN' ? '/admin/manager-bonus' : '/manager/manager-bonus';
+  });
+
+  readonly hrDeductionRoute = computed(() => {
+    const role = this.userRole();
+    return role === 'ROLE_ADMIN' ? '/admin/manager-deduction' : '/manager/manager-deduction';
+  });
+
+  readonly hrEmployeeRoute = computed(() => {
+    const role = this.userRole();
+    return role === 'ROLE_ADMIN' ? '/admin/manager-employee' : '/manager/manager-employee';
+  });
+
+  readonly hrEmployeeLeaveRoute = computed(() => {
+    const role = this.userRole();
+    return role === 'ROLE_ADMIN' ? '/admin/manager-employee-leave' : '/manager/manager-employee-leave';
+  });
+
+  readonly hrOvertimeRoute = computed(() => {
+    const role = this.userRole();
+    return role === 'ROLE_ADMIN' ? '/admin/manager-overtime' : '/manager/manager-overtime';
+  });
+
+  readonly hrPayrollConfigRoute = computed(() => {
+    const role = this.userRole();
+    return role === 'ROLE_ADMIN' ? '/admin/manager-payroll-config' : '/manager/manager-payroll-config';
+  });
+
+  readonly hrPayrollRoute = computed(() => {
+    const role = this.userRole();
+    return role === 'ROLE_ADMIN' ? '/admin/manager-payroll' : '/manager/manager-payroll';
   });
 
   constructor() {

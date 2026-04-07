@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { CategoryModel, PortionsModel } from '../../../model/type';
+import { CategoryModel } from '../../../model/type';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -15,10 +15,8 @@ import { Sidebar } from "../sidebar/sidebar";
 export class MenuCategories implements OnInit {
   
   isEditMode: boolean = false;
-  
 
   categoryList : Array<CategoryModel> = [];
-  porttionList : Array<PortionsModel> = [];
   categoryObj : CategoryModel = {
     id : 0,
     name : '',
