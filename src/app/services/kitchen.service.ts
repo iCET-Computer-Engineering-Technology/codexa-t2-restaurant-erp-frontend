@@ -53,7 +53,15 @@ export class KitchenService {
   }
 
   sendToKitchen(orderId: number): Observable<void> {
-    return this.tryKitchenOrderCommand('send', orderId);
+    const normalizedOrderId = Number(orderId);
+    if (!Number.isFinite(normalizedOrderId) || normalizedOrderId <= 0) {
+      return throwError(() => new Error('Invalid order id for send-to-kitchen'));
+    }
+
+    const params = new HttpParams().set('orderId', String(normalizedOrderId));
+    return this.http
+      .post<void>(`${this.api}/kitchen/send`, null, { params })
+      .pipe(map(() => undefined));
   }
 
   markOrderReady(orderId: number): Observable<void> {
@@ -104,6 +112,15 @@ export class KitchenService {
           knownOrderIds.size > 0
             ? allCachedReadyHistory.filter((order) => knownOrderIds.has(order.id))
             : allCachedReadyHistory;
+        const kitchenOrderIdByOrderId = new Map<number, number>();
+        kitchenOrders.forEach((item) => {
+          kitchenOrderIdByOrderId.set(item.orderId, item.id);
+        });
+        cachedReadyHistory.forEach((item) => {
+          if (item.kitchenOrderId && Number.isFinite(item.kitchenOrderId) && item.kitchenOrderId > 0) {
+            kitchenOrderIdByOrderId.set(item.id, item.kitchenOrderId);
+          }
+        });
 
         // Keep local cache aligned to server-visible orders so deleted DB rows are not shown again.
         if (knownOrderIds.size > 0) {
@@ -115,10 +132,16 @@ export class KitchenService {
             isSentToKitchen: true,
             status: this.normalizeStatus(order.status),
           }));
+        readyHistory.forEach((item) => {
+          if (item.kitchenOrderId && Number.isFinite(item.kitchenOrderId) && item.kitchenOrderId > 0) {
+            kitchenOrderIdByOrderId.set(item.id, item.kitchenOrderId);
+          }
+        });
 
         if (kitchenOrders.length === 0) {
           if (!includePendingOpenOrders) {
-            return of(this.applyMenuItemNames(this.mergeMissingOrders([], readyHistory), menuItems).sort((a, b) => b.id - a.id));
+            const hydratedReadyHistory = this.applyKitchenOrderIds(this.mergeMissingOrders([], readyHistory), kitchenOrderIdByOrderId);
+            return of(this.applyMenuItemNames(hydratedReadyHistory, menuItems).sort((a, b) => b.id - a.id));
           }
 
           const withPending = this.mergeMissingOrders(
@@ -129,7 +152,8 @@ export class KitchenService {
             readyHistory
           );
 
-          return of(this.applyMenuItemNames(withPending, menuItems).sort((a, b) => b.id - a.id));
+          const hydratedWithPending = this.applyKitchenOrderIds(withPending, kitchenOrderIdByOrderId);
+          return of(this.applyMenuItemNames(hydratedWithPending, menuItems).sort((a, b) => b.id - a.id));
         }
 
         const detailRequests = kitchenOrders.map((kitchenOrder) => {
@@ -162,7 +186,8 @@ export class KitchenService {
 
             if (!includePendingOpenOrders) {
               const withReadyHistory = this.mergeMissingOrders(merged, readyHistory);
-              return this.applyMenuItemNames(withReadyHistory, menuItems).sort((a, b) => b.id - a.id);
+              const hydratedWithReadyHistory = this.applyKitchenOrderIds(withReadyHistory, kitchenOrderIdByOrderId);
+              return this.applyMenuItemNames(hydratedWithReadyHistory, menuItems).sort((a, b) => b.id - a.id);
             }
 
             // Keep any open orders that do not yet have a kitchen-order row.
@@ -176,11 +201,31 @@ export class KitchenService {
               }));
 
             const withReadyHistory = this.mergeMissingOrders([...merged, ...pending], readyHistory);
-            return this.applyMenuItemNames(withReadyHistory, menuItems).sort((a, b) => b.id - a.id);
+            const hydratedWithReadyHistory = this.applyKitchenOrderIds(withReadyHistory, kitchenOrderIdByOrderId);
+            return this.applyMenuItemNames(hydratedWithReadyHistory, menuItems).sort((a, b) => b.id - a.id);
           })
         );
       })
     );
+  }
+
+  private applyKitchenOrderIds(orders: Order[], kitchenOrderIdByOrderId: Map<number, number>): Order[] {
+    return orders.map((order) => {
+      if (order.kitchenOrderId && Number.isFinite(order.kitchenOrderId) && order.kitchenOrderId > 0) {
+        return order;
+      }
+
+      const mappedKitchenOrderId = kitchenOrderIdByOrderId.get(order.id);
+      if (!mappedKitchenOrderId) {
+        return order;
+      }
+
+      return {
+        ...order,
+        kitchenOrderId: mappedKitchenOrderId,
+        isSentToKitchen: true,
+      };
+    });
   }
 
   getWaiters(): Observable<Waiter[]> {
@@ -205,39 +250,141 @@ export class KitchenService {
   }
 
   assignWaiter(kitchenOrderId: number, waiterId: number): Observable<void> {
-    return this.assignWaiterWithFallback(kitchenOrderId, waiterId);
+    return this.http
+      .post<void>(`${this.api}/kitchen/assign`, { kitchenOrderId, waiterId })
+      .pipe(map(() => undefined));
+  }
+
+  assignWaiterByOrderStatus(orderId: number, waiterId: number, status: string): Observable<void> {
+    const normalizedOrderId = Number(orderId);
+    const normalizedWaiterId = Number(waiterId);
+
+    if (!Number.isFinite(normalizedOrderId) || normalizedOrderId <= 0) {
+      return throwError(() => new Error('Invalid order id for waiter assignment'));
+    }
+
+    if (!Number.isFinite(normalizedWaiterId) || normalizedWaiterId <= 0) {
+      return throwError(() => new Error('Invalid waiter id for waiter assignment'));
+    }
+
+    const normalizedStatus = this.normalizeStatus(status || 'READY');
+
+    return this.http
+      .post<void>(`${this.api}/waiter/status`, {
+        orderId: normalizedOrderId,
+        waiterId: normalizedWaiterId,
+        status: normalizedStatus,
+      })
+      .pipe(map(() => undefined));
   }
 
   assignChef(kitchenOrderId: number, chefId: number): Observable<void> {
     return this.assignChefWithFallback(kitchenOrderId, chefId);
   }
 
-  assignWaiterWithFallback(kitchenOrderId: number, waiterId: number, orderId?: number): Observable<void> {
-    const payloads: Array<Record<string, unknown>> = [{ kitchenOrderId, waiterId }];
+  resolveKitchenOrderId(orderId: number, orderNumber?: string): Observable<number | null> {
+    return this.http.get<unknown>(`${this.api}/kitchen/orders`).pipe(
+      switchMap((response) => {
+        const kitchenOrders = this.normalizeKitchenOrders(response);
+        const directMatch = kitchenOrders.find((item) => item.orderId === orderId || item.id === orderId);
+        if (directMatch) {
+          return of(directMatch.id);
+        }
 
-    if (orderId != null && Number.isFinite(orderId) && orderId > 0) {
-      payloads.push({ orderId, waiterId });
+        if (!orderNumber) {
+          return of(null);
+        }
 
-      if (orderId !== kitchenOrderId) {
-        payloads.push({ kitchenOrderId: orderId, waiterId });
-      }
-    }
+        const normalizedTargetOrderNumber = this.normalizeComparableOrderNumber(orderNumber);
+        const directOrderNumberMatch = kitchenOrders.find(
+          (item) => this.normalizeComparableOrderNumber(item.orderNumber ?? '') === normalizedTargetOrderNumber
+        );
+        if (directOrderNumberMatch) {
+          return of(directOrderNumberMatch.id);
+        }
 
-    return this.tryPostPayloads(`${this.api}/kitchen/assign`, payloads);
+        const detailRequests = kitchenOrders
+          .filter((item) => Number.isFinite(item.orderId) && item.orderId > 0)
+          .map((item) =>
+            this.http.get<unknown>(`${this.api}/order/find-by-id/${item.orderId}`).pipe(
+              map((detailResponse) => {
+                const detail = this.normalizeOrderDetail(detailResponse);
+                return {
+                  kitchenOrderId: item.id,
+                  orderNumber: this.normalizeComparableOrderNumber(detail?.orderNumber ?? ''),
+                };
+              }),
+              catchError(() =>
+                of({
+                  kitchenOrderId: item.id,
+                  orderNumber: '',
+                })
+              )
+            )
+          );
+
+        if (detailRequests.length === 0) {
+          return of(null);
+        }
+
+        return forkJoin(detailRequests).pipe(
+          map((details) => details.find((item) => item.orderNumber === normalizedTargetOrderNumber)?.kitchenOrderId ?? null)
+        );
+      }),
+      catchError(() => of(null))
+    );
+  }
+
+  ensureKitchenOrderId(orderId: number, orderNumber?: string): Observable<number | null> {
+    return this.resolveKitchenOrderId(orderId, orderNumber).pipe(catchError(() => of(null)));
+  }
+
+  assignWaiterWithFallback(
+    kitchenOrderId: number,
+    waiterId: number,
+    orderId?: number,
+    status = 'READY'
+  ): Observable<void> {
+    const normalizedOrderId = Number(orderId);
+    const hasOrderId = Number.isFinite(normalizedOrderId) && normalizedOrderId > 0;
+
+    return this.assignWaiter(kitchenOrderId, waiterId).pipe(
+      catchError((error) => {
+        const statusCode = Number(error?.status ?? 0);
+        if (!hasOrderId || (statusCode !== 400 && statusCode !== 404)) {
+          return throwError(() => error);
+        }
+
+        return this.assignWaiterByOrderStatus(normalizedOrderId, waiterId, status).pipe(
+          catchError(() => throwError(() => error))
+        );
+      })
+    );
   }
 
   assignChefWithFallback(kitchenOrderId: number, chefId: number, orderId?: number): Observable<void> {
-    const payloads: Array<Record<string, unknown>> = [{ kitchenOrderId, chefId }];
+    const hasOrderId = orderId != null && Number.isFinite(orderId) && orderId > 0;
+    const resolvedOrderId = hasOrderId ? Number(orderId) : 0;
+    const shouldAddKitchenAliasFromOrderId = resolvedOrderId !== kitchenOrderId;
+    const variants: Array<{ body: unknown; params?: HttpParams }> = [
+      ...(hasOrderId
+        ? [
+            { body: { orderId: resolvedOrderId, chefId } },
+            {
+              body: null,
+              params: new HttpParams().set('orderId', resolvedOrderId).set('chefId', chefId),
+            },
+            ...(shouldAddKitchenAliasFromOrderId ? [{ body: { kitchenOrderId: resolvedOrderId, chefId } }] : []),
+          ]
+        : []),
+      { body: { kitchenOrderId, chefId } },
+      {
+        body: null,
+        params: new HttpParams().set('kitchenOrderId', kitchenOrderId).set('chefId', chefId),
+      },
+    ];
 
-    if (orderId != null && Number.isFinite(orderId) && orderId > 0) {
-      payloads.push({ orderId, chefId });
-
-      if (orderId !== kitchenOrderId) {
-        payloads.push({ kitchenOrderId: orderId, chefId });
-      }
-    }
-
-    return this.tryPostPayloads(`${this.api}/kitchen/assign-chef`, payloads);
+    return this.tryPostVariants(`${this.api}/kitchen/assign-chef`, variants);
   }
 
   updateOrderItemStatus(orderItemId: number, status: string): Observable<void> {
@@ -336,9 +483,21 @@ export class KitchenService {
     ]);
   }
 
-  private tryPostPayloads(endpoint: string, payloads: Array<Record<string, unknown>>): Observable<void> {
-    return this.tryRequestFactories(
-      payloads.map((payload) => () => this.http.post<void>(endpoint, payload).pipe(map(() => undefined)))
+  private tryPostVariants(
+    endpoint: string,
+    variants: Array<{ body: unknown; params?: HttpParams }>,
+    index = 0,
+    lastError?: unknown
+  ): Observable<void> {
+    if (index >= variants.length) {
+      return throwError(() => (lastError instanceof Error ? lastError : new Error('Failed to assign with available payload variants')));
+    }
+
+    const current = variants[index];
+
+    return this.http.post<void>(endpoint, current.body, { params: current.params }).pipe(
+      map(() => undefined),
+      catchError((error) => this.tryPostVariants(endpoint, variants, index + 1, error))
     );
   }
 
@@ -361,14 +520,39 @@ export class KitchenService {
     );
   }
 
-  private normalizeKitchenOrders(response: unknown): Array<{ id: number; orderId: number; status: string }> {
+  private normalizeKitchenOrders(response: unknown): Array<{ id: number; orderId: number; status: string; orderNumber?: string }> {
     return this.extractArray<Record<string, unknown>>(response)
-      .map((raw) => ({
-        id: Number(raw['id']),
-        orderId: Number(raw['orderId']),
-        status: String(raw['status'] ?? ''),
-      }))
+      .map((raw) => {
+        const nestedKitchenOrder = raw['kitchenOrder'] as Record<string, unknown> | undefined;
+        const nestedOrder = raw['order'] as Record<string, unknown> | undefined;
+        const nestedOrderDto = raw['orderDto'] as Record<string, unknown> | undefined;
+        const rawOrderNumber = raw['orderNumber'] ?? raw['order_no'] ?? nestedOrder?.['orderNumber'] ?? nestedOrderDto?.['orderNumber'];
+
+        return {
+          id: Number(
+            raw['id'] ??
+              raw['kitchenOrderId'] ??
+              raw['kitchen_order_id'] ??
+              raw['kitchenOrderID'] ??
+              nestedKitchenOrder?.['id']
+          ),
+          orderId: Number(
+            raw['orderId'] ??
+              raw['order_id'] ??
+              raw['orderID'] ??
+              nestedOrder?.['id'] ??
+              nestedOrderDto?.['id'] ??
+              raw['id']
+          ),
+          status: String(raw['status'] ?? raw['orderStatus'] ?? ''),
+          orderNumber: typeof rawOrderNumber === 'string' ? rawOrderNumber : undefined,
+        };
+      })
       .filter((order) => Number.isFinite(order.id) && order.id > 0 && Number.isFinite(order.orderId));
+  }
+
+  private normalizeComparableOrderNumber(orderNumber: string): string {
+    return orderNumber.trim().toUpperCase().replace(/\s+/g, '');
   }
 
   private normalizeOpenOrders(response: unknown): Order[] {
@@ -681,7 +865,21 @@ export class KitchenService {
     }
 
     const obj = response as Record<string, unknown> | null;
-    const keys = ['data', 'result', 'results', 'items', 'payload', 'content', 'orderItems', 'orderItemDtos', 'orderDetails'];
+    const keys = [
+      'data',
+      'result',
+      'results',
+      'items',
+      'payload',
+      'content',
+      'orders',
+      'kitchenOrders',
+      'openOrders',
+      'assignments',
+      'orderItems',
+      'orderItemDtos',
+      'orderDetails',
+    ];
 
     for (const key of keys) {
       const value = obj?.[key];
