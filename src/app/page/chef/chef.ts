@@ -1,11 +1,10 @@
 import { Component, AfterViewInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { Sidebar } from '../sidebar/sidebar';
-import { Notify } from '../notify/notify';
 
 @Component({
   selector: 'app-chef',
-  imports: [Sidebar, RouterOutlet, Notify],
+  imports: [Sidebar, RouterOutlet],
   templateUrl: './chef.html',
   styleUrl: './chef.css',
 })

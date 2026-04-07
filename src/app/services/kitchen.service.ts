@@ -318,7 +318,7 @@ export class KitchenService {
     }
 
     if (normalized === 'RECEIVED') {
-      return ['RECEIVED', 'NEW'];
+      return ['RECEIVED', 'NEW', 'OPEN', 'PENDING'];
     }
 
     return [normalized];
@@ -329,30 +329,11 @@ export class KitchenService {
     const orderIdParams = new HttpParams().set('orderId', orderId);
     const idParams = new HttpParams().set('id', orderId);
 
-    return this.tryKitchenCommandVariants([
+    return this.tryRequestFactories([
       () => this.http.post<void>(endpoint, null, { params: orderIdParams }).pipe(map(() => undefined)),
       () => this.http.post<void>(endpoint, { orderId }, { params: orderIdParams }).pipe(map(() => undefined)),
       () => this.http.post<void>(endpoint, null, { params: idParams }).pipe(map(() => undefined)),
     ]);
-  }
-
-  private tryKitchenCommandVariants(requestFactories: Array<() => Observable<void>>): Observable<void> {
-    const [current, ...remaining] = requestFactories;
-
-    if (!current) {
-      return throwError(() => new Error('No kitchen command variants available'));
-    }
-
-    return current().pipe(
-      catchError((error) => {
-        const statusCode = Number(error?.status ?? 0);
-        if (statusCode === 400 || statusCode === 404 || remaining.length === 0) {
-          return throwError(() => error);
-        }
-
-        return this.tryKitchenCommandVariants(remaining);
-      })
-    );
   }
 
   private tryPostPayloads(endpoint: string, payloads: Array<Record<string, unknown>>): Observable<void> {
@@ -370,7 +351,8 @@ export class KitchenService {
 
     return current().pipe(
       catchError((error) => {
-        if (remaining.length === 0) {
+        const statusCode = Number(error?.status ?? 0);
+        if (statusCode === 400 || statusCode === 404 || remaining.length === 0) {
           return throwError(() => error);
         }
 
@@ -450,6 +432,29 @@ export class KitchenService {
         id
       ),
     } satisfies Order;
+  }
+
+  private normalizeAllOrders(response: unknown): Order[] {
+    return this.extractArray<Record<string, unknown>>(response)
+      .map((raw) => {
+        const id = Number(raw['id'] ?? raw['orderId']);
+        const tableId = Number(raw['tableId'] ?? 0);
+        const orderNumber = String(raw['orderNumber'] ?? raw['order_no'] ?? `ORD-${id}`);
+        const status = this.normalizeStatus(raw['status']);
+        const items = this.normalizeOrderItems(
+          raw['items'] ?? raw['orderItems'] ?? raw['orderItemDtos'] ?? raw['orderDetails'],
+          id
+        );
+
+        return {
+          id,
+          tableId: Number.isFinite(tableId) ? tableId : 0,
+          orderNumber,
+          status,
+          items,
+        } satisfies Order;
+      })
+      .filter((order) => Number.isFinite(order.id) && order.id > 0);
   }
 
   private normalizeOrderItems(items: unknown, fallbackOrderId: number): OrderItem[] {

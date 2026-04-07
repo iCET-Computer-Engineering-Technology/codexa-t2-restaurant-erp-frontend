@@ -9,9 +9,9 @@ import { initFlowbite } from 'flowbite';
   styleUrl: './app.css'
 })
 export class App implements OnInit {
+  
   ngOnInit(): void {
     initFlowbite();
   }
-
   protected readonly title = signal('RestaurantERP');
 }
