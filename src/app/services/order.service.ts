@@ -84,10 +84,9 @@ export class OrderService {
     getAllPortions(): Observable<PortionDto[]> {
         return this.firstSuccessfulGet<PortionDto[]>(
             [
-                `${this.apiUrl}/portions/get-all`,
-                `${this.apiUrl}/portion/get-all`,
                 `${this.apiUrl}/portions`,
-                `${this.apiUrl}/portion`,
+                `${this.rootUrl}/portions`,
+                `${this.apiUrl}/portions/get-all`,
             ],
             (response) => this.normalizePortions(response),
             []

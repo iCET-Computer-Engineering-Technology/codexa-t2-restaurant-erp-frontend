@@ -111,7 +111,7 @@ export class Kitchen implements OnInit {
 
   private loadWaiters(): void {
     this.isWaitersLoading.set(true);
-    this.kitchenService.getWaiters().subscribe({
+    this.kitchenService.getAvailableWaiters().subscribe({
       next: (waiters) => {
         this.waiters.set(waiters);
         this.isWaitersLoading.set(false);
@@ -267,24 +267,61 @@ export class Kitchen implements OnInit {
     this.successMessage.set('');
     this.activeOrderActionId.set(order.id);
 
-    const executeStatusUpdate = (): void => {
-      this.kitchenService.updateOrderStatus(order.id, status).subscribe({
+    const executeStatusUpdate = (targetOrder: Order = order): void => {
+      this.kitchenService.updateOrderStatus(targetOrder, status).subscribe({
         next: () => {
           this.successMessage.set('Order status updated.');
           this.activeOrderActionId.set(null);
           this.refreshBoard();
         },
         error: () => {
+          if (status === 'PREPARING') {
+            this.activeOrderActionId.set(null);
+            this.refreshBoard();
+            return;
+          }
+
           this.errorMessage.set('Failed to update order status.');
           this.activeOrderActionId.set(null);
         },
       });
     };
 
+    const triggerPreparingAfterSend = (): void => {
+      this.isLoading.set(true);
+      this.loadBoard().subscribe({
+        next: (orders) => {
+          const refreshedOrder =
+            orders.find((candidate) => candidate.id === order.id) ??
+            this.orders().find((candidate) => candidate.id === order.id) ??
+            order;
+          executeStatusUpdate(refreshedOrder);
+        },
+      });
+    };
+
     if (!order.isSentToKitchen && status !== 'RECEIVED') {
       this.kitchenService.sendToKitchen(order.id).subscribe({
-        next: () => executeStatusUpdate(),
-        error: () => {
+        next: () => {
+          if (status === 'PREPARING') {
+            triggerPreparingAfterSend();
+            return;
+          }
+
+          executeStatusUpdate();
+        },
+        error: (error) => {
+          const statusCode = Number(error?.status ?? 0);
+          if (statusCode === 400 || statusCode === 409) {
+            if (status === 'PREPARING') {
+              triggerPreparingAfterSend();
+              return;
+            }
+
+            executeStatusUpdate();
+            return;
+          }
+
           this.errorMessage.set('Failed to send order to kitchen.');
           this.activeOrderActionId.set(null);
         },
@@ -354,7 +391,14 @@ export class Kitchen implements OnInit {
       return 'ready';
     }
 
-    if (status === 'PREPARING' || status === 'IN_PROGRESS') {
+    if (
+      status === 'PREPARING' ||
+      status === 'IN_PROGRESS' ||
+      status === 'SENT' ||
+      status === 'SENT_TO_KITCHEN' ||
+      status === 'QUEUED' ||
+      status === 'KITCHEN_QUEUE'
+    ) {
       return 'preparing';
     }
 
@@ -375,7 +419,10 @@ export class Kitchen implements OnInit {
     }
 
     return order.items
-      .map((item) => `${item.quantity}x ${item.menuItemName ?? `Item #${item.menuItemId}`}`)
+      .map((item) => {
+        const itemLabel = item.menuItemName ?? `Item #${item.menuItemId}`;
+        return `${item.quantity}x ${itemLabel}`;
+      })
       .join(', ');
   }
 
