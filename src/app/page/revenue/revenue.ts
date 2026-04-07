@@ -13,7 +13,8 @@ import { RevenueService, RevenueData } from '../../services/revenue.service';
 export class Revenue implements OnInit {
   
   // Basic Stats
-  totalRevenue: number = 0;
+  weeklyTotalRevenue: number = 0;
+  selectedDateTotalRevenue: number = 0;
   selectedDate: string = new Date().toISOString().split('T')[0];
   selectedCalendarDay: number = new Date().getDate();
   isLoading: boolean = false;
@@ -51,7 +52,9 @@ export class Revenue implements OnInit {
         if (data && data.length > 0) {
           this.doughnutChartLabels = data.map(item => item.channelType);
           this.doughnutChartData = data.map(item => item.totalRevenue);
-          this.totalRevenue = data.reduce((sum, item) => sum + item.totalRevenue, 0);
+          this.weeklyTotalRevenue = data.reduce((sum, item) => sum + item.totalRevenue, 0);
+        } else {
+          this.weeklyTotalRevenue = 0;
         }
       },
       error: (err) => {
@@ -70,8 +73,10 @@ export class Revenue implements OnInit {
         if (data && data.length > 0) {
           // Only update transactions table, NOT the Performance circles (they show weekly data)
           this.transactions = data;
+          this.selectedDateTotalRevenue = data.reduce((sum, item) => sum + item.totalRevenue, 0);
         } else {
           this.transactions = [];
+          this.selectedDateTotalRevenue = 0;
         }
         this.isLoading = false;
       },
@@ -80,6 +85,7 @@ export class Revenue implements OnInit {
         this.errorMessage = 'Could not connect to the backend server.';
         this.isLoading = false;
         this.transactions = [];
+        this.selectedDateTotalRevenue = 0;
       }
     });
   }
@@ -107,8 +113,8 @@ export class Revenue implements OnInit {
   }
 
   getChannelPercentage(index: number): number {
-    if (this.totalRevenue === 0 || !this.doughnutChartData[index]) return 0;
-    return (this.doughnutChartData[index] / this.totalRevenue) * 100;
+    if (this.weeklyTotalRevenue === 0 || !this.doughnutChartData[index]) return 0;
+    return (this.doughnutChartData[index] / this.weeklyTotalRevenue) * 100;
   }
 
   getCircleStrokeDasharray(index: number): string {
