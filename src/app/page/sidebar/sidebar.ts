@@ -19,7 +19,7 @@ export class Sidebar {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly authService = inject(AuthService);
 
-  readonly isDarkMode = signal(true);
+  readonly isDarkMode = signal(false);
   readonly isHovered = signal(false);
 
   // Get logged-in user info
@@ -60,29 +60,22 @@ export class Sidebar {
 
   readonly kitchenDashboardRoute = computed(() => {
     const role = this.userRole();
-    return role === 'ROLE_CHEF' ? '/chef' : '/admin/kitchen/kitchen-dashboard';
+    return role === 'ROLE_CHEF' ? '/chef' : '/admin/kitchen';
   });
 
   readonly kitchenOrderTableRoute = computed(() => {
     const role = this.userRole();
-    return role === 'ROLE_CHEF' ? '/chef/kitchen-oder-table' : '/admin/kitchen/kitchen-order-table';
+    return role === 'ROLE_CHEF' ? '/chef' : '/admin/kitchen';
   });
 
   readonly kitchenOrderAssignRoute = computed(() => {
     const role = this.userRole();
-    return role === 'ROLE_CHEF' ? '/chef/order-assign' : '/admin/kitchen/order-assign';
+    return role === 'ROLE_CHEF' ? '/chef' : '/admin/kitchen';
   });
 
   constructor() {
     if (!isPlatformBrowser(this.platformId)) {
       return;
-    }
-
-    const savedTheme = localStorage.getItem('admin-sidebar-theme');
-    if (savedTheme === 'light') {
-      this.isDarkMode.set(false);
-    } else if (savedTheme === 'dark') {
-      this.isDarkMode.set(true);
     }
 
     // Load user info
