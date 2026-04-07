@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, catchError, forkJoin, map, of, switchMap } from 'rxjs';
+import { Observable, catchError, forkJoin, map, of, switchMap, throwError } from 'rxjs';
 
 import { environment } from '../../environments/environment';
 
@@ -178,10 +178,52 @@ export class KitchenService {
   }
 
   assignWaiter(kitchenOrderId: number, waiterId: number): Observable<void> {
-    const payload = { kitchenOrderId, waiterId };
-    return this.http
-      .post<void>(`${this.api}/kitchen/assign`, payload)
-      .pipe(map(() => undefined));
+    return this.assignWaiterWithFallback(kitchenOrderId, waiterId, undefined);
+  }
+
+  assignWaiterWithFallback(kitchenOrderId: number, waiterId: number, orderId?: number): Observable<void> {
+    const payloads: Array<Record<string, unknown>> = [{ kitchenOrderId, waiterId }];
+
+    if (orderId != null && Number.isFinite(orderId) && orderId > 0) {
+      payloads.push({ orderId, waiterId });
+
+      if (orderId !== kitchenOrderId) {
+        payloads.push({ kitchenOrderId: orderId, waiterId });
+      }
+    }
+
+    return this.tryAssignWaiterPayloads(payloads, orderId ?? kitchenOrderId, waiterId);
+  }
+
+  private tryAssignWaiterPayloads(
+    payloads: Array<Record<string, unknown>>,
+    fallbackOrderId: number,
+    waiterId: number
+  ): Observable<void> {
+    const [current, ...remaining] = payloads;
+
+    if (!current) {
+      return this.http
+        .post<void>(`${this.api}/waiter/status`, {
+          orderId: fallbackOrderId,
+          waiterId,
+          status: 'active',
+        })
+        .pipe(map(() => undefined));
+    }
+
+    return this.http.post<void>(`${this.api}/kitchen/assign`, current).pipe(
+      map(() => undefined),
+      catchError((error) => {
+        if (remaining.length === 0) {
+          return this.tryAssignWaiterPayloads([], fallbackOrderId, waiterId).pipe(
+            catchError(() => throwError(() => error))
+          );
+        }
+
+        return this.tryAssignWaiterPayloads(remaining, fallbackOrderId, waiterId);
+      })
+    );
   }
 
   updateOrderStatus(orderId: number, status: string): Observable<void> {
@@ -192,9 +234,41 @@ export class KitchenService {
       return this.http.post<void>(`${this.api}/kitchen/ready`, null, { params }).pipe(map(() => undefined));
     }
 
-    return this.http
-      .put<void>(`${this.api}/order/update/${orderId}/status`, { status: normalized })
-      .pipe(map(() => undefined));
+    const statusCandidates = this.getStatusCandidates(normalized);
+    return this.tryUpdateOrderStatus(orderId, statusCandidates);
+  }
+
+  private tryUpdateOrderStatus(orderId: number, statuses: string[]): Observable<void> {
+    const [current, ...remaining] = statuses;
+
+    if (!current) {
+      return throwError(() => new Error('No valid order status available'));
+    }
+
+    return this.http.put<void>(`${this.api}/order/update/${orderId}/status`, { status: current }).pipe(
+      map(() => undefined),
+      catchError((error) => {
+        if (remaining.length === 0) {
+          return throwError(() => error);
+        }
+
+        return this.tryUpdateOrderStatus(orderId, remaining);
+      })
+    );
+  }
+
+  private getStatusCandidates(status: string): string[] {
+    const normalized = status.trim().toUpperCase();
+
+    if (normalized === 'PREPARING') {
+      return ['PREPARING', 'IN_PROGRESS', 'IN-PROGRESS', 'preparing', 'in_progress'];
+    }
+
+    if (normalized === 'RECEIVED') {
+      return ['RECEIVED', 'NEW', 'OPEN', 'PENDING'];
+    }
+
+    return [normalized];
   }
 
   private normalizeKitchenOrders(response: unknown): Array<{ id: number; orderId: number; status: string }> {
