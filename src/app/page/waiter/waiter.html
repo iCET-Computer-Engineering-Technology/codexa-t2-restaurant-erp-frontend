@@ -1,0 +1,66 @@
+<app-sidebar></app-sidebar>
+
+<div class="waiter-layout p-6 sm:ml-72 min-h-screen">
+  <div class="modern-container">
+    <div class="modern-header">
+      <div>
+        <h1 class="modern-title">Waiter Assignments</h1>
+        <p class="modern-subtitle">Manage active waiter assignments and orders</p>
+      </div>
+      <div class="search-wrapper">
+        <input type="text" placeholder="Search waiter, order ID..." class="modern-search">
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th>Waiter Name</th>
+            <th>Order ID</th>
+            <th>Assigned At</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (ord of orderAssigmentList; track ord.id) {
+            <tr class="table-row">
+              <td>
+                <div class="waiter-cell">
+                  <div class="waiter-avatar" [style.background]="getAvatarColor(ord.id)">
+                    <span>{{ (ord.waiterName || 'W')?.charAt(0)?.toUpperCase() }}</span>
+                  </div>
+                  <div class="waiter-info">
+                    <div class="waiter-name">{{ ord.waiterName || 'N/A' }}</div>
+                    <div class="waiter-id">ID: {{ ord.waiterId }}</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="order-id-badge">#{{ ord.id }}</span></td>
+              <td>{{ ord.assignedAt | date: 'short' }}</td>
+              <td>
+                <span class="status-badge" [ngClass]="getStatusClass(ord.status)">
+                  <span class="status-dot"></span>
+                  {{ getStatusLabel(ord.status) }}
+                </span>
+              </td>
+              <td>
+                <div class="action-buttons">
+                  <button class="action-btn edit-btn" (click)="markAsServed(ord.kitchenOrderId, ord.waiterId)">
+                    <span>Served</span>
+                  </button>
+                  <button class="action-btn remove-btn" (click)="markAsUnserved(ord.kitchenOrderId, ord.waiterId)">
+                    <span>Unserved</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="5" class="empty-cell">No assignments found.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
