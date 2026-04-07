@@ -58,13 +58,7 @@ export const routes: Routes = [
     path: 'chef',
     canActivate: [roleGuard],
     data: { roles: ['ROLE_ADMIN', 'ROLE_CHEF'] },
-    loadComponent: () => import('./page/chef/chef').then((m) => m.Chef),
-    children: [
-      {
-        path: '',
-        component: Kitchen,
-      }
-    ]
+    loadComponent: () => import('./page/chef/chef').then((m) => m.Chef)
   },
   {
     path: 'admin',
@@ -135,7 +129,7 @@ export const routes: Routes = [
       },
       {
         path: 'kitchen',
-        component: Kitchen,
+        component: Kitchen
       },
       {
         path: 'supplier-ingredient',
