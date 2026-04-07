@@ -8,9 +8,6 @@ import { CampaignsComponent } from './page/admin/marketing-campaign/campaigns/ca
 import { AutomatedMessagesComponent } from './page/admin/marketing-campaign/automated-messages/automated-messages';
 import { AnalyticsComponent } from './page/admin/marketing-campaign/analytics/analytics';
 import { Kitchen } from './page/kitchen/kitchen';
-import { KitchenDashboard } from './page/kitchen/kitchen-dashboard/kitchen-dashboard';
-import { KitchenOrderTable } from './page/kitchen/kitchen-order-table/kitchen-order-table';
-import { OrderAssign } from './page/kitchen/order-assign/order-assign';
 import {BasicSalary} from './page/manager/basic-salary/basic-salary';
 import {Allowance} from './page/manager/allowance/allowance';
 import {Deduction} from './page/manager/deduction/deduction';
@@ -201,15 +198,7 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        component: KitchenDashboard,
-      },
-      {
-        path: 'kitchen-oder-table',
-        component: KitchenOrderTable,
-      },
-      {
-        path: 'order-assign',
-        component: OrderAssign,
+        component: Kitchen,
       }
     ]
   },
@@ -319,26 +308,6 @@ export const routes: Routes = [
       {
         path: 'kitchen',
         component: Kitchen,
-
-        children: [
-          {
-            path: '',
-            redirectTo: 'kitchen-dashboard',
-            pathMatch: 'full',
-          },
-          {
-            path: 'kitchen-dashboard',
-            component: KitchenDashboard,
-          },
-          {
-            path: 'kitchen-order-table',
-            component: KitchenOrderTable,
-          },
-          {
-            path: 'order-assign',
-            component: OrderAssign,
-          },
-        ],
       },
 
     ],
