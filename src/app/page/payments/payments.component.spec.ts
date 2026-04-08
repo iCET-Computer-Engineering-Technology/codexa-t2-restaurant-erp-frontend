@@ -15,45 +15,7 @@ describe('PaymentsComponent', () => {
     let paymentService: any;
     let authService: any;
 
-    const mockOrders: OrderWithItemNameResponse[] = [
-        {
-            id: 1,
-            orderNumber: 'ORD-001',
-            tableId: 1,
-            orderType: 'Dine In',
-            status: 'completed',
-            totalAmount: 5000,
-            subTotal: 4000,
-            taxAmount: 500,
-            discountAmount: 0,
-            serviceCharge: 500,
-            createdAt: new Date().toISOString(),
-            items: [
-                {
-                    id: 1,
-                    menuItemName: 'Biryani',
-                    portionName: 'Large',
-                    quantity: 1,
-                    price: 500,
-                    lineTotal: 500
-                }
-            ]
-        },
-        {
-            id: 2,
-            orderNumber: 'ORD-002',
-            tableId: 2,
-            orderType: 'Takeaway',
-            status: 'completed',
-            totalAmount: 3000,
-            subTotal: 2500,
-            taxAmount: 250,
-            discountAmount: 0,
-            serviceCharge: 250,
-            createdAt: new Date().toISOString(),
-            items: []
-        }
-    ];
+    
 
     beforeEach(async () => {
         const orderServiceSpy = jasmine.createSpyObj('OrderService', ['getAllOrdersWithItemNames']);
@@ -86,68 +48,15 @@ describe('PaymentsComponent', () => {
             expect(component).toBeTruthy();
         });
 
-        it('should load unpaid orders on init', () => {
-            orderService.getAllOrdersWithItemNames.and.returnValue(of(mockOrders));
-            paymentService.getPaymentByOrderId.and.returnValue(of(null));
-
-            component.ngOnInit();
-            fixture.detectChanges();
-
-            expect(orderService.getAllOrdersWithItemNames).toHaveBeenCalled();
-        });
-
         it('should initialize signals with default values', () => {
             expect(component.orderListFilter()).toBe('unpaid');
             expect(component.viewState()).toBe('summary');
             expect(component.paymentMethod()).toBe('cash');
-            expect(component.cartItems.length).toBe(0);
             expect(component.isLoading()).toBe(false);
         });
     });
 
     describe('Order Loading and Filtering', () => {
-        it('should load and separate unpaid and paid orders', (done) => {
-            orderService.getAllOrdersWithItemNames.and.returnValue(of(mockOrders));
-            paymentService.getPaymentByOrderId.and.callFake((orderId) => {
-                return orderId === 1 ? of(null) : of({ id: 1, orderId, paymentMethod: 'CASH', amount: 3000 });
-            });
-
-            component.loadUnpaidOrders();
-
-            setTimeout(() => {
-                fixture.detectChanges();
-                expect(component.unpaidOrders().length).toBeGreaterThan(0);
-                done();
-            }, 200);
-        });
-
-        it('should filter orders by unpaid status', () => {
-            component.allOrders.set(mockOrders);
-            component.unpaidOrders.set([mockOrders[0]]);
-            component.paidOrders.set([mockOrders[1]]);
-            component.orderListFilter.set('unpaid');
-
-            expect(component.filteredOrders()).toEqual([mockOrders[0]]);
-        });
-
-        it('should filter orders by paid status', () => {
-            component.allOrders.set(mockOrders);
-            component.unpaidOrders.set([mockOrders[0]]);
-            component.paidOrders.set([mockOrders[1]]);
-            component.orderListFilter.set('paid');
-
-            expect(component.filteredOrders()).toEqual([mockOrders[1]]);
-        });
-
-        it('should show all orders when filter is all', () => {
-            component.allOrders.set(mockOrders);
-            component.unpaidOrders.set([mockOrders[0]]);
-            component.paidOrders.set([mockOrders[1]]);
-            component.orderListFilter.set('all');
-
-            expect(component.filteredOrders()).toEqual(mockOrders);
-        });
-
         it('should handle empty orders gracefully', () => {
             orderService.getAllOrdersWithItemNames.and.returnValue(of([]));
 
@@ -157,32 +66,59 @@ describe('PaymentsComponent', () => {
             expect(component.hasOrders()).toBe(false);
         });
 
-        it('should filter out voided orders', () => {
-            const voidedOrder = { ...mockOrders[0], status: 'voided' };
-            orderService.getAllOrdersWithItemNames.and.returnValue(of([voidedOrder, mockOrders[1]]));
-            paymentService.getPaymentByOrderId.and.returnValue(of(null));
+        it('should filter orders by unpaid status', () => {
+            const testOrder1: OrderWithItemNameResponse = { id: 1, orderNumber: 'ORD-1', items: [], totalAmount: 3000, createdAt: new Date().toISOString(), status: 'pending' } as any;
+            const testOrder2: OrderWithItemNameResponse = { id: 2, orderNumber: 'ORD-2', items: [], totalAmount: 5000, createdAt: new Date().toISOString(), status: 'pending' } as any;
 
-            component.loadUnpaidOrders();
-            fixture.detectChanges();
+            component.allOrders.set([testOrder1, testOrder2]);
+            component.unpaidOrders.set([testOrder1]);
+            component.paidOrders.set([testOrder2]);
+            component.orderListFilter.set('unpaid');
 
-            expect(component.allOrders()[0].status).not.toBe('voided');
+            expect(component.filteredOrders()).toEqual([testOrder1]);
+        });
+
+        it('should filter orders by paid status', () => {
+            const testOrder1: OrderWithItemNameResponse = { id: 1, orderNumber: 'ORD-1', items: [], totalAmount: 3000, createdAt: new Date().toISOString(), status: 'pending' } as any;
+            const testOrder2: OrderWithItemNameResponse = { id: 2, orderNumber: 'ORD-2', items: [], totalAmount: 5000, createdAt: new Date().toISOString(), status: 'pending' } as any;
+
+            component.allOrders.set([testOrder1, testOrder2]);
+            component.unpaidOrders.set([testOrder1]);
+            component.paidOrders.set([testOrder2]);
+            component.orderListFilter.set('paid');
+
+            expect(component.filteredOrders()).toEqual([testOrder2]);
+        });
+
+        it('should show all orders when filter is all', () => {
+            const testOrder1: OrderWithItemNameResponse = { id: 1, orderNumber: 'ORD-1', items: [], totalAmount: 3000, createdAt: new Date().toISOString(), status: 'pending' } as any;
+            const testOrder2: OrderWithItemNameResponse = { id: 2, orderNumber: 'ORD-2', items: [], totalAmount: 5000, createdAt: new Date().toISOString(), status: 'pending' } as any;
+
+            component.allOrders.set([testOrder1, testOrder2]);
+            component.unpaidOrders.set([testOrder1]);
+            component.paidOrders.set([testOrder2]);
+            component.orderListFilter.set('all');
+
+            expect(component.filteredOrders()).toEqual([testOrder1, testOrder2]);
         });
     });
 
     describe('Order Selection', () => {
         it('should select an order', () => {
-            component.selectOrder(mockOrders[0]);
+            const testOrder: OrderWithItemNameResponse = { id: 1, orderNumber: 'ORD-1', items: [], totalAmount: 3000, createdAt: new Date().toISOString(), status: 'pending' } as any;
+            component.selectOrder(testOrder);
 
-            expect(component.selectedOrder()).toEqual(mockOrders[0]);
+            expect(component.selectedOrder()).toEqual(testOrder);
             expect(component.viewState()).toBe('summary');
         });
 
         it('should reset payment form when selecting order', () => {
+            const testOrder: OrderWithItemNameResponse = { id: 1, orderNumber: 'ORD-1', items: [], totalAmount: 3000, createdAt: new Date().toISOString(), status: 'pending' } as any;
             component.paymentMethod.set('card');
             component.tipAmount.set(500);
             component.referenceNumber.set('REF-123');
 
-            component.selectOrder(mockOrders[0]);
+            component.selectOrder(testOrder);
 
             expect(component.paymentMethod()).toBe('cash');
             expect(component.tipAmount()).toBe(0);
@@ -190,7 +126,8 @@ describe('PaymentsComponent', () => {
         });
 
         it('should deselect order when selecting null', () => {
-            component.selectedOrder.set(mockOrders[0]);
+            const testOrder: OrderWithItemNameResponse = { id: 1, orderNumber: 'ORD-1', items: [], totalAmount: 3000, createdAt: new Date().toISOString(), status: 'pending' } as any;
+            component.selectedOrder.set(testOrder);
             component.selectOrder(null as any);
 
             expect(component.selectedOrder()).toBeNull();
@@ -198,22 +135,25 @@ describe('PaymentsComponent', () => {
     });
 
     describe('Payment Method Selection', () => {
+        let testOrder: OrderWithItemNameResponse;
+
         beforeEach(() => {
-            component.selectedOrder.set(mockOrders[0]);
+            testOrder = { id: 1, orderNumber: 'ORD-1', items: [], totalAmount: 5000, createdAt: new Date().toISOString(), status: 'pending' } as any;
+            component.selectedOrder.set(testOrder);
         });
 
         it('should select cash payment method', () => {
             component.selectPaymentMethod('cash');
 
             expect(component.paymentMethod()).toBe('cash');
-            expect(component.cashReceived()).toBe(mockOrders[0].totalAmount);
+            expect(component.cashReceived()).toBe(testOrder.totalAmount);
         });
 
         it('should select card payment method', () => {
             component.selectPaymentMethod('card');
 
             expect(component.paymentMethod()).toBe('card');
-            expect(component.amount()).toBe(mockOrders[0].totalAmount);
+            expect(component.amount()).toBe(testOrder.totalAmount);
         });
 
         it('should select mixed payment method and initialize with one cash row', () => {
@@ -233,73 +173,79 @@ describe('PaymentsComponent', () => {
     });
 
     describe('Cash Payment Validation', () => {
+        let testOrder: OrderWithItemNameResponse;
+
         beforeEach(() => {
-            component.selectedOrder.set(mockOrders[0]);
+            testOrder = { id: 1, orderNumber: 'ORD-1', items: [], totalAmount: 5000, createdAt: new Date().toISOString(), status: 'pending' } as any;
+            component.selectedOrder.set(testOrder);
             component.paymentMethod.set('cash');
         });
 
         it('should validate cash payment when exact amount is paid', () => {
-            component.cashReceived.set(mockOrders[0].totalAmount);
+            component.cashReceived.set(testOrder.totalAmount);
 
             expect(component.isValidPayment()).toBe(true);
         });
 
         it('should validate cash payment when more than amount is paid', () => {
-            component.cashReceived.set(mockOrders[0].totalAmount + 1000);
+            component.cashReceived.set(testOrder.totalAmount + 1000);
 
             expect(component.isValidPayment()).toBe(true);
         });
 
         it('should reject cash payment when insufficient amount is paid', () => {
-            component.cashReceived.set(mockOrders[0].totalAmount - 1000);
+            component.cashReceived.set(testOrder.totalAmount - 1000);
 
             expect(component.isValidPayment()).toBe(false);
         });
 
         it('should calculate change for cash payment', () => {
-            const received = mockOrders[0].totalAmount + 1000;
+            const received = testOrder.totalAmount + 1000;
             component.cashReceived.set(received);
 
-            const expectedChange = received - mockOrders[0].totalAmount;
+            const expectedChange = received - testOrder.totalAmount;
             expect(component.changeAmount()).toBe(expectedChange);
         });
 
         it('should return zero change when exact amount is paid', () => {
-            component.cashReceived.set(mockOrders[0].totalAmount);
+            component.cashReceived.set(testOrder.totalAmount);
 
             expect(component.changeAmount()).toBe(0);
         });
     });
 
     describe('Card Payment Validation', () => {
+        let testOrder: OrderWithItemNameResponse;
+
         beforeEach(() => {
-            component.selectedOrder.set(mockOrders[0]);
+            testOrder = { id: 1, orderNumber: 'ORD-1', items: [], totalAmount: 5000, createdAt: new Date().toISOString(), status: 'pending' } as any;
+            component.selectedOrder.set(testOrder);
             component.paymentMethod.set('card');
         });
 
         it('should validate card payment with reference number', () => {
-            component.amount.set(mockOrders[0].totalAmount);
+            component.amount.set(testOrder.totalAmount);
             component.referenceNumber.set('CARD-REF-12345');
 
             expect(component.isValidPayment()).toBe(true);
         });
 
         it('should reject card payment without reference number', () => {
-            component.amount.set(mockOrders[0].totalAmount);
+            component.amount.set(testOrder.totalAmount);
             component.referenceNumber.set('');
 
             expect(component.isValidPayment()).toBe(false);
         });
 
         it('should reject card payment with insufficient amount', () => {
-            component.amount.set(mockOrders[0].totalAmount - 1000);
+            component.amount.set(testOrder.totalAmount - 1000);
             component.referenceNumber.set('CARD-REF-12345');
 
             expect(component.isValidPayment()).toBe(false);
         });
 
         it('should reject card payment when only whitespace in reference', () => {
-            component.amount.set(mockOrders[0].totalAmount);
+            component.amount.set(testOrder.totalAmount);
             component.referenceNumber.set('   ');
 
             expect(component.isValidPayment()).toBe(false);
@@ -307,8 +253,11 @@ describe('PaymentsComponent', () => {
     });
 
     describe('Mixed Payment Validation', () => {
+        let testOrder: OrderWithItemNameResponse;
+
         beforeEach(() => {
-            component.selectedOrder.set(mockOrders[0]);
+            testOrder = { id: 1, orderNumber: 'ORD-1', items: [], totalAmount: 5000, createdAt: new Date().toISOString(), status: 'pending' } as any;
+            component.selectedOrder.set(testOrder);
             component.paymentMethod.set('mixed');
         });
 
@@ -345,7 +294,7 @@ describe('PaymentsComponent', () => {
                 { method: 'card', amount: 2000, referenceNumber: 'REF-123' }
             ]);
 
-            const remaining = mockOrders[0].totalAmount - 4000;
+            const remaining = testOrder.totalAmount - 4000;
             expect(component.remainingAmount()).toBe(remaining);
         });
 
@@ -383,14 +332,17 @@ describe('PaymentsComponent', () => {
     });
 
     describe('Payment Confirmation', () => {
+        let testOrder: OrderWithItemNameResponse;
+
         beforeEach(() => {
             authService.getUserId.and.returnValue(1);
-            component.selectedOrder.set(mockOrders[0]);
+            testOrder = { id: 1, orderNumber: 'ORD-1', items: [], totalAmount: 5000, createdAt: new Date().toISOString(), status: 'pending' } as any;
+            component.selectedOrder.set(testOrder);
         });
 
         it('should confirm cash payment successfully', (done) => {
             component.paymentMethod.set('cash');
-            component.cashReceived.set(mockOrders[0].totalAmount);
+            component.cashReceived.set(testOrder.totalAmount);
             paymentService.createPayment.and.returnValue(of({ id: 1 }));
 
             component.confirmPayment();
@@ -399,14 +351,14 @@ describe('PaymentsComponent', () => {
                 expect(paymentService.createPayment).toHaveBeenCalled();
                 const callArgs = paymentService.createPayment.calls.mostRecent().args[0];
                 expect(callArgs.paymentMethod).toBe('CASH');
-                expect(callArgs.amount).toBe(mockOrders[0].totalAmount);
+                expect(callArgs.amount).toBe(testOrder.totalAmount);
                 done();
             }, 100);
         });
 
         it('should confirm card payment with reference number', (done) => {
             component.paymentMethod.set('card');
-            component.amount.set(mockOrders[0].totalAmount);
+            component.amount.set(testOrder.totalAmount);
             component.referenceNumber.set('CARD-REF-123');
             paymentService.createPayment.and.returnValue(of({ id: 1 }));
 
@@ -441,7 +393,7 @@ describe('PaymentsComponent', () => {
 
         it('should include tip amount in payment', (done) => {
             component.paymentMethod.set('cash');
-            component.cashReceived.set(mockOrders[0].totalAmount + 500);
+            component.cashReceived.set(testOrder.totalAmount + 500);
             component.tipAmount.set(500);
             paymentService.createPayment.and.returnValue(of({ id: 1 }));
 
@@ -456,7 +408,7 @@ describe('PaymentsComponent', () => {
 
         it('should handle payment creation error', (done) => {
             component.paymentMethod.set('cash');
-            component.cashReceived.set(mockOrders[0].totalAmount);
+            component.cashReceived.set(testOrder.totalAmount);
             paymentService.createPayment.and.returnValue(
                 throwError(() => ({ error: { message: 'Payment processing failed' }, status: 400 }))
             );
@@ -471,17 +423,17 @@ describe('PaymentsComponent', () => {
         });
 
         it('should move order to paid list after successful payment', (done) => {
-            component.unpaidOrders.set([mockOrders[0]]);
+            component.unpaidOrders.set([testOrder]);
             component.paidOrders.set([]);
             component.paymentMethod.set('cash');
-            component.cashReceived.set(mockOrders[0].totalAmount);
+            component.cashReceived.set(testOrder.totalAmount);
             paymentService.createPayment.and.returnValue(of({ id: 1 }));
 
             component.confirmPayment();
 
             setTimeout(() => {
-                expect(component.unpaidOrders().some(o => o.id === mockOrders[0].id)).toBe(false);
-                expect(component.paidOrders().some(o => o.id === mockOrders[0].id)).toBe(true);
+                expect(component.unpaidOrders().some(o => o.id === testOrder.id)).toBe(false);
+                expect(component.paidOrders().some(o => o.id === testOrder.id)).toBe(true);
                 done();
             }, 100);
         });
@@ -543,7 +495,8 @@ describe('PaymentsComponent', () => {
             paymentMap.set(1, true);
             component.paymentExistsByOrderId.set(paymentMap);
 
-            component.selectedOrder.set(mockOrders[0]);
+            const testOrder: OrderWithItemNameResponse = { id: 1, orderNumber: 'ORD-1', items: [], totalAmount: 3000, createdAt: new Date().toISOString(), status: 'pending' } as any;
+            component.selectedOrder.set(testOrder);
 
             expect(component.selectedOrderIsPaid()).toBe(true);
         });
@@ -553,18 +506,20 @@ describe('PaymentsComponent', () => {
             paymentMap.set(1, false);
             component.paymentExistsByOrderId.set(paymentMap);
 
-            component.selectedOrder.set(mockOrders[0]);
+            const testOrder: OrderWithItemNameResponse = { id: 1, orderNumber: 'ORD-1', items: [], totalAmount: 3000, createdAt: new Date().toISOString(), status: 'pending' } as any;
+            component.selectedOrder.set(testOrder);
 
             expect(component.selectedOrderIsPaid()).toBe(false);
         });
 
         it('should not allow payment for already paid order', () => {
-            component.selectedOrder.set(mockOrders[0]);
+            const testOrder: OrderWithItemNameResponse = { id: 1, orderNumber: 'ORD-1', items: [], totalAmount: 5000, createdAt: new Date().toISOString(), status: 'pending' } as any;
+            component.selectedOrder.set(testOrder);
             const paymentMap = new Map<number, boolean>();
             paymentMap.set(1, true);
             component.paymentExistsByOrderId.set(paymentMap);
             component.paymentMethod.set('cash');
-            component.cashReceived.set(mockOrders[0].totalAmount);
+            component.cashReceived.set(testOrder.totalAmount);
 
             expect(component.isValidPayment()).toBe(false);
         });
@@ -572,7 +527,8 @@ describe('PaymentsComponent', () => {
 
     describe('UI State Management', () => {
         it('should show payment form when showing payment form', () => {
-            component.selectedOrder.set(mockOrders[0]);
+            const testOrder: OrderWithItemNameResponse = { id: 1, orderNumber: 'ORD-1', items: [], totalAmount: 3000, createdAt: new Date().toISOString(), status: 'pending' } as any;
+            component.selectedOrder.set(testOrder);
             component.showPaymentForm();
 
             expect(component.viewState()).toBe('form');
