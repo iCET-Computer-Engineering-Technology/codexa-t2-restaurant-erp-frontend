@@ -111,7 +111,7 @@ export class Kitchen implements OnInit {
 
   private loadWaiters(): void {
     this.isWaitersLoading.set(true);
-    this.kitchenService.getWaiters().subscribe({
+    this.kitchenService.getAvailableWaiters().subscribe({
       next: (waiters) => {
         this.waiters.set(waiters);
         this.isWaitersLoading.set(false);
@@ -201,44 +201,111 @@ export class Kitchen implements OnInit {
       return;
     }
 
-    if (!selectedOrder.kitchenOrderId) {
-      this.errorMessage.set('Refreshing kitchen data before assigning waiter...');
-      this.isLoading.set(true);
-      this.loadBoard().subscribe({
-        next: () => {
-          const refreshedOrder = this.readyCards().find((order) => order.id === selectedCardId) ?? null;
-          if (!refreshedOrder) {
-            this.errorMessage.set('Order data is unavailable right now. Please refresh and try again.');
-            return;
-          }
-
-          this.assignWaiterToOrder(refreshedOrder, waiterId);
-        },
-      });
-      return;
-    }
-
     this.assignWaiterToOrder(selectedOrder, waiterId);
   }
 
   private assignWaiterToOrder(selectedOrder: Order, waiterId: number): void {
     this.activeOrderActionId.set(selectedOrder.id);
-    this.kitchenService
-      .assignWaiterWithFallback(selectedOrder.kitchenOrderId ?? selectedOrder.id, waiterId, selectedOrder.id)
-      .subscribe({
+
+    const kitchenOrderId = selectedOrder.kitchenOrderId;
+    if (kitchenOrderId && Number.isFinite(kitchenOrderId) && kitchenOrderId > 0) {
+      this.assignWaiterWithKitchenOrderId(selectedOrder, waiterId, kitchenOrderId);
+      return;
+    }
+
+    this.kitchenService.ensureKitchenOrderId(selectedOrder.id, selectedOrder.orderNumber).subscribe({
+      next: (resolvedKitchenOrderId) => {
+        if (!resolvedKitchenOrderId) {
+          this.recoverKitchenOrderIdAndAssign(selectedOrder, waiterId);
+          return;
+        }
+
+        this.assignWaiterWithKitchenOrderId(selectedOrder, waiterId, resolvedKitchenOrderId);
+      },
+      error: () => {
+        this.recoverKitchenOrderIdAndAssign(selectedOrder, waiterId);
+      },
+    });
+  }
+
+  private recoverKitchenOrderIdAndAssign(selectedOrder: Order, waiterId: number): void {
+    this.errorMessage.set('Refreshing kitchen data before waiter assignment...');
+    this.tryAssignAfterKitchenSync(selectedOrder.id, waiterId, selectedOrder);
+  }
+
+  private tryAssignAfterKitchenSync(orderId: number, waiterId: number, fallbackOrder?: Order): void {
+    this.isLoading.set(true);
+    this.loadBoard().subscribe({
+      next: (orders) => {
+        const refreshedOrder =
+          orders.find((candidate) => candidate.id === orderId) ??
+          this.orders().find((candidate) => candidate.id === orderId) ??
+          fallbackOrder ??
+          null;
+
+        if (!refreshedOrder) {
+          this.errorMessage.set('Order data is unavailable right now. Please refresh and try again.');
+          this.activeOrderActionId.set(null);
+          return;
+        }
+
+        const refreshedKitchenOrderId = refreshedOrder.kitchenOrderId;
+        if (refreshedKitchenOrderId && Number.isFinite(refreshedKitchenOrderId) && refreshedKitchenOrderId > 0) {
+          this.assignWaiterWithKitchenOrderId(refreshedOrder, waiterId, refreshedKitchenOrderId);
+          return;
+        }
+
+        this.kitchenService.ensureKitchenOrderId(refreshedOrder.id, refreshedOrder.orderNumber).subscribe({
+          next: (resolvedKitchenOrderId) => {
+            if (!resolvedKitchenOrderId) {
+              this.assignWaiterByOrderStatusFallback(refreshedOrder, waiterId);
+              return;
+            }
+
+            this.assignWaiterWithKitchenOrderId(refreshedOrder, waiterId, resolvedKitchenOrderId);
+          },
+          error: () => {
+            this.assignWaiterByOrderStatusFallback(refreshedOrder, waiterId);
+          },
+        });
+      },
+      error: () => {
+        if (fallbackOrder) {
+          this.assignWaiterByOrderStatusFallback(fallbackOrder, waiterId);
+          return;
+        }
+
+        this.errorMessage.set('Unable to refresh kitchen data for waiter assignment.');
+        this.activeOrderActionId.set(null);
+      },
+    });
+  }
+
+  private assignWaiterByOrderStatusFallback(order: Order, waiterId: number): void {
+    this.kitchenService.assignWaiterByOrderStatus(order.id, waiterId, order.status).subscribe({
       next: () => {
-        const waiter = this.waiters().find((item) => item.id === waiterId);
-        this.orders.update((orders) =>
-          orders.map((order) =>
-            order.id === selectedOrder.id
-              ? {
-                  ...order,
-                  waiterId,
-                  waiterName: waiter?.name ?? order.waiterName,
-                }
-              : order
-          )
-        );
+        this.applyWaiterAssignment(order.id, waiterId, order.kitchenOrderId);
+        this.successMessage.set('Waiter assigned successfully.');
+        this.activeOrderActionId.set(null);
+        this.closeWaiterAssignmentModal();
+        this.refreshBoard();
+      },
+      error: () => {
+        this.errorMessage.set('Failed to assign waiter. Please try again.');
+        this.activeOrderActionId.set(null);
+      },
+    });
+  }
+
+  private assignWaiterWithKitchenOrderId(selectedOrder: Order, waiterId: number, kitchenOrderId: number): void {
+    this.kitchenService.assignWaiterWithFallback(
+      kitchenOrderId,
+      waiterId,
+      selectedOrder.id,
+      selectedOrder.status
+    ).subscribe({
+      next: () => {
+        this.applyWaiterAssignment(selectedOrder.id, waiterId, kitchenOrderId);
         this.successMessage.set('Waiter assigned successfully.');
         this.activeOrderActionId.set(null);
         this.closeWaiterAssignmentModal();
@@ -248,6 +315,25 @@ export class Kitchen implements OnInit {
         this.activeOrderActionId.set(null);
       },
     });
+  }
+
+  private applyWaiterAssignment(orderId: number, waiterId: number, kitchenOrderId?: number): void {
+    const waiter = this.waiters().find((item) => item.id === waiterId);
+    const hasKitchenOrderId =
+      kitchenOrderId != null && Number.isFinite(kitchenOrderId) && kitchenOrderId > 0;
+
+    this.orders.update((orders) =>
+      orders.map((order) =>
+        order.id === orderId
+          ? {
+              ...order,
+              ...(hasKitchenOrderId ? { kitchenOrderId } : {}),
+              waiterId,
+              waiterName: waiter?.name ?? order.waiterName,
+            }
+          : order
+      )
+    );
   }
 
   startPreparing(order: Order): void {
@@ -267,24 +353,72 @@ export class Kitchen implements OnInit {
     this.successMessage.set('');
     this.activeOrderActionId.set(order.id);
 
-    const executeStatusUpdate = (): void => {
-      this.kitchenService.updateOrderStatus(order.id, status).subscribe({
+    const executeStatusUpdate = (targetOrder: Order = order): void => {
+      this.kitchenService.updateOrderStatus(targetOrder, status).subscribe({
         next: () => {
+          if (status === 'READY') {
+            this.kitchenService.recordReadyOrder(targetOrder);
+          }
+
           this.successMessage.set('Order status updated.');
           this.activeOrderActionId.set(null);
           this.refreshBoard();
         },
         error: () => {
+          if (status === 'PREPARING') {
+            this.activeOrderActionId.set(null);
+            this.refreshBoard();
+            return;
+          }
+
           this.errorMessage.set('Failed to update order status.');
           this.activeOrderActionId.set(null);
         },
       });
     };
 
+    const triggerPreparingAfterSend = (): void => {
+      this.isLoading.set(true);
+      this.loadBoard().subscribe({
+        next: (orders) => {
+          const refreshedOrder =
+            orders.find((candidate) => candidate.id === order.id) ??
+            this.orders().find((candidate) => candidate.id === order.id) ??
+            order;
+          executeStatusUpdate(refreshedOrder);
+        },
+      });
+    };
+
     if (!order.isSentToKitchen && status !== 'RECEIVED') {
-      this.kitchenService.sendToKitchen(order.id).subscribe({
-        next: () => executeStatusUpdate(),
-        error: () => {
+      const normalizedOrderId = Number(order.id);
+      if (!Number.isFinite(normalizedOrderId) || normalizedOrderId <= 0) {
+        this.errorMessage.set('Internal error: invalid order id for send-to-kitchen.');
+        this.activeOrderActionId.set(null);
+        return;
+      }
+
+      this.kitchenService.sendToKitchen(normalizedOrderId).subscribe({
+        next: () => {
+          if (status === 'PREPARING') {
+            triggerPreparingAfterSend();
+            return;
+          }
+
+          executeStatusUpdate();
+        },
+        error: (error) => {
+          const statusCode = Number(error?.status ?? 0);
+          if (statusCode === 400 || statusCode === 409) {
+            if (status === 'PREPARING') {
+              triggerPreparingAfterSend();
+              return;
+            }
+
+            executeStatusUpdate();
+            return;
+          }
+
           this.errorMessage.set('Failed to send order to kitchen.');
           this.activeOrderActionId.set(null);
         },
@@ -354,7 +488,14 @@ export class Kitchen implements OnInit {
       return 'ready';
     }
 
-    if (status === 'PREPARING' || status === 'IN_PROGRESS') {
+    if (
+      status === 'PREPARING' ||
+      status === 'IN_PROGRESS' ||
+      status === 'SENT' ||
+      status === 'SENT_TO_KITCHEN' ||
+      status === 'QUEUED' ||
+      status === 'KITCHEN_QUEUE'
+    ) {
       return 'preparing';
     }
 
@@ -375,7 +516,10 @@ export class Kitchen implements OnInit {
     }
 
     return order.items
-      .map((item) => `${item.quantity}x ${item.menuItemName ?? `Item #${item.menuItemId}`}`)
+      .map((item) => {
+        const itemLabel = item.menuItemName ?? `Item #${item.menuItemId}`;
+        return `${item.quantity}x ${itemLabel}`;
+      })
       .join(', ');
   }
 
