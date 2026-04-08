@@ -284,6 +284,11 @@ export class ReservationsComponent implements OnInit {
       return;
     }
 
+    const saveBtn = document.getElementsByClassName('save-btn')[0];
+    if (saveBtn) {
+      (saveBtn as HTMLButtonElement).disabled = true;
+    }
+
     const reservation = {
       customerId: this.reservationForm.customerId || 0,
       customerName: this.reservationForm.customerName,
