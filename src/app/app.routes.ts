@@ -24,6 +24,7 @@ import { MenuCategories } from './page/menu-categories/menu-categories';
 import { MenuItemPrice } from './page/menu-item-price/menu-item-price';
 import { Portions } from './page/portions/portions';
 import { OrderPlacementComponent } from './page/order-placement/order-placement.component';
+import { OrdersContainerComponent } from './page/orders-container/orders-container.component';
 import { roleGuard } from './guards/role.guard';
 import { RevenueService } from './services/revenue.service';
 import { Revenue } from './page/revenue/revenue';
@@ -45,7 +46,7 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        component: OrderPlacementComponent,
+        component: OrdersContainerComponent,
       },
       {
         path: 'cashier-customer',
@@ -219,7 +220,7 @@ export const routes: Routes = [
       },
       {
         path: 'admin-order',
-        component: OrderPlacementComponent,
+        component: OrdersContainerComponent,
       },
       {
         path: 'admin-dashboard',

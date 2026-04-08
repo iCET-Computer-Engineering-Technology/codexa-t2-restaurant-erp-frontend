@@ -26,6 +26,7 @@ import {
     PortionDto,
     TableDto,
 } from '../models/order-placement.model';
+import { OrderWithItemNameResponse } from '../models/order.model';
 
 @Injectable({
     providedIn: 'root'
@@ -348,6 +349,64 @@ export class OrderService {
             orderData,
             (response) => this.normalizeOrderResponse(response)
         );
+    }
+
+    // View Orders Tab Methods
+    getAllOrdersWithItemNames(): Observable<OrderWithItemNameResponse[]> {
+        return this.http.get<OrderWithItemNameResponse[]>(
+            `${this.apiUrl}/order/find-all-with-item-names`
+        ).pipe(
+            map(orders => orders.map(order => this.normalizeOrderWithItems(order)))
+        );
+    }
+
+    getOrdersByStatus(status: string): Observable<OrderWithItemNameResponse[]> {
+        return this.http.get<OrderWithItemNameResponse[]>(
+            `${this.apiUrl}/order/find-by-status/${status}`
+        ).pipe(
+            map(orders => orders.map(order => this.normalizeOrderWithItems(order)))
+        );
+    }
+
+    getOrderWithItemNamesById(id: number): Observable<OrderWithItemNameResponse> {
+        return this.http.get<OrderWithItemNameResponse>(
+            `${this.apiUrl}/order/find-with-item-names/${id}`
+        ).pipe(
+            map(order => this.normalizeOrderWithItems(order))
+        );
+    }
+
+    private normalizeOrderWithItems(raw: any): OrderWithItemNameResponse {
+        return {
+            id: Number(raw?.id ?? 0),
+            orderTypeId: raw?.orderTypeId != null ? Number(raw.orderTypeId) : undefined,
+            orderNumber: String(raw?.orderNumber ?? ''),
+            orderType: String(raw?.orderType ?? ''),
+            tableId: raw?.tableId != null ? Number(raw.tableId) : undefined,
+            customerId: raw?.customerId != null ? Number(raw.customerId) : undefined,
+            serverId: raw?.serverId != null ? Number(raw.serverId) : undefined,
+            status: String(raw?.status ?? 'unknown'),
+            subTotal: Number(raw?.subTotal ?? 0),
+            discountAmount: Number(raw?.discountAmount ?? 0),
+            taxAmount: Number(raw?.taxAmount ?? 0),
+            serviceCharge: Number(raw?.serviceCharge ?? 0),
+            totalAmount: Number(raw?.totalAmount ?? 0),
+            notes: raw?.notes != null ? String(raw.notes) : undefined,
+            createdAt: String(raw?.createdAt ?? ''),
+            updatedAt: String(raw?.updatedAt ?? ''),
+            items: Array.isArray(raw?.items) ? raw.items.map((item: any) => ({
+                id: Number(item?.id ?? 0),
+                menuItemId: Number(item?.menuItemId ?? 0),
+                menuItemName: String(item?.menuItemName ?? item?.itemName ?? ''),
+                portionId: Number(item?.portionId ?? 0),
+                portionName: String(item?.portionName ?? ''),
+                quantity: Number(item?.quantity ?? 0),
+                price: Number(item?.price ?? 0),
+                lineTotal: item?.lineTotal != null ? Number(item.lineTotal) : Number(item?.price ?? 0) * Number(item?.quantity ?? 0),
+                status: item?.status != null ? String(item.status) : undefined,
+                notes: item?.notes != null ? String(item.notes) : undefined,
+            })) : []
+        };
     }
 
     private firstSuccessfulGet<T>(
