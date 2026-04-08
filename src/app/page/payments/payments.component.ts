@@ -172,12 +172,15 @@ export class PaymentsComponent implements OnInit {
     
     const processBatch = (batchIndex: number) => {
       if (batchIndex >= batches.length) {
-        const sortByCreatedAt = (a: OrderWithItemNameResponse, b: OrderWithItemNameResponse) =>
+        const sortByCreatedAtAsc = (a: OrderWithItemNameResponse, b: OrderWithItemNameResponse) =>
           new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        
+        const sortByCreatedAtDesc = (a: OrderWithItemNameResponse, b: OrderWithItemNameResponse) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
 
-        // All batches processed
-        this.unpaidOrders.set([...unpaidList].sort(sortByCreatedAt));
-        this.paidOrders.set([...paidList].sort(sortByCreatedAt));
+        // All batches processed - unpaid oldest first, paid newest first
+        this.unpaidOrders.set([...unpaidList].sort(sortByCreatedAtAsc));
+        this.paidOrders.set([...paidList].sort(sortByCreatedAtDesc));
         this.paymentExistsByOrderId.set(paymentMap);
         this.isLoading.set(false);
         this.isCheckingPayments.set(false);
@@ -276,7 +279,7 @@ export class PaymentsComponent implements OnInit {
   confirmPayment(): void {
     const order = this.selectedOrder();
     const isValid = this.isValidPayment();
-    const userId = this.authService.getUserId() || 0; // Default to 0 if no user ID
+    const userId = this.authService.getUserId() || undefined; // Use undefined if no user ID
 
     console.log('🔍 Payment Debug:', {
       hasOrder: !!order,
@@ -414,7 +417,7 @@ export class PaymentsComponent implements OnInit {
     // Mark as paid in-memory
     this.paidOrders.update((orders) => {
       if (orders.some((o) => o.id === order.id)) return orders;
-      return [...orders, order].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+      return [...orders, order].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     });
     this.paymentExistsByOrderId.update((map) => {
       const next = new Map(map);
