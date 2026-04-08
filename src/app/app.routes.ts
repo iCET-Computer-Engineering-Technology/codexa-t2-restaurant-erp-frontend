@@ -7,9 +7,6 @@ import { MarketingCampaign } from './page/admin/marketing-campaign/marketing-cam
 import { CampaignsComponent } from './page/admin/marketing-campaign/campaigns/campaigns';
 import { AnalyticsComponent } from './page/admin/marketing-campaign/analytics/analytics';
 import { Kitchen } from './page/kitchen/kitchen';
-import { KitchenDashboard } from './page/kitchen/kitchen-dashboard/kitchen-dashboard';
-import { KitchenOrderTable } from './page/kitchen/kitchen-order-table/kitchen-order-table';
-import { OrderAssign } from './page/kitchen/order-assign/order-assign';
 import { MenuCategories } from './page/menu-categories/menu-categories';
 import { MenuItemPrice } from './page/menu-item-price/menu-item-price';
 import { Portions } from './page/portions/portions';
@@ -20,9 +17,14 @@ import { SupplierIngredient } from './page/supplier-ingredient/supplier-ingredie
 import { OrderPlacementComponent } from './page/order-placement/order-placement.component';
 import { ReservationsComponent } from './page/reservations/reservations';
 import { roleGuard } from './guards/role.guard';
+<<<<<<< HEAD
 import { Suppliers } from './page/supplier/supplier';
 import { KpiDashboard } from './page/kpi-dashboard/kpi-dashboard';
 
+=======
+import { RevenueService } from './services/revenue.service';
+import { Revenue } from './page/revenue/revenue';
+>>>>>>> 11d216b3bdea9cc97f69fa8dfeb628daa4dea08c
 export const routes: Routes = [
   {
     path: '',
@@ -67,15 +69,7 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        component: KitchenDashboard,
-      },
-      {
-        path: 'kitchen-oder-table',
-        component: KitchenOrderTable,
-      },
-      {
-        path: 'order-assign',
-        component: OrderAssign,
+        component: Kitchen,
       }
     ]
   },
@@ -153,28 +147,19 @@ export const routes: Routes = [
       {
         path: 'kitchen',
         component: Kitchen,
-
-        children: [
-          {
-            path: '',
-            redirectTo: 'kitchen-dashboard',
-            pathMatch: 'full',
-          },
-          {
-            path: 'kitchen-dashboard',
-            component: KitchenDashboard,
-          },
-          {
-            path: 'kitchen-order-table',
-            component: KitchenOrderTable,
-          },
-          {
-            path: 'order-assign',
-            component: OrderAssign,
-          }
-        ],
       },
+<<<<<<< HEAD
 
+=======
+      {
+        path: 'supplier-ingredient',
+        component: SupplierIngredient
+      },
+      {
+        path: 'revenue',
+        component: Revenue
+      }
+>>>>>>> 11d216b3bdea9cc97f69fa8dfeb628daa4dea08c
     ],
   },
 ];

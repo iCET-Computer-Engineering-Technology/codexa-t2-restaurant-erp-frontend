@@ -1,10 +1,11 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { Sidebar } from '../sidebar/sidebar';
+import { Notify } from '../notify/notify';
 
 @Component({
   selector: 'app-admin',
-  imports: [Sidebar, RouterOutlet],
+  imports: [Sidebar, RouterOutlet, Notify],
   templateUrl: './admin.html',
   styleUrl: './admin.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
