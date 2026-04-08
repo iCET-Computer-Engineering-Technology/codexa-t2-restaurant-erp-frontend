@@ -96,7 +96,7 @@
 </aside>
 
 <main class="kpi-main sm:ml-72" [class.kpi-main-light]="!isDarkMode()">
-   <div class="kpi-content">
+   <div class="kpi-content w-full max-w-[1240px] ml-0 mr-auto">
       <header class="kpi-header">
          <div>
             <p class="kpi-eyebrow">{{ greeting }}</p>
@@ -118,49 +118,49 @@
          <p class="kpi-error-note">{{ loadError() }}</p>
       }
 
-      <section class="rounded-2xl border border-slate-700/40 bg-slate-900/50 p-5 shadow-xl backdrop-blur">
+      <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
          <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
             <div>
-               <h3 class="text-lg font-semibold text-white">Orders By Status</h3>
-               <p class="text-sm text-slate-300">Live status distribution from order API.</p>
+               <h3 class="text-lg font-semibold text-slate-900">Orders By Status</h3>
+               <p class="text-sm text-slate-500">Live status distribution from order API.</p>
             </div>
             <div class="text-right">
                <p class="text-xs uppercase tracking-wider text-slate-400">Total Orders</p>
-               <p class="text-2xl font-bold text-emerald-300">{{ orders().length }}</p>
+               <p class="text-2xl font-bold text-emerald-600">{{ orders().length }}</p>
             </div>
          </div>
 
          <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             @for (summary of orderStatusSummary(); track summary.status) {
-               <article class="rounded-xl border border-slate-600/50 bg-slate-800/60 p-4">
+               <article class="rounded-xl border border-slate-200 bg-white p-4">
                   <p class="text-xs uppercase tracking-wider text-slate-400">{{ summary.status }}</p>
-                  <p class="mt-1 text-3xl font-semibold text-white">{{ summary.count }}</p>
+                  <p class="mt-1 text-3xl font-semibold text-slate-900">{{ summary.count }}</p>
                </article>
             }
 
             @if (orderStatusSummary().length === 0) {
-               <article class="rounded-xl border border-dashed border-slate-600 bg-slate-800/40 p-4 sm:col-span-2 xl:col-span-4">
-                  <p class="text-sm text-slate-300">No order status data available.</p>
+               <article class="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4 sm:col-span-2 xl:col-span-4">
+                  <p class="text-sm text-slate-500">No order status data available.</p>
                </article>
             }
          </div>
       </section>
 
-      <section class="mt-6 rounded-2xl border border-slate-700/40 bg-slate-900/50 p-5 shadow-xl backdrop-blur">
+      <section class="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
          <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
             <div>
-               <h3 class="text-lg font-semibold text-white">All Orders</h3>
-               <p class="text-sm text-slate-300">Complete order list from /api/order/find-all-with-item-names.</p>
+               <h3 class="text-lg font-semibold text-slate-900">All Orders</h3>
+               <p class="text-sm text-slate-500">Complete order list from /api/order/find-all-with-item-names.</p>
             </div>
             <div class="text-right">
                <p class="text-xs uppercase tracking-wider text-slate-400">Total Order Value</p>
-               <p class="text-xl font-bold text-cyan-300">{{ totalOrderAmount() | currency:currencyCode:'symbol':'1.0-2' }}</p>
+               <p class="text-xl font-bold text-cyan-700">{{ totalOrderAmount() | currency:currencyCode:'symbol':'1.0-2' }}</p>
             </div>
          </div>
 
-         <div class="overflow-x-auto rounded-xl border border-slate-700">
-            <table class="min-w-full divide-y divide-slate-700 text-sm">
-               <thead class="bg-slate-800/80 text-left text-slate-300">
+         <div class="overflow-x-auto rounded-xl border border-slate-200">
+            <table class="min-w-full divide-y divide-slate-200 text-sm">
+               <thead class="bg-slate-50 text-left text-slate-600">
                   <tr>
                      <th class="px-4 py-3 font-medium">Order #</th>
                      <th class="px-4 py-3 font-medium">Type</th>
@@ -171,14 +171,14 @@
                      <th class="px-4 py-3 font-medium">Created</th>
                   </tr>
                </thead>
-               <tbody class="divide-y divide-slate-800 text-slate-100">
+               <tbody class="divide-y divide-slate-100 text-slate-700">
                   @if (orders().length === 0) {
                      <tr>
                         <td colspan="7" class="px-4 py-6 text-center text-slate-400">No orders found.</td>
                      </tr>
                   } @else {
                      @for (order of orders(); track order.id) {
-                        <tr class="bg-slate-900/20 hover:bg-slate-800/40">
+                        <tr class="bg-white hover:bg-slate-50">
                            <td class="px-4 py-3 font-medium">{{ order.orderNumber || ('ORD-' + order.id) }}</td>
                            <td class="px-4 py-3">{{ order.orderType }}</td>
                            <td class="px-4 py-3">{{ order.tableId }}</td>
@@ -186,23 +186,23 @@
                               <span
                                  class="inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold"
                                  [class.border-emerald-400]="formatStatus(order.status) === 'Completed'"
-                                 [class.bg-emerald-500/15]="formatStatus(order.status) === 'Completed'"
-                                 [class.text-emerald-300]="formatStatus(order.status) === 'Completed'"
+                                 [class.bg-emerald-100]="formatStatus(order.status) === 'Completed'"
+                                 [class.text-emerald-700]="formatStatus(order.status) === 'Completed'"
                                  [class.border-amber-400]="formatStatus(order.status) === 'Pending' || formatStatus(order.status) === 'In Progress'"
-                                 [class.bg-amber-500/15]="formatStatus(order.status) === 'Pending' || formatStatus(order.status) === 'In Progress'"
-                                 [class.text-amber-200]="formatStatus(order.status) === 'Pending' || formatStatus(order.status) === 'In Progress'"
+                                 [class.bg-amber-100]="formatStatus(order.status) === 'Pending' || formatStatus(order.status) === 'In Progress'"
+                                 [class.text-amber-700]="formatStatus(order.status) === 'Pending' || formatStatus(order.status) === 'In Progress'"
                                  [class.border-sky-400]="formatStatus(order.status) === 'Served'"
-                                 [class.bg-sky-500/15]="formatStatus(order.status) === 'Served'"
-                                 [class.text-sky-200]="formatStatus(order.status) === 'Served'"
+                                 [class.bg-sky-100]="formatStatus(order.status) === 'Served'"
+                                 [class.text-sky-700]="formatStatus(order.status) === 'Served'"
                                  [class.border-slate-500]="formatStatus(order.status) !== 'Completed' && formatStatus(order.status) !== 'Pending' && formatStatus(order.status) !== 'In Progress' && formatStatus(order.status) !== 'Served'"
-                                 [class.bg-slate-500/15]="formatStatus(order.status) !== 'Completed' && formatStatus(order.status) !== 'Pending' && formatStatus(order.status) !== 'In Progress' && formatStatus(order.status) !== 'Served'"
-                                 [class.text-slate-200]="formatStatus(order.status) !== 'Completed' && formatStatus(order.status) !== 'Pending' && formatStatus(order.status) !== 'In Progress' && formatStatus(order.status) !== 'Served'">
+                                 [class.bg-slate-100]="formatStatus(order.status) !== 'Completed' && formatStatus(order.status) !== 'Pending' && formatStatus(order.status) !== 'In Progress' && formatStatus(order.status) !== 'Served'"
+                                 [class.text-slate-700]="formatStatus(order.status) !== 'Completed' && formatStatus(order.status) !== 'Pending' && formatStatus(order.status) !== 'In Progress' && formatStatus(order.status) !== 'Served'">
                                  {{ formatStatus(order.status) }}
                               </span>
                            </td>
                            <td class="px-4 py-3">{{ itemCount(order) }}</td>
-                           <td class="px-4 py-3 font-semibold text-cyan-200">{{ order.totalAmount | currency:currencyCode:'symbol':'1.0-2' }}</td>
-                           <td class="px-4 py-3 text-slate-300">{{ order.createdAt | date:'MMM d, y h:mm a' }}</td>
+                           <td class="px-4 py-3 font-semibold text-cyan-700">{{ order.totalAmount | currency:currencyCode:'symbol':'1.0-2' }}</td>
+                           <td class="px-4 py-3 text-slate-500">{{ order.createdAt | date:'MMM d, y h:mm a' }}</td>
                         </tr>
                      }
                   }
@@ -211,30 +211,30 @@
          </div>
       </section>
 
-      <section class="mt-6 rounded-2xl border border-slate-700/40 bg-slate-900/50 p-5 shadow-xl backdrop-blur">
+      <section class="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
          <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
             <div>
-               <h3 class="text-lg font-semibold text-white">Table Details</h3>
-               <p class="text-sm text-slate-300">Current table inventory and status from /api/tables.</p>
+               <h3 class="text-lg font-semibold text-slate-900">Table Details</h3>
+               <p class="text-sm text-slate-500">Current table inventory and status from /api/tables.</p>
             </div>
             <div class="text-right">
                <p class="text-xs uppercase tracking-wider text-slate-400">Total Tables</p>
-               <p class="text-2xl font-bold text-indigo-300">{{ tables().length }}</p>
+               <p class="text-2xl font-bold text-indigo-600">{{ tables().length }}</p>
             </div>
          </div>
 
          <div class="mb-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             @for (summary of tableStatusSummary(); track summary.status) {
-               <article class="rounded-xl border border-slate-600/50 bg-slate-800/60 p-4">
+               <article class="rounded-xl border border-slate-200 bg-white p-4">
                   <p class="text-xs uppercase tracking-wider text-slate-400">{{ summary.status }}</p>
-                  <p class="mt-1 text-2xl font-semibold text-white">{{ summary.count }}</p>
+                  <p class="mt-1 text-2xl font-semibold text-slate-900">{{ summary.count }}</p>
                </article>
             }
          </div>
 
-         <div class="overflow-x-auto rounded-xl border border-slate-700">
-            <table class="min-w-full divide-y divide-slate-700 text-sm">
-               <thead class="bg-slate-800/80 text-left text-slate-300">
+         <div class="overflow-x-auto rounded-xl border border-slate-200">
+            <table class="min-w-full divide-y divide-slate-200 text-sm">
+               <thead class="bg-slate-50 text-left text-slate-600">
                   <tr>
                      <th class="px-4 py-3 font-medium">ID</th>
                      <th class="px-4 py-3 font-medium">Table Number</th>
@@ -242,14 +242,14 @@
                      <th class="px-4 py-3 font-medium">Status</th>
                   </tr>
                </thead>
-               <tbody class="divide-y divide-slate-800 text-slate-100">
+               <tbody class="divide-y divide-slate-100 text-slate-700">
                   @if (tables().length === 0) {
                      <tr>
                         <td colspan="4" class="px-4 py-6 text-center text-slate-400">No table details found.</td>
                      </tr>
                   } @else {
                      @for (table of tables(); track table.id) {
-                        <tr class="bg-slate-900/20 hover:bg-slate-800/40">
+                        <tr class="bg-white hover:bg-slate-50">
                            <td class="px-4 py-3">{{ table.id }}</td>
                            <td class="px-4 py-3 font-medium">{{ table.tableNumber }}</td>
                            <td class="px-4 py-3">{{ table.capacity }}</td>
