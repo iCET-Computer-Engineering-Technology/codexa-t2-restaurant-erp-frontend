@@ -81,48 +81,55 @@ export class Sidebar {
   // HR Manager routes based on role
   readonly hrAllowanceRoute = computed(() => {
     const role = this.userRole();
-    return role === 'ROLE_ADMIN' ? '/admin/manager-allowance' : '/manager/manager-allowance';
+    return role === 'ROLE_ADMIN' ? '/admin/admin-allowance' : '/manager/manager-allowance';
   });
 
   readonly hrBasicSalaryRoute = computed(() => {
     const role = this.userRole();
-    return role === 'ROLE_ADMIN' ? '/admin/manager-basic-salary' : '/manager/manager-basic-salary';
+    return role === 'ROLE_ADMIN' ? '/admin/admin-basic-salary' : '/manager/manager-basic-salary';
   });
 
   readonly hrBonusRoute = computed(() => {
     const role = this.userRole();
-    return role === 'ROLE_ADMIN' ? '/admin/manager-bonus' : '/manager/manager-bonus';
+    return role === 'ROLE_ADMIN' ? '/admin/admin-bonus' : '/manager/manager-bonus';
   });
 
   readonly hrDeductionRoute = computed(() => {
     const role = this.userRole();
-    return role === 'ROLE_ADMIN' ? '/admin/manager-deduction' : '/manager/manager-deduction';
+    return role === 'ROLE_ADMIN' ? '/admin/admin-deduction' : '/manager/manager-deduction';
   });
 
   readonly hrEmployeeRoute = computed(() => {
     const role = this.userRole();
-    return role === 'ROLE_ADMIN' ? '/admin/manager-employee' : '/manager/manager-employee';
+    return role === 'ROLE_ADMIN' ? '/admin/admin-employee' : '/manager/manager-employee';
   });
 
   readonly hrEmployeeLeaveRoute = computed(() => {
     const role = this.userRole();
-    return role === 'ROLE_ADMIN' ? '/admin/manager-employee-leave' : '/manager/manager-employee-leave';
+    return role === 'ROLE_ADMIN' ? '/admin/admin-employee-leave' : '/manager/manager-employee-leave';
   });
 
   readonly hrOvertimeRoute = computed(() => {
     const role = this.userRole();
-    return role === 'ROLE_ADMIN' ? '/admin/manager-overtime' : '/manager/manager-overtime';
+    return role === 'ROLE_ADMIN' ? '/admin/admin-overtime' : '/manager/manager-overtime';
   });
 
   readonly hrPayrollConfigRoute = computed(() => {
     const role = this.userRole();
-    return role === 'ROLE_ADMIN' ? '/admin/manager-payroll-config' : '/manager/manager-payroll-config';
+    return role === 'ROLE_ADMIN' ? '/admin/admin-payroll-config' : '/manager/manager-payroll-config';
   });
 
   readonly hrPayrollRoute = computed(() => {
     const role = this.userRole();
-    return role === 'ROLE_ADMIN' ? '/admin/manager-payroll' : '/manager/manager-payroll';
+    return role === 'ROLE_ADMIN' ? '/admin/admin-payroll' : '/manager/manager-payroll';
   });
+
+  readonly supplierRoute = computed(() => {
+    const role = this.userRole();
+    return role === 'ROLE_ADMIN' ? '/admin/admin-supplier' : '/manager/manager-supplier';
+  });
+
+  readonly showSupplier = computed(() => ['ROLE_ADMIN', 'ROLE_MANAGER'].includes(this.userRole() || ''));
 
   constructor() {
     if (!isPlatformBrowser(this.platformId)) {

@@ -267,8 +267,9 @@
             </li>
             }
 
+             @if (showSupplier()) {
              <li>
-               <button type="button" routerLink="/admin/admin-supplier" routerLinkActive="sidebar-item-active"
+               <button type="button" [routerLink]="supplierRoute()" routerLinkActive="sidebar-item-active"
                   class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group">
                   <div class="sidebar-item-icon flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-200">
                      <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -278,6 +279,7 @@
                   <span>Supplier</span>
                </button>
             </li>
+            }
          </ul>
 
          <!-- <p class="sidebar-section-label px-3 mt-6 mb-2 text-[10px] font-semibold uppercase tracking-wider">Management</p>

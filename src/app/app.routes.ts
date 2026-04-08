@@ -5,7 +5,6 @@ import { Dashboard } from './page/dashboard/dashboard';
 import { Customers } from './page/customers/customers';
 import { MarketingCampaign } from './page/admin/marketing-campaign/marketing-campaign';
 import { CampaignsComponent } from './page/admin/marketing-campaign/campaigns/campaigns';
-import { AutomatedMessagesComponent } from './page/admin/marketing-campaign/automated-messages/automated-messages';
 import { AnalyticsComponent } from './page/admin/marketing-campaign/analytics/analytics';
 import { Kitchen } from './page/kitchen/kitchen';
 import {BasicSalary} from './page/manager/basic-salary/basic-salary';
@@ -24,14 +23,12 @@ import { MenuCategories } from './page/menu-categories/menu-categories';
 import { MenuItemPrice } from './page/menu-item-price/menu-item-price';
 import { Portions } from './page/portions/portions';
 
-import { MenuItem } from './page/menu-item/menu-item';
 import { Suppliers } from './page/supplier/supplier';
 import { SupplierIngredient } from './page/supplier-ingredient/supplier-ingredient';
 
 import { OrderPlacementComponent } from './page/order-placement/order-placement.component';
 import { ReservationsComponent } from './page/reservations/reservations';
 import { roleGuard } from './guards/role.guard';
-import { RevenueService } from './services/revenue.service';
 import { Revenue } from './page/revenue/revenue';
 export const routes: Routes = [
   {
@@ -124,6 +121,10 @@ export const routes: Routes = [
             path: 'manager-salary-response',
             component: SalaryResponse
           },
+          {
+            path: 'manager-supplier',
+            component: Suppliers
+          },
       ]
   },
 
@@ -173,7 +174,7 @@ export const routes: Routes = [
       },
       {
         path: 'menu-item',
-        component: MenuItem
+        component: MenuItems
       },
       {
         path: "menu-item-prices",
@@ -223,6 +224,50 @@ export const routes: Routes = [
       {
         path: 'revenue',
         component: Revenue
+      },
+      {
+        path: 'admin-employee',
+        component: Employee
+      },
+      {
+        path: 'admin-allowance',
+        component: Allowance
+      },
+      {
+        path: 'admin-basic-salary',
+        component: BasicSalary
+      },
+      {
+        path: 'admin-deduction',
+        component: Deduction
+      },
+      {
+        path: 'admin-employee-leave',
+        component: EmployeeLeave
+      },
+      {
+        path: 'admin-overtime',
+        component: Overtime
+      },
+      {
+        path: 'admin-payroll-config',
+        component: PayrollConfig
+      },
+      {
+        path: 'admin-payroll',
+        component: Payroll
+      },
+      {
+        path: 'admin-bonus',
+        component: Bonus
+      },
+      {
+        path: 'admin-salary-request',
+        component: SalaryRequest
+      },
+      {
+        path: 'admin-salary-response',
+        component: SalaryResponse
       }
     ],
   },
