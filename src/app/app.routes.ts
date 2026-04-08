@@ -311,10 +311,6 @@ export const routes: Routes = [
         component: Kitchen,
       },
       {
-        path: 'supplier-ingredient',
-        component: SupplierIngredient
-      },
-      {
         path: 'revenue',
         component: Revenue
       }

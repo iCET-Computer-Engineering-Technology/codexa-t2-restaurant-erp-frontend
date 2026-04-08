@@ -43,6 +43,7 @@ export class Sidebar {
   readonly showProducts = computed(() => this.userRole() === 'ROLE_ADMIN');
   readonly showReservations = computed(() => ['ROLE_ADMIN', 'ROLE_CASHIER'].includes(this.userRole() || ''));
   readonly showRevenue = computed(() => this.userRole() === 'ROLE_ADMIN');
+  readonly showHR = computed(() => ['ROLE_ADMIN', 'ROLE_MANAGER'].includes(this.userRole() || ''));
 
   // Dynamic routes based on role
   readonly customersRoute = computed(() => {
