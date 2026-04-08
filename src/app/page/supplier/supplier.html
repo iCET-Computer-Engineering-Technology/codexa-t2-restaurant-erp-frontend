@@ -1,0 +1,270 @@
+
+<app-sidebar></app-sidebar>
+
+<div class="dashboard-container">
+  <!-- Page Header -->
+  <div style="margin-bottom: 32px;">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <h1 class="page-title" style="margin: 0; font-size: 32px; font-weight: 800; background: linear-gradient(135deg, #0f172a 0%, #334155 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+          Supplier Management
+        </h1>
+        <p style="margin: 8px 0 0 0; color: #64748b; font-size: 14px;">Manage and organize all supplier information</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-content-grid">
+
+    <!-- LEFT COLUMN: Form -->
+    <div class="left-column">
+      <div class="form-section" style="box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); border-radius: 16px;">
+        <div class="section-header" style="background: linear-gradient(135deg, #f0f9ff 0%, #f5f3ff 100%); margin: -24px -24px 20px -24px; padding: 24px;">
+          <h3 style="font-size: 20px; font-weight: 700; color: #0f172a;">{{ isUpdateMode ? 'Edit Supplier' : 'Add New Supplier' }}</h3>
+          <p class="subtitle">{{ isUpdateMode ? 'Update supplier information and details.' : 'Fill in the details to add a new supplier to the system.' }}</p>
+        </div>
+
+        <div class="form-body">
+
+          <!-- Row 1: Supplier Name & Contact Name -->
+          <div class="form-row form-row-2">
+            <div class="form-group">
+              <label style="font-weight: 600; color: #0f172a;">Supplier Name <span style="color: #ef4444;">*</span></label>
+              <input
+                type="text"
+                [(ngModel)]="newSupplier.name"
+                placeholder="Enter supplier name"
+                class="form-control"
+                [ngClass]="{'input-error': isSubmitted && !isValidName()}"
+                style="border: 1px solid #e2e8f0; transition: all 0.3s ease;"
+              />
+              <div class="error-message" *ngIf="isSubmitted && !isValidName()">
+                <span style="color: #ef4444;">●</span> Please enter the supplier name.
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label style="font-weight: 600; color: #0f172a;">Contact Name <span style="color: #ef4444;">*</span></label>
+              <input
+                type="text"
+                [(ngModel)]="newSupplier.contactName"
+                placeholder="Enter contact person name"
+                class="form-control"
+                [ngClass]="{'input-error': isSubmitted && !isValidContactName()}"
+                style="border: 1px solid #e2e8f0; transition: all 0.3s ease;"
+              />
+              <div class="error-message" *ngIf="isSubmitted && !isValidContactName()">
+                <span style="color: #ef4444;">●</span> Please enter the contact name.
+              </div>
+            </div>
+          </div>
+
+          <!-- Row 2: Email & Phone -->
+          <div class="form-row form-row-2">
+            <div class="form-group">
+              <label style="font-weight: 600; color: #0f172a;">Email Address</label>
+              <input
+                type="email"
+                [(ngModel)]="newSupplier.email"
+                placeholder="supplier@example.com"
+                class="form-control"
+                [ngClass]="{'input-error': isSubmitted && !isValidEmail()}"
+                style="border: 1px solid #e2e8f0; transition: all 0.3s ease;"
+              />
+              <div class="error-message" *ngIf="isSubmitted && !isValidEmail()">
+                <span style="color: #ef4444;">●</span> Please enter a valid email address.
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label style="font-weight: 600; color: #0f172a;">Phone Number <span style="color: #ef4444;">*</span></label>
+              <input
+                type="text"
+                [(ngModel)]="newSupplier.phone"
+                placeholder="07XXXXXXXX"
+                class="form-control"
+                [ngClass]="{'input-error': isSubmitted && !isValidPhone()}"
+                style="border: 1px solid #e2e8f0; transition: all 0.3s ease;"
+              />
+              <div class="error-message" *ngIf="isSubmitted && !isValidPhone()">
+                <span style="color: #ef4444;">●</span> Please enter a valid Sri Lankan phone number.
+              </div>
+            </div>
+          </div>
+
+          <!-- Row 3: Address -->
+          <div class="form-group">
+            <label style="font-weight: 600; color: #0f172a;">Address <span style="color: #ef4444;">*</span></label>
+            <textarea
+              [(ngModel)]="newSupplier.address"
+              placeholder="Enter the complete supplier address"
+              class="form-control"
+              [ngClass]="{'input-error': isSubmitted && !isValidAddress()}"
+              style="resize: vertical; min-height: 100px; border: 1px solid #e2e8f0; transition: all 0.3s ease;"
+            ></textarea>
+            <div class="error-message" *ngIf="isSubmitted && !isValidAddress()">
+              <span style="color: #ef4444;">●</span> Please enter the supplier address.
+            </div>
+          </div>
+
+        </div>
+
+        <div class="form-footer">
+          <button class="cancel-btn" (click)="resetForm()" style="transition: all 0.3s ease; font-weight: 600;">
+            Clear
+          </button>
+          <button class="save-btn" (click)="saveSupplier()" style="transition: all 0.3s ease; font-weight: 600;">
+            {{ isUpdateMode ? 'Update' : 'Save' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN: Table -->
+    <div class="right-column table-section">
+      <div class="table-header-box">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <h3 style="margin: 0; font-size: 20px; font-weight: 700; color: #0f172a;">Supplier List</h3>
+          <span class="badge">{{ totalSuppliers }} Total</span>
+        </div>
+
+        <div class="search-container">
+          <svg style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: #94a3b8;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            type="text"
+            [(ngModel)]="searchText"
+            (input)="onSearch()"
+            class="block w-full p-3 ps-9 border text-sm rounded-base placeholder:text-body"
+            placeholder="Search suppliers..."
+            style="padding-left: 40px; border: 1px solid #e2e8f0; background: #f8fafc; transition: all 0.3s ease;"
+          />
+        </div>
+      </div>
+
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+        <tr style="border-bottom: 2px solid #e2e8f0; background: #f8fafc;">
+          <th style="padding: 16px 24px; color: #475569; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">#</th>
+          <th style="padding: 16px 24px; color: #475569; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Supplier Details</th>
+          <th style="padding: 16px 24px; color: #475569; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Contact</th>
+          <th style="padding: 16px 24px; color: #475569; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Address</th>
+          <th style="padding: 16px 24px; color: #475569; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; text-align: right;">Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let s of paginatedSuppliers; let i = index" style="border-bottom: 1px solid #f1f5f9; transition: all 0.2s ease; cursor: default;" onmouseover="this.style.background='#f9fafb'; this.style.boxShadow='inset 0 0 0 2px #e2e8f0';" onmouseout="this.style.background='white'; this.style.boxShadow='none';">
+
+          <!-- Index -->
+          <td style="padding: 16px 24px; color: #64748b; font-weight: 600;" data-label="#">
+            {{ ((currentPage - 1) * itemsPerPage) + i + 1 }}
+          </td>
+
+          <!-- Supplier Name + Email -->
+          <td style="padding: 16px 24px;" data-label="Supplier Details">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div *ngIf="s.name"
+                   style="width: 44px; height: 44px; border-radius: 10px; background: linear-gradient(135deg, #e0e7ff 0%, #dbeafe 100%); color: #4f46e5; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; flex-shrink: 0; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);">
+                {{ s.name.charAt(0) | uppercase }}
+              </div>
+              <div>
+                <div style="font-weight: 700; color: #0f172a; font-size: 15px;">{{ s.name }}</div>
+                <div style="color: #64748b; font-size: 13px; margin-top: 4px; display: flex; align-items: center; gap: 4px;">
+                  {{ s.email || 'No email' }}
+                </div>
+              </div>
+            </div>
+          </td>
+
+          <!-- Contact Name + Phone -->
+          <td style="padding: 16px 24px;" data-label="Contact">
+            <div style="font-weight: 600; color: #0f172a; font-size: 15px;">{{ s.contactName }}</div>
+            <div style="color: #64748b; font-size: 13px; margin-top: 4px; display: flex; align-items: center; gap: 4px;">
+              {{ s.phone }}
+            </div>
+          </td>
+
+          <!-- Address -->
+          <td style="padding: 16px 24px;" data-label="Address">
+            <div
+              style="color: #475569; font-size: 13px; max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 4px; font-weight: 500;"
+              [title]="s.address">
+              {{ s.address }}
+            </div>
+          </td>
+
+          <!-- Actions -->
+          <td style="padding: 16px 24px; text-align: right;" data-label="Actions">
+            <div style="display: flex; gap: 8px; justify-content: flex-end;">
+
+              <!-- Edit -->
+              <button
+                (click)="editSupplier(s)"
+                title="Edit Supplier"
+                class="edit-btn"
+                style="border: 1px solid rgba(34, 197, 94, 0.2); padding: 8px 12px; border-radius: 8px; cursor: pointer; transition: all 0.25s ease; display: inline-flex; align-items: center; gap: 4px; font-weight: 600; font-size: 13px; background-color: rgba(34, 197, 94, 0.08); color: #22c55e;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+                Edit
+              </button>
+
+              <!-- Delete -->
+              <button
+                (click)="deleteSupplier(s.id!)"
+                title="Delete Supplier"
+                class="delete-btn"
+                style="border: 1px solid rgba(239, 68, 68, 0.2); padding: 8px 12px; border-radius: 8px; cursor: pointer; transition: all 0.25s ease; display: inline-flex; align-items: center; gap: 4px; font-weight: 600; font-size: 13px; background-color: rgba(239, 68, 68, 0.08); color: #ef4444;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+                Delete
+              </button>
+
+            </div>
+          </td>
+        </tr>
+
+        <!-- Empty State -->
+        <tr *ngIf="paginatedSuppliers.length === 0">
+          <td colspan="5" style="text-align: center; padding: 60px 24px; color: #94a3b8; background: #fafafa;">
+            <div style="font-size: 16px; font-weight: 500; color: #64748b; margin-bottom: 4px;">No suppliers found</div>
+            <div style="font-size: 13px; color: #94a3b8;">Try adjusting your search filters or add a new supplier</div>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+
+      <!-- Pagination -->
+      <div class="pagination-controls"
+           style="display: flex; justify-content: space-between; align-items: center; padding: 24px; border-top: 1px solid #e2e8f0; background: #fafafa; gap: 16px;">
+        <button
+          class="pagination-btn"
+          (click)="prevPage()"
+          [disabled]="currentPage === 1"
+          style="padding: 10px 16px; background-color: white; border: 1px solid #cbd5e1; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s ease; color: #475569; font-size: 13px;"
+          onmouseover="if(!this.disabled) { this.style.background='#e2e8f0'; this.style.transform='translateY(-2px)'; }"
+          onmouseout="if(!this.disabled) { this.style.background='white'; this.style.transform='translateY(0)'; }">
+          ← Previous
+        </button>
+
+        <div style="color: #64748b; font-weight: 600; font-size: 13px; padding: 8px 16px; background: white; border: 1px solid #e2e8f0; border-radius: 8px;">
+          Page <span style="color: #4f46e5; font-weight: 700;">{{ currentPage }}</span> of <span style="color: #334155;">{{ totalPages }}</span>
+        </div>
+
+        <button
+          class="pagination-btn"
+          (click)="nextPage()"
+          [disabled]="currentPage === totalPages"
+          style="padding: 10px 16px; background-color: white; border: 1px solid #cbd5e1; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s ease; color: #475569; font-size: 13px;"
+          onmouseover="if(!this.disabled) { this.style.background='#e2e8f0'; this.style.transform='translateY(-2px)'; }"
+          onmouseout="if(!this.disabled) { this.style.background='white'; this.style.transform='translateY(0)'; }">
+          Next →
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
