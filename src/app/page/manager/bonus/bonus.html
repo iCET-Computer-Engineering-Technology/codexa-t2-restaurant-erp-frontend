@@ -1,0 +1,128 @@
+<div class="dashboard-container">
+  <h2 class="page-title">Bonus Management</h2>
+
+  <div class="main-content-grid">
+    <div class="form-section">
+      <div class="section-header">
+        <h3>Add New Bonus</h3>
+        <p class="subtitle">Assign performance-based or seasonal bonuses to specific staff members.</p>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="employeeId">Select Employee</label>
+            <select
+              id="employeeId"
+              formControlName="employeeId"
+              class="form-control"
+              [class.input-error]="form.get('employeeId')?.invalid && form.get('employeeId')?.touched">
+              <option value="" disabled selected>-- Select an Employee --</option>
+              <option *ngFor="let employee of employees" [value]="employee.id">
+                {{ employee.firstName + ' ' + employee.lastName }} (ID: {{ employee.id }})
+              </option>
+            </select>
+            <div *ngIf="form.get('employeeId')?.invalid && form.get('employeeId')?.touched" class="error-message">
+              Employee selection is required
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="amount">Amount (Rs.)</label>
+            <input
+              id="amount"
+              formControlName="amount"
+              type="number"
+              class="form-control"
+              placeholder="0.00"
+              [class.input-error]="form.get('amount')?.invalid && form.get('amount')?.touched" />
+            <div *ngIf="form.get('amount')?.invalid && form.get('amount')?.touched" class="error-message">
+              Please enter a valid positive amount
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row" *ngIf="form.get('type')?.value === 'Other'">
+          <div class="form-group">
+            <label for="other">Bonus Description / Note</label>
+            <input id="other" formControlName="other" type="text" class="form-control" placeholder="Reason for bonus..." />
+          </div>
+        </div>
+
+        <div class="form-footer">
+          <button type="button" (click)="clearForm()" class="cancel-btn">Clear Form</button>
+          <button type="submit" [disabled]="!form.valid" class="save-btn">Issue Bonus</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="table-section" [formGroup]="form">
+      <div class="table-header-box">
+        <h3>
+          Issued Bonuses
+          <span class="badge">{{ bonus.length }} Records</span>
+        </h3>
+
+        <input
+          type="text"
+          formControlName="search"
+          placeholder="Search by Employee Name..."
+          class="search-box"
+          (keyup.enter)="employeeSearchByName()"
+        >
+      </div>
+    </div>
+
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+          <tr>
+            <th>#</th>
+            <th>Employee Details</th>
+            <th>Bonus Amount</th>
+            <th style="text-align: center;">Actions</th>
+          </tr>
+          </thead>
+          <tbody>
+            @for (b of bonus; track b.id; let i = $index) {
+              <tr>
+                <td class="fw-bold">#{{ i + 1 }}</td>
+                <td>
+                  <div class="customer-info">
+                    <div class="avatar" style="background: #10b981;">E</div>
+                    <div>
+                      <div class="fw-bold">Employee ID: {{ b.employeeId }}</div>
+                      @for (employee of employees; track employee.id) {
+                        <div class="text-muted" *ngIf="employee.id === b.employeeId">{{employee.firstName +' ' +employee.lastName}}</div>
+                      }
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="fw-bold" style="color: #0f172a; font-size: 16px;">
+                    Rs. {{ b.amount | number:'1.2-2' }}
+                  </span>
+                </td>
+                <td style="text-align: center;">
+                  <button (click)="editBonus(b.id)" class="action-btn edit-btn" title="Modify">
+                    Edit
+                  </button>
+                  <button (click)="deleteBonus(b.id)" class="action-btn delete-btn" title="Revoke">
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="4" style="text-align: center; padding: 60px; color: #64748b;">
+                  <div style="font-size: 40px; margin-bottom: 10px;">🎁</div>
+                  <p>No bonuses have been recorded yet.</p>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+

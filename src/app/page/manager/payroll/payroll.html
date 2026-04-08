@@ -1,0 +1,154 @@
+<div class="dashboard-container">
+  <h2 class="page-title">Payroll Management</h2>
+
+  <div class="main-content-grid">
+    <div class="form-section">
+      <div class="section-header">
+        <h3>Process New Payroll</h3>
+        <p class="subtitle">Calculate comprehensive earnings, statutory deductions (EPF/ETF), and final net pay.</p>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-body">
+        <div class="form-row-3">
+          <div class="form-group">
+            <label for="employeeId">Select Employee</label>
+            <select id="employeeId" formControlName="employeeId" class="form-control">
+              <option value="" disabled selected>-- Select Employee --</option>
+              <option *ngFor="let employee of employees" [value]="employee.id">
+                {{ employee.firstName + ' ' + employee.lastName }}
+              </option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="payrollDate">Payroll Date</label>
+            <input id="payrollDate" formControlName="payrollDate" type="date" class="form-control" readonly />
+          </div>
+          <div class="form-group">
+            <label for="basicSalary">Basic Salary (Rs.)</label>
+            <input id="basicSalary" formControlName="basicSalary" type="number" step="0.01" class="form-control" />
+          </div>
+        </div>
+
+        <hr style="margin: 20px 0; border: 0; border-top: 1px dashed #e2e8f0;">
+
+        <div class="form-row-3">
+          <div class="form-group">
+            <label for="epfEmployee">EPF Employee (8%)</label>
+            <input id="epfEmployee" formControlName="epfEmployee" type="number" class="form-control" />
+          </div>
+          <div class="form-group">
+            <label for="epfEmployer">EPF Employer (12%)</label>
+            <input id="epfEmployer" formControlName="epfEmployer" type="number" class="form-control" />
+          </div>
+          <div class="form-group">
+            <label for="etfEmployer">ETF Employer (3%)</label>
+            <input id="etfEmployer" formControlName="etfEmployer" type="number" class="form-control" />
+          </div>
+        </div>
+
+        <div class="form-row-3">
+          <div class="form-group">
+            <label for="allowance">Allowance</label>
+            <input id="allowance" formControlName="allowance" type="number" class="form-control" />
+          </div>
+          <div class="form-group">
+            <label for="bonus">Bonus</label>
+            <input id="bonus" formControlName="bonus" type="number" class="form-control" />
+          </div>
+          <div class="form-group">
+            <label for="overtimeAmount">Overtime Pay</label>
+            <input id="overtimeAmount" formControlName="overtimeAmount" type="number" class="form-control" />
+          </div>
+        </div>
+
+        <div class="form-row-3">
+          <div class="form-group">
+            <label for="leaveDays">Unpaid Leave Days</label>
+            <input id="leaveDays" formControlName="leaveDays" type="number" class="form-control" />
+          </div>
+          <div class="form-group">
+            <label for="leaveDeduction">Leave Deduction</label>
+            <input id="leaveDeduction" formControlName="leaveDeduction" type="number" class="form-control" />
+          </div>
+          <div class="form-group">
+            <label for="donation">Donations/Other</label>
+            <input id="donation" formControlName="donation" type="number" class="form-control" />
+          </div>
+        </div>
+
+        <div class="form-row-3" style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
+          <div class="form-group">
+            <label class="fw-bold" style="color: #ef4444;">Total Deductions</label>
+            <input id="totalDeduction" formControlName="totalDeduction" type="number" class="form-control" style="color: #ef4444;" />
+          </div>
+          <div class="form-group">
+            <label class="fw-bold" style="color: #10b981;">Net Salary (Payable)</label>
+            <input id="netSalary" formControlName="netSalary" type="number" class="form-control" style="font-weight: 800; color: #10b981;" />
+          </div>
+          <div class="form-group">
+            <label class="fw-bold" style="color: #6366f1;">Total Employer Cost</label>
+            <input id="employerCost" formControlName="employerCost" type="number" class="form-control" style="color: #6366f1;" />
+          </div>
+        </div>
+
+        <div class="form-footer">
+          <button type="button" (click)="clearForm()" class="cancel-btn">Reset All</button>
+          <button type="submit" [disabled]="!form.valid" class="save-btn">Finalize & Save Payroll</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="table-section">
+      <div class="table-header-box">
+        <h3>Payroll History</h3>
+        <div class="flex gap-2">
+          <input type="text" placeholder="Search employee..." class="search-box">
+<!--          <button class="cancel-btn" style="padding: 5px 15px;">Export CSV</button>-->
+        </div>
+      </div>
+
+      <div style="overflow-x: auto;">
+        <table style="min-width: 1200px;"> <thead>
+        <tr>
+          <th>#</th>
+          <th>Employee</th>
+          <th>Basic (Rs)</th>
+          <th>EPF (Emp)</th>
+          <th>EPF (Co)</th>
+          <th>Allowance</th>
+          <th>Bonus</th>
+          <th>Net Salary</th>
+          <th>Date</th>
+          <th style="text-align: center;">Actions</th>
+        </tr>
+        </thead>
+          <tbody>
+            @for (payroll of payrolls; track payroll.id; let i = $index) {
+          <tr>
+            <td class="fw-bold">#{{ i + 1 }}</td>
+            <td>{{ getEmployeeName(payroll.employeeId) }}</td>
+            <td>{{ payroll.basicSalary | number:'1.0-0' }}</td>
+            <td style="color: #ef4444;">-{{ payroll.epfEmployee | number:'1.0-0' }}</td>
+            <td>{{ payroll.epfEmployer | number:'1.0-0' }}</td>
+            <td>{{ payroll.allowance | number:'1.0-0' }}</td>
+            <td>{{ payroll.bonus | number:'1.0-0' }}</td>
+            <td class="fw-bold" style="color: #10b981; font-size: 15px;">Rs. {{ payroll.netSalary | number:'1.0-2' }}</td>
+            <td>{{ payroll.payrollDate | date:'yyyy-MM-dd' }}</td>
+            <td style="text-align: center;">
+              <div class="flex gap-1 justify-center">
+                <button (click)="editPayroll(payroll.id)" class="action-btn edit-btn">Edit</button>
+                <button (click)="deletePayroll(payroll.id)" class="action-btn delete-btn">Del</button>
+              </div>
+            </td>
+          </tr>
+            } @empty {
+          <tr *ngIf="payrolls.length === 0">
+            <td colspan="10" style="text-align: center; padding: 40px;">No payroll records found.</td>
+          </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

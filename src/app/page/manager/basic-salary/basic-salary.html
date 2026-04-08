@@ -1,0 +1,109 @@
+<div class="dashboard-container">
+  <h2 class="page-title">Basic Salary Management</h2>
+
+  <div class="main-content-grid">
+    <div class="form-section">
+      <div class="section-header">
+        <h3>Add New Salary</h3>
+        <p class="subtitle">Set the base compensation rates for specific staff roles.</p>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="roleName">Select Role</label>
+            <select
+              id="roleName"
+              formControlName="roleName"
+              class="form-control"
+              [class.input-error]="form.get('roleName')?.invalid && form.get('roleName')?.touched">
+              <option value="" disabled selected>-- Select a Role --</option>
+              <option value="ROLE_ADMIN">Admin</option>
+              <option value="ROLE_MANAGER">Manager</option>
+              <option value="ROLE_CASHIER">Cashier</option>
+              <option value="ROLE_WAITER">Waiter</option>
+              <option value="ROLE_CHEF">Chef</option>
+            </select>
+            <div *ngIf="form.get('roleName')?.invalid && form.get('roleName')?.touched" class="error-message">
+              Role is required
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="amount">Amount (Rs.)</label>
+            <input
+              id="amount"
+              formControlName="amount"
+              type="number"
+              class="form-control"
+              placeholder="e.g. 50000"
+              [class.input-error]="form.get('amount')?.invalid && form.get('amount')?.touched" />
+            <div *ngIf="form.get('amount')?.invalid && form.get('amount')?.touched" class="error-message">
+              Amount is required and must be positive
+            </div>
+          </div>
+        </div>
+
+        <div class="form-footer">
+          <button type="button" (click)="clearForm()" class="cancel-btn">Clear</button>
+          <button type="submit" [disabled]="!form.valid" class="save-btn">Save Salary Config</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="table-section">
+      <div class="table-header-box">
+        <h3>Salary Configurations <span class="badge">{{ basicSalaries.length }} Active Roles</span></h3>
+      </div>
+
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+          <tr>
+            <th>#</th>
+            <th>Role Designation</th>
+            <th>Base Amount</th>
+            <th style="text-align: center;">Actions</th>
+          </tr>
+          </thead>
+          <tbody>
+            @for (salary of basicSalaries; track salary.id;let i = $index) {
+              <tr>
+                <td class="fw-bold">{{ i + 1 }}</td>
+                <td>
+                  <div class="customer-info">
+                    <div class="avatar" style="background: #4f46e5;">{{ salary.roleName.split('_')[1].substring(0,1) }}</div>
+                    <div>
+                      <div class="fw-bold">{{ salary.roleName.replace('ROLE_', '') }}</div>
+                      <div class="text-muted">System Level Access</div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="fw-bold" style="color: #0f172a; font-size: 16px;">
+                    Rs. {{ salary.amount | number:'1.2-2' }}
+                  </span>
+                </td>
+                <td style="text-align: center;">
+                  <button (click)="editBasicSalary(salary.id)" class="action-btn edit-btn" title="Edit Configuration">
+                    Edit
+                  </button>
+                  <button (click)="deleteBasicSalary(salary.id)" class="action-btn delete-btn" title="Remove Configuration">
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="4" style="text-align: center; padding: 60px; color: #64748b;">
+                  <div style="font-size: 40px; margin-bottom: 10px;">💸</div>
+                  <p>No salary configurations found. Add a role to get started.</p>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
