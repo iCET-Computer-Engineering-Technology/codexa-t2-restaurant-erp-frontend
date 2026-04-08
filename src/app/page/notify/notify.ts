@@ -106,8 +106,12 @@ export class Notify implements OnInit, OnDestroy {
     });
   }
 
+  getAlertKey(alert: LowStockAlert): number {
+    return alert.id ?? alert.ingredientId;
+  }
+
   openAlert(alert: LowStockAlert): void {
-    this.selectedAlertId.set(alert.id || null);
+    this.selectedAlertId.set(this.getAlertKey(alert));
     this.newThreshold.set(alert.lowStockThreshold || 0);
   }
 
@@ -120,7 +124,7 @@ export class Notify implements OnInit, OnDestroy {
     const alertId = this.selectedAlertId();
     if (!alertId) return;
 
-    const alert = this.alerts().find((a) => a.id === alertId);
+    const alert = this.alerts().find((a) => this.getAlertKey(a) === alertId);
     if (!alert) return;
 
     const threshold = this.newThreshold();
@@ -138,7 +142,7 @@ export class Notify implements OnInit, OnDestroy {
           // Update local alert
           this.alerts.update((current) =>
             current.map((a) =>
-              a.id === alertId
+              this.getAlertKey(a) === alertId
                 ? { ...a, lowStockThreshold: threshold }
                 : a
             )
@@ -153,9 +157,11 @@ export class Notify implements OnInit, OnDestroy {
       });
   }
 
-  dismissAlert(id: number | undefined): void {
-    if (!id) return;
-    this.alerts.update((current) => current.filter((a) => a.id !== id));
+  dismissAlert(alert: LowStockAlert): void {
+    const targetKey = this.getAlertKey(alert);
+    this.alerts.update((current) =>
+      current.filter((item) => this.getAlertKey(item) !== targetKey)
+    );
   }
 
   toggleVisibility(): void {
@@ -179,7 +185,7 @@ export class Notify implements OnInit, OnDestroy {
     const deltaY = event.clientY - this.dragStartY();
 
     // Calculate total distance moved
-    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    const distance = Math.hypot(deltaX, deltaY);
     this.dragDistance.set(distance);
 
     // Update position
