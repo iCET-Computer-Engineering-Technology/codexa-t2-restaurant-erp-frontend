@@ -17,14 +17,10 @@ import { SupplierIngredient } from './page/supplier-ingredient/supplier-ingredie
 import { OrderPlacementComponent } from './page/order-placement/order-placement.component';
 import { ReservationsComponent } from './page/reservations/reservations';
 import { roleGuard } from './guards/role.guard';
-<<<<<<< HEAD
-import { Suppliers } from './page/supplier/supplier';
-import { KpiDashboard } from './page/kpi-dashboard/kpi-dashboard';
-
-=======
 import { RevenueService } from './services/revenue.service';
 import { Revenue } from './page/revenue/revenue';
->>>>>>> 11d216b3bdea9cc97f69fa8dfeb628daa4dea08c
+import { Suppliers } from './page/supplier/supplier';
+import { KpiDashboard } from './page/kpi-dashboard/kpi-dashboard';
 export const routes: Routes = [
   {
     path: '',
@@ -148,9 +144,6 @@ export const routes: Routes = [
         path: 'kitchen',
         component: Kitchen,
       },
-<<<<<<< HEAD
-
-=======
       {
         path: 'supplier-ingredient',
         component: SupplierIngredient
@@ -159,7 +152,6 @@ export const routes: Routes = [
         path: 'revenue',
         component: Revenue
       }
->>>>>>> 11d216b3bdea9cc97f69fa8dfeb628daa4dea08c
     ],
   },
 ];
