@@ -23,9 +23,16 @@ import { MenuItems } from './page/menu-items/menu-items';
 import { MenuCategories } from './page/menu-categories/menu-categories';
 import { MenuItemPrice } from './page/menu-item-price/menu-item-price';
 import { Portions } from './page/portions/portions';
-import { OrderPlacementComponent } from './page/order-placement/order-placement.component';
-import { roleGuard } from './guards/role.guard';
 
+import { MenuItem } from './page/menu-item/menu-item';
+import { Suppliers } from './page/supplier/supplier';
+import { SupplierIngredient } from './page/supplier-ingredient/supplier-ingredient';
+
+import { OrderPlacementComponent } from './page/order-placement/order-placement.component';
+import { ReservationsComponent } from './page/reservations/reservations';
+import { roleGuard } from './guards/role.guard';
+import { RevenueService } from './services/revenue.service';
+import { Revenue } from './page/revenue/revenue';
 export const routes: Routes = [
   {
     path: '',
@@ -121,70 +128,6 @@ export const routes: Routes = [
   },
 
   {
-    path: 'manager',
-    loadComponent: () => import('./page/manager/manager').then((m) => m.Manager),
-    children: [
-          {
-            path: 'manager-dashboard',
-            component: Dashboard,
-          },
-          {
-            path: '',
-            pathMatch:"full",
-            redirectTo:'manager-dashboard'
-          },
-          {
-            path: 'admin-dashboard',
-            pathMatch:"full",
-            redirectTo:'manager-dashboard'
-          },
-          {
-            path: 'manager-allowance',
-            component: Allowance,
-          },
-          {
-            path: 'manager-basic-salary',
-            component: BasicSalary
-          },
-          {
-            path: 'manager-deduction',
-            component: Deduction
-          },
-          {
-            path: 'manager-employee',
-            component: Employee
-          },
-          {
-            path: 'manager-employee-leave',
-            component: EmployeeLeave
-          },
-          {
-            path: 'manager-overtime',
-            component: Overtime
-          },
-          {
-            path: 'manager-payroll-config',
-            component: PayrollConfig
-          },
-          {
-            path: 'manager-payroll',
-            component: Payroll
-          },
-          {
-            path: 'manager-bonus',
-            component: Bonus
-          },
-          {
-            path: 'manager-salary-request',
-            component: SalaryRequest
-          },
-          {
-            path: 'manager-salary-response',
-            component: SalaryResponse
-          },
-      ]
-  },
-  {
     path: 'waiter',
     canActivate: [roleGuard],
     data: { roles: ['ROLE_ADMIN', 'ROLE_CASHIER', 'ROLE_WAITER'] },
@@ -213,6 +156,10 @@ export const routes: Routes = [
         component: Dashboard,
       },
       {
+        path: 'admin-supplier',
+        component: Suppliers
+      },
+      {
         path: 'admin-customer',
         component: Customers,
       },
@@ -225,52 +172,8 @@ export const routes: Routes = [
         component: Dashboard,
       },
       {
-        path: 'manager-allowance',
-        component: Allowance,
-      },
-      {
-        path: 'manager-basic-salary',
-        component: BasicSalary,
-      },
-      {
-        path: 'manager-bonus',
-        component: Bonus,
-      },
-      {
-        path: 'manager-deduction',
-        component: Deduction,
-      },
-      {
-        path: 'manager-employee',
-        component: Employee,
-      },
-      {
-        path: 'manager-employee-leave',
-        component: EmployeeLeave,
-      },
-      {
-        path: 'manager-overtime',
-        component: Overtime,
-      },
-      {
-        path: 'manager-payroll-config',
-        component: PayrollConfig,
-      },
-      {
-        path: 'manager-payroll',
-        component: Payroll,
-      },
-      {
-        path: 'manager-salary-request',
-        component: SalaryRequest,
-      },
-      {
-        path: 'manager-salary-response',
-        component: SalaryResponse,
-      },
-      {
-        path: 'menu-items',
-        component: MenuItems
+        path: 'menu-item',
+        component: MenuItem
       },
       {
         path: "menu-item-prices",
@@ -283,6 +186,10 @@ export const routes: Routes = [
       {
         path: "portions",
         component: Portions
+      },
+      {
+        path: "reservations",
+        component: ReservationsComponent
       },
       {
         path: 'admin-marketing',
@@ -309,7 +216,14 @@ export const routes: Routes = [
         path: 'kitchen',
         component: Kitchen,
       },
-
+      {
+        path: 'supplier-ingredient',
+        component: SupplierIngredient
+      },
+      {
+        path: 'revenue',
+        component: Revenue
+      }
     ],
   },
 ];

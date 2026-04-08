@@ -1,4 +1,4 @@
-import {DOCUMENT, isPlatformBrowser} from '@angular/common';
+import { DOCUMENT, isPlatformBrowser } from '@angular/common';
 import { ChangeDetectionStrategy, Component, PLATFORM_ID, inject, signal, computed } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
@@ -44,6 +44,8 @@ export class Sidebar {
 
   // HR Manager visibility
   readonly showHR = computed(() => ['ROLE_ADMIN', 'ROLE_MANAGER'].includes(this.userRole() || ''));
+  readonly showReservations = computed(() => ['ROLE_ADMIN', 'ROLE_CASHIER'].includes(this.userRole() || ''));
+  readonly showRevenue = computed(() => this.userRole() === 'ROLE_ADMIN');
 
   // Dynamic routes based on role
   readonly customersRoute = computed(() => {
