@@ -25,7 +25,8 @@ import { MenuItemPrice } from './page/menu-item-price/menu-item-price';
 import { Portions } from './page/portions/portions';
 import { OrderPlacementComponent } from './page/order-placement/order-placement.component';
 import { roleGuard } from './guards/role.guard';
-
+import { RevenueService } from './services/revenue.service';
+import { Revenue } from './page/revenue/revenue';
 export const routes: Routes = [
   {
     path: '',
@@ -309,7 +310,14 @@ export const routes: Routes = [
         path: 'kitchen',
         component: Kitchen,
       },
-
+      {
+        path: 'supplier-ingredient',
+        component: SupplierIngredient
+      },
+      {
+        path: 'revenue',
+        component: Revenue
+      }
     ],
   },
 ];
