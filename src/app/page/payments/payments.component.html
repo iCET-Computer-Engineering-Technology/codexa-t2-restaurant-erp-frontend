@@ -70,20 +70,6 @@
           </div>
         }
 
-        <!-- Error Message -->
-        @if (hasError() && !isCheckingPayments()) {
-          <div class="border-b border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            <div class="flex items-center justify-between">
-              <span>{{ error() }}</span>
-              <button
-                (click)="retry()"
-                class="ml-2 rounded bg-red-100 px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-200"
-                type="button">
-                Retry
-              </button>
-            </div>
-          </div>
-        }
 
         <div class="overflow-x-auto">
           <table class="w-full border-collapse text-sm">
@@ -257,21 +243,6 @@
                 <h3 class="text-lg font-semibold text-gray-900">Process Payment</h3>
                 <p class="mt-1 text-sm text-gray-600">{{ selectedOrder()?.orderNumber }}</p>
               </div>
-
-              <!-- Error Message -->
-              @if (hasError()) {
-                <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                  <div class="flex items-center justify-between">
-                    <span>{{ error() }}</span>
-                    <button
-                      (click)="error.set(null)"
-                      class="ml-2 rounded bg-red-100 px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-200"
-                      type="button">
-                      ✕ Close
-                    </button>
-                  </div>
-                </div>
-              }
 
               <!-- Payment Method Selector -->
               <div class="px-4 py-4">

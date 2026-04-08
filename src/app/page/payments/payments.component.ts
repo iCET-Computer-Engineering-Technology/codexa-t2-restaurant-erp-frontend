@@ -6,6 +6,7 @@ import { catchError, concatMap, delay } from 'rxjs/operators';
 import { OrderService } from '../../services/order.service';
 import { PaymentService } from '../../services/payment.service';
 import { AuthService } from '../../services/auth.service';
+import { ToastService } from '../../services/toast.service';
 import { OrderWithItemNameResponse } from '../../models/order.model';
 import { PaymentDto, PaymentMethod, PaymentRow } from '../../models/payment.model';
 
@@ -107,7 +108,8 @@ export class PaymentsComponent implements OnInit {
   constructor(
     private orderService: OrderService,
     private paymentService: PaymentService,
-    private authService: AuthService
+    private authService: AuthService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -148,7 +150,7 @@ export class PaymentsComponent implements OnInit {
         this.checkPaymentStatus(potentiallyUnpaid);
       },
       error: (err) => {
-        this.error.set('Failed to load orders. Please try again.');
+        this.toastService.error('Failed to load orders. Please try again.');
         this.isLoading.set(false);
         this.isCheckingPayments.set(false);
         console.error('Error loading orders:', err);
@@ -296,7 +298,7 @@ export class PaymentsComponent implements OnInit {
 
     if (!order) {
       console.error('❌ No order selected');
-      this.error.set('No order selected');
+      this.toastService.error('No order selected');
       return;
     }
     
@@ -365,7 +367,7 @@ export class PaymentsComponent implements OnInit {
             || err.message 
             || 'Payment failed. Please try again.';
           
-          this.error.set(`API Error: ${errorMsg}`);
+          this.toastService.error(`API Error: ${errorMsg}`);
           this.isProcessing.set(false);
         }
       });
@@ -396,7 +398,7 @@ export class PaymentsComponent implements OnInit {
         this.processMixedPayments(payments, index + 1);
       },
       error: (err) => {
-        this.error.set(`Payment ${index + 1} of ${payments.length} failed. Please contact support.`);
+        this.toastService.error(`Payment ${index + 1} of ${payments.length} failed. Please contact support.`);
         this.isProcessing.set(false);
         console.error('Mixed payment error:', err);
       }
@@ -408,8 +410,7 @@ export class PaymentsComponent implements OnInit {
     if (!order) return;
 
     console.log('🎉 Payment success! Order:', order.id);
-    // Show success message (you can add a toast service here)
-    alert('Payment recorded successfully');
+    this.toastService.success('Payment recorded successfully');
 
     // Remove order from unpaid list
     this.unpaidOrders.update(orders => orders.filter(o => o.id !== order.id));

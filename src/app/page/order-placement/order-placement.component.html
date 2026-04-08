@@ -7,16 +7,6 @@
     </div>
   </div>
 
-  <!-- Alert Messages -->
-  <div *ngIf="errorMessage" class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-    {{ errorMessage }}
-  </div>
-
-  <div *ngIf="successMessage"
-    class="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
-    {{ successMessage }}
-  </div>
-
   <!-- Loading State -->
   <div *ngIf="loadingCategories" class="flex min-h-70 flex-col items-center justify-center gap-4">
     <div class="h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-blue-600"></div>

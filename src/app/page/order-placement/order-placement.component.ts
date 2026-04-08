@@ -5,6 +5,7 @@ import { Subject } from 'rxjs';
 import { takeUntil, timeout } from 'rxjs/operators';
 import Swal from 'sweetalert2';
 import { OrderService } from '../../services/order.service';
+import { ToastService } from '../../services/toast.service';
 import {
     CustomerDto,
     MenuCategoriesDto,
@@ -51,9 +52,7 @@ export class OrderPlacementComponent implements OnInit, OnDestroy {
     orderNotes = '';
     customerSearchMobile = '';
 
-    // Messages
-    errorMessage = '';
-    successMessage = '';
+
 
     // Prices cache for menu items
     menuItemPrices: { [key: number]: MenuItemPriceDto[] } = {};
@@ -67,7 +66,8 @@ export class OrderPlacementComponent implements OnInit, OnDestroy {
 
     constructor(
         private readonly orderService: OrderService,
-        private readonly cdr: ChangeDetectorRef
+        private readonly cdr: ChangeDetectorRef,
+        private readonly toastService: ToastService
     ) { }
 
     ngOnInit(): void {
@@ -170,7 +170,6 @@ export class OrderPlacementComponent implements OnInit, OnDestroy {
     loadCategories(): void {
         console.log('loadCategories() called');
         this.loadingCategories = true;
-        this.errorMessage = '';
 
         this.orderService
             .getAllCategories()
@@ -189,14 +188,13 @@ export class OrderPlacementComponent implements OnInit, OnDestroy {
                     if (this.categories.length > 0) {
                         this.selectCategory(this.categories[0].id);
                     } else {
-                        this.errorMessage = 'No categories available.';
-                        this.requestRender();
+                        this.toastService.error('No categories available.');
                     }
                 },
                 error: (err) => {
                     console.error('✗ Error loading categories from API:', err);
                     this.loadingCategories = false;
-                    this.errorMessage = 'Failed to load categories. Please refresh the page.';
+                    this.toastService.error('Failed to load categories. Please refresh the page.');
                     this.requestRender();
                 },
             });
@@ -218,7 +216,6 @@ export class OrderPlacementComponent implements OnInit, OnDestroy {
     loadMenuItems(categoryId: number): void {
         console.log('loadMenuItems() called for category:', categoryId);
         this.loadingMenuItems = true;
-        this.errorMessage = '';
 
         // Clear previous category items immediately to avoid showing stale cards
         this.menuItems = [];
@@ -249,7 +246,7 @@ export class OrderPlacementComponent implements OnInit, OnDestroy {
                 error: (err) => {
                     console.error('✗ Error loading menu items from API:', err);
                     this.loadingMenuItems = false;
-                    this.errorMessage = 'Failed to load menu items. Please select another category.';
+                    this.toastService.error('Failed to load menu items. Please select another category.');
                     this.requestRender();
                 },
             });
@@ -291,7 +288,6 @@ export class OrderPlacementComponent implements OnInit, OnDestroy {
     loadTables(): void {
         console.log('loadTables() called');
         this.loadingTables = true;
-        this.errorMessage = '';
 
         this.orderService
             .getAllTables()
@@ -306,10 +302,9 @@ export class OrderPlacementComponent implements OnInit, OnDestroy {
                     this.loadingTables = false;
                     this.requestRender();
                 },
-                error: (err) => {
-                    console.error('✗ Error loading tables from API:', err);
+                error: () => {
                     this.loadingTables = false;
-                    this.errorMessage = 'Failed to load tables. Please refresh the page.';
+                    this.toastService.error('Failed to load tables. Please refresh the page.');
                     this.requestRender();
                 },
             });
@@ -377,13 +372,11 @@ export class OrderPlacementComponent implements OnInit, OnDestroy {
     // CUSTOMER SEARCH 
     searchCustomer(): void {
         if (!this.customerSearchMobile.trim()) {
-            this.errorMessage = 'Please enter a mobile number';
-            this.requestRender();
+            this.toastService.error('Please enter a mobile number');
             return;
         }
 
         this.loadingCustomer = true;
-        this.errorMessage = '';
         this.requestRender();
 
         this.orderService
@@ -402,7 +395,7 @@ export class OrderPlacementComponent implements OnInit, OnDestroy {
                     console.error('Error searching customer:', err);
                     this.selectedCustomer = null;
                     this.loadingCustomer = false;
-                    this.errorMessage = 'Customer not found. Proceeding as walk-in order.';
+                    this.toastService.warning('Customer not found. Proceeding as walk-in order.');
                     this.requestRender();
                 },
             });
@@ -425,20 +418,17 @@ export class OrderPlacementComponent implements OnInit, OnDestroy {
     submitOrder(): void {
         // Validation
         if (this.cartItems.length === 0) {
-            this.errorMessage = 'Please add at least one item to the order.';
-            this.requestRender();
+            this.toastService.error('Please add at least one item to the order.');
             return;
         }
 
         if (this.isDineIn() && !this.selectedTableId) {
-            this.errorMessage = 'Please select a table for dine-in orders.';
-            this.requestRender();
+            this.toastService.error('Please select a table for dine-in orders.');
             return;
         }
 
         if (!this.selectedOrderTypeId) {
-            this.errorMessage = 'Please select an order type.';
-            this.requestRender();
+            this.toastService.error('Please select an order type.');
             return;
         }
 
@@ -446,7 +436,6 @@ export class OrderPlacementComponent implements OnInit, OnDestroy {
         const placedTotal = this.getCartTotal();
 
         this.submittingOrder = true;
-        this.errorMessage = '';
         this.requestRender();
 
         // Build order request
@@ -481,7 +470,7 @@ export class OrderPlacementComponent implements OnInit, OnDestroy {
                 error: (err) => {
                     console.error('Error creating order:', err);
                     this.submittingOrder = false;
-                    this.errorMessage = 'Order failed. Please try again.';
+                    this.toastService.error('Order failed. Please try again.');
                     this.requestRender();
                 },
             });
@@ -566,11 +555,6 @@ export class OrderPlacementComponent implements OnInit, OnDestroy {
         this.customerSearchMobile = '';
         this.orderNotes = '';
         this.requestRender();
-
-        setTimeout(() => {
-            this.successMessage = '';
-            this.requestRender();
-        }, 5000);
     }
 
     //UI HELPER METHODS
@@ -583,12 +567,7 @@ export class OrderPlacementComponent implements OnInit, OnDestroy {
     }
 
     private showSuccessMessage(message: string): void {
-        this.successMessage = message;
-        this.requestRender();
-        setTimeout(() => {
-            this.successMessage = '';
-            this.requestRender();
-        }, 3000);
+        this.toastService.success(message);
     }
 
     private requestRender(): void {
