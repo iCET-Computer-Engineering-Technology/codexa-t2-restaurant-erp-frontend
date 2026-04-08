@@ -23,11 +23,15 @@ import { MenuItems } from './page/menu-items/menu-items';
 import { MenuCategories } from './page/menu-categories/menu-categories';
 import { MenuItemPrice } from './page/menu-item-price/menu-item-price';
 import { Portions } from './page/portions/portions';
+import { MenuItem } from './page/menu-item/menu-item';
+import { SupplierIngredient } from './page/supplier-ingredient/supplier-ingredient';
 import { OrderPlacementComponent } from './page/order-placement/order-placement.component';
 import { OrdersContainerComponent } from './page/orders-container/orders-container.component';
 import { roleGuard } from './guards/role.guard';
 import { RevenueService } from './services/revenue.service';
 import { Revenue } from './page/revenue/revenue';
+import { Suppliers } from './page/supplier/supplier';
+import { KpiDashboard } from './page/kpi-dashboard/kpi-dashboard';
 export const routes: Routes = [
   {
     path: '',
@@ -273,6 +277,9 @@ export const routes: Routes = [
       {
         path: 'menu-items',
         component: MenuItems
+      },
+        path: 'kpi-dashboard',
+        component: KpiDashboard,
       },
       {
         path: "menu-item-prices",
