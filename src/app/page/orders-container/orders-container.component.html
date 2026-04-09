@@ -1,0 +1,85 @@
+<div class="h-screen flex flex-col bg-gray-50">
+  <!-- Tab Navigation -->
+  <div class="bg-white border-b border-gray-200 shadow-sm">
+    <nav class="flex space-x-1 px-6" aria-label="Tabs">
+      <button
+        (click)="selectTab('placement')"
+        [class]="activeTab() === 'placement'
+          ? 'border-blue-500 text-blue-600 whitespace-nowrap py-4 px-6 border-b-2 font-semibold text-sm'
+          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm'"
+        type="button">
+        <svg class="inline-block w-5 h-5 mr-2 -mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+        </svg>
+        Order Placement
+      </button>
+
+      <button
+        (click)="selectTab('view-orders')"
+        [class]="activeTab() === 'view-orders'
+          ? 'border-blue-500 text-blue-600 whitespace-nowrap py-4 px-6 border-b-2 font-semibold text-sm'
+          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm'"
+        type="button">
+        <svg class="inline-block w-5 h-5 mr-2 -mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        View Orders
+      </button>
+
+      <button
+        (click)="selectTab('payments')"
+        [class]="activeTab() === 'payments'
+          ? 'border-blue-500 text-blue-600 whitespace-nowrap py-4 px-6 border-b-2 font-semibold text-sm'
+          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm'"
+        type="button">
+        <svg class="inline-block w-5 h-5 mr-2 -mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+        </svg>
+        Payments
+      </button>
+
+      <button
+        (click)="selectTab('receipts')"
+        [class]="activeTab() === 'receipts'
+          ? 'border-blue-500 text-blue-600 whitespace-nowrap py-4 px-6 border-b-2 font-semibold text-sm'
+          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm'"
+        type="button">
+        <svg class="inline-block w-5 h-5 mr-2 -mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        Receipts
+      </button>
+    </nav>
+  </div>
+
+  <!-- Tab Content -->
+  <div class="flex-1 overflow-hidden">
+    <!-- Order Placement Tab -->
+    @if (activeTab() === 'placement') {
+      <app-order-placement></app-order-placement>
+    }
+
+    <!-- View Orders Tab -->
+    @if (activeTab() === 'view-orders') {
+      <app-view-orders></app-view-orders>
+    }
+
+    <!-- Payments Tab (Placeholder) -->
+    @if (activeTab() === 'payments') {
+      <app-payments></app-payments>
+    }
+
+    <!-- Receipts Tab (Placeholder) -->
+    @if (activeTab() === 'receipts') {
+      <div class="flex items-center justify-center h-full">
+        <div class="text-center">
+          <svg class="h-16 w-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+          <h3 class="text-lg font-medium text-gray-900 mb-2">Receipts</h3>
+          <p class="text-sm text-gray-500">Receipts component coming soon</p>
+        </div>
+      </div>
+    }
+  </div>
+</div>
