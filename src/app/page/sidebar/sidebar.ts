@@ -29,7 +29,19 @@ export class Sidebar {
     const user = this.username();
     return user ? user.charAt(0).toUpperCase() : 'A';
   });
+  private normalizeRole(role: string | null): string {
+    const upper = (role ?? '').trim().toUpperCase();
+    if (!upper) return '';
+    return upper.startsWith('ROLE_') ? upper : `ROLE_${upper}`;
+  }
 
+  private hasRole(role: string): boolean {
+    return this.normalizeRole(this.userRole()) === this.normalizeRole(role);
+  }
+  private hasAnyRole(roles: string[]): boolean {
+    const currentRole = this.normalizeRole(this.userRole());
+    return roles.map((r) => this.normalizeRole(r)).includes(currentRole);
+  }
   // Role-based visibility
   readonly showDashboard = computed(() => this.userRole() === 'ROLE_ADMIN');
   readonly showCustomers = computed(() => ['ROLE_ADMIN', 'ROLE_CASHIER'].includes(this.userRole() || ''));
@@ -42,6 +54,9 @@ export class Sidebar {
   readonly showProducts = computed(() => this.userRole() === 'ROLE_ADMIN');
   readonly showReservations = computed(() => ['ROLE_ADMIN', 'ROLE_CASHIER'].includes(this.userRole() || ''));
   readonly showRevenue = computed(() => this.userRole() === 'ROLE_ADMIN');
+
+  readonly showHR = computed(() => this.hasAnyRole(['ROLE_ADMIN', 'ROLE_MANAGER']));
+  readonly showSupplier = computed(() => this.hasAnyRole(['ROLE_ADMIN', 'ROLE_MANAGER']));
 
   // Dynamic routes based on role
   readonly customersRoute = computed(() => {
@@ -72,6 +87,28 @@ export class Sidebar {
   readonly kitchenOrderAssignRoute = computed(() => {
     const role = this.userRole();
     return role === 'ROLE_CHEF' ? '/chef' : '/admin/kitchen';
+  });
+// HR Manager routes based on role
+  readonly hrAllowanceRoute = computed(() => '/manager/manager-allowance');
+
+  readonly hrBasicSalaryRoute = computed(() => '/manager/manager-basic-salary');
+
+  readonly hrBonusRoute = computed(() => '/manager/manager-bonus');
+
+  readonly hrDeductionRoute = computed(() => '/manager/manager-deduction');
+
+  readonly hrEmployeeRoute = computed(() => '/manager/manager-employee');
+
+  readonly hrEmployeeLeaveRoute = computed(() => '/manager/manager-employee-leave');
+
+  readonly hrOvertimeRoute = computed(() => '/manager/manager-overtime');
+
+  readonly hrPayrollConfigRoute = computed(() => '/manager/manager-payroll-config');
+
+  readonly hrPayrollRoute = computed(() => '/manager/manager-payroll');
+
+  readonly supplierRoute = computed(() => {
+    return this.hasRole('ROLE_ADMIN') ? '/admin/admin-supplier' : '/manager/manager-supplier';
   });
 
   constructor() {

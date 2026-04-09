@@ -217,6 +217,20 @@ aside {
   padding: 8px 0 12px 0;
 }
 
+.marketing-menu-group:focus-within .marketing-submenu {
+  max-height: 300px;
+  padding: 8px 0 12px 0;
+}
+
+/* HR has more items; allow a taller expanded panel to avoid clipping Payroll. */
+.marketing-menu-group:hover .marketing-submenu.hr-submenu {
+  max-height: 960px;
+}
+
+.marketing-menu-group:focus-within .marketing-submenu.hr-submenu {
+  max-height: 960px;
+}
+
 .sidebar-submenu-item {
   color: rgba(203, 213, 225, 0.7);
   background: transparent;

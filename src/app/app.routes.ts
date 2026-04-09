@@ -10,7 +10,17 @@ import { Kitchen } from './page/kitchen/kitchen';
 import { MenuCategories } from './page/menu-categories/menu-categories';
 import { MenuItemPrice } from './page/menu-item-price/menu-item-price';
 import { Portions } from './page/portions/portions';
-
+import {BasicSalary} from './page/manager/basic-salary/basic-salary';
+import {Allowance} from './page/manager/allowance/allowance';
+import {Deduction} from './page/manager/deduction/deduction';
+import {Employee} from './page/manager/employee/employee';
+import {EmployeeLeave} from './page/manager/employee-leave/employee-leave';
+import {Overtime} from './page/manager/overtime/overtime';
+import {PayrollConfig} from './page/manager/payroll-config/payroll-config';
+import {Payroll} from './page/manager/payroll/payroll';
+import {SalaryRequest} from './page/manager/salary-request/salary-request';
+import {SalaryResponse} from './page/manager/salary-response/salary-response';
+import {Bonus} from './page/manager/bonus/bonus';
 import { MenuItem } from './page/menu-item/menu-item';
 import { Suppliers } from './page/supplier/supplier';
 import { SupplierIngredient } from './page/supplier-ingredient/supplier-ingredient';
@@ -50,6 +60,80 @@ export const routes: Routes = [
       }
     ]
   },
+  {
+    path: 'manager',
+    canActivate: [roleGuard],
+    data: { roles: ['ROLE_ADMIN', 'ROLE_MANAGER'] },
+    loadComponent: () => import('./page/manager/manager').then((m) => m.Manager),
+    children: [
+      {
+        path: 'manager-dashboard',
+        component: Dashboard,
+      },
+      {
+        path: '',
+        pathMatch:"full",
+        redirectTo:'manager-dashboard'
+      },
+      {
+        path: 'admin-dashboard',
+        pathMatch:"full",
+        redirectTo:'manager-dashboard'
+      },
+      {
+        path: 'manager-allowance',
+        component: Allowance,
+      },
+      {
+        path: 'manager-basic-salary',
+        component: BasicSalary
+      },
+      {
+        path: 'manager-deduction',
+        component: Deduction
+      },
+      {
+        path: 'manager-employee',
+        component: Employee
+      },
+      {
+        path: 'manager-employee-leave',
+        component: EmployeeLeave
+      },
+      {
+        path: 'manager-overtime',
+        component: Overtime
+      },
+      {
+        path: 'manager-payroll-config',
+        component: PayrollConfig
+      },
+      {
+        path: 'manager-payroll',
+        component: Payroll
+      },
+      {
+        path: 'manager-bonus',
+        component: Bonus
+      },
+      {
+        path: 'manager-salary-request',
+        component: SalaryRequest
+      },
+      {
+        path: 'manager-salary-response',
+        component: SalaryResponse
+      },
+      {
+        path: 'manager-supplier',
+        component: Suppliers
+      },
+    ]
+  },
+
+
+
+
   {
     path: 'waiter',
     canActivate: [roleGuard],
