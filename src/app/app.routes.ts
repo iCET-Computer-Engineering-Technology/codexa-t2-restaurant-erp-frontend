@@ -18,6 +18,7 @@ import { SupplierIngredient } from './page/supplier-ingredient/supplier-ingredie
 import { OrderPlacementComponent } from './page/order-placement/order-placement.component';
 import { ReservationsComponent } from './page/reservations/reservations';
 import { roleGuard } from './guards/role.guard';
+import { OrdersContainerComponent } from './page/orders-container/orders-container.component';
 export const routes: Routes = [
   {
     path: '',
@@ -86,7 +87,7 @@ export const routes: Routes = [
       },
       {
         path: 'admin-order',
-        component: OrderPlacementComponent,
+        component: OrdersContainerComponent,
       },
       {
         path: 'admin-dashboard',
