@@ -52,8 +52,6 @@ export class OrderPlacementComponent implements OnInit, OnDestroy {
     orderNotes = '';
     customerSearchMobile = '';
 
-
-
     // Prices cache for menu items
     menuItemPrices: { [key: number]: MenuItemPriceDto[] } = {};
 
@@ -143,7 +141,7 @@ export class OrderPlacementComponent implements OnInit, OnDestroy {
 
     getDisplayPortionName(price: MenuItemPriceDto): string {
         const raw = (price?.portionName ?? '').trim();
-        // If backend returned a real name, prefer it
+        //backend returned a real name, prefer it
         if (raw.length > 0 && raw !== 'Default' && !/^Portion\s+\d+$/i.test(raw)) {
             return raw;
         }
