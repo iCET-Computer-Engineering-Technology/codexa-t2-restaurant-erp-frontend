@@ -167,7 +167,7 @@ export class Suppliers implements OnInit {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#ef4444'
-    }).then((result) => {
+    }).then((result: any) => {
       if (result.isConfirmed) {
         this.supplierService.deleteSupplier(id).subscribe({
           next: () => {

@@ -6,7 +6,6 @@ import { Customers } from './page/customers/customers';
 import { MarketingCampaign } from './page/admin/marketing-campaign/marketing-campaign';
 import { CampaignsComponent } from './page/admin/marketing-campaign/campaigns/campaigns';
 import { AnalyticsComponent } from './page/admin/marketing-campaign/analytics/analytics';
-import { Kitchen } from './page/kitchen/kitchen';
 import { MenuCategories } from './page/menu-categories/menu-categories';
 import { MenuItemPrice } from './page/menu-item-price/menu-item-price';
 import { Portions } from './page/portions/portions';
@@ -62,7 +61,12 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        component: Kitchen,
+        pathMatch: 'full',
+        redirectTo: 'kitchen',
+      },
+      {
+        path: 'kitchen',
+        loadComponent: () => import('./page/kitchen/kitchen').then((m) => m.Kitchen),
       }
     ]
   },
@@ -135,7 +139,7 @@ export const routes: Routes = [
       },
       {
         path: 'kitchen',
-        component: Kitchen,
+        loadComponent: () => import('./page/kitchen/kitchen').then((m) => m.Kitchen),
       },
       {
         path: 'supplier-ingredient',

@@ -70,7 +70,7 @@ deletePortion(id: number): void {
       confirmButtonColor: "#dc2626", 
       cancelButtonColor: "#6b7280", 
       confirmButtonText: "Yes, delete it!"
-    }).then((result) => {
+    }).then((result: any) => {
       
       if (result.isConfirmed) {
         this.http.delete(`http://localhost:8080/portions/${id}`).subscribe({

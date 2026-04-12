@@ -4,11 +4,10 @@ import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
-import { Sidebar } from "../sidebar/sidebar";
 
 @Component({
   selector: 'app-menu-categories',
-  imports: [ReactiveFormsModule, FormsModule, CommonModule, Sidebar],
+  imports: [ReactiveFormsModule, FormsModule, CommonModule],
   templateUrl: './menu-categories.html',
   styleUrl: './menu-categories.css',
 })
@@ -75,7 +74,7 @@ deleteMenuCategory(id: number): void {
       confirmButtonColor: "#dc2626", 
       cancelButtonColor: "#6b7280", 
       confirmButtonText: "Yes, delete it!"
-    }).then((result) => {
+    }).then((result: any) => {
       
       if (result.isConfirmed) {
         this.http.delete(`http://localhost:8080/api/categories/${id}`).subscribe({

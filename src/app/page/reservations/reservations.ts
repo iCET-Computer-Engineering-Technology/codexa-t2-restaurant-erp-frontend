@@ -455,7 +455,7 @@ export class ReservationsComponent implements OnInit {
       confirmButtonColor: '#ef4444',
       cancelButtonColor: '#94a3b8',
       confirmButtonText: 'Yes, cancel it',
-    }).then((result) => {
+    }).then((result: any) => {
       if (result.isConfirmed) {
         this.confirmCancelReservation(reservationId);
       }

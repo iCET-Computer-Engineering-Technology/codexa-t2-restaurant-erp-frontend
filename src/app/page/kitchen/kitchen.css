@@ -1,0 +1,138 @@
+/* Kitchen Display System Styles */
+
+:host {
+  --animation-duration: 300ms;
+  --z-modal: 50;
+}
+
+/* Smooth animations for order cards */
+article {
+  animation: slideIn var(--animation-duration) ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Order status colors with gradient backgrounds */
+.bg-blue-50 {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+}
+
+.bg-amber-50 {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+}
+
+.bg-emerald-50 {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+}
+
+/* Improved button hover effects */
+button:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 200ms ease-out;
+}
+
+button:not(:disabled):active {
+  transform: translateY(0);
+}
+
+/* Drag and drop zone feedback */
+[dragover] {
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
+/* Accessibility improvements */
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Order item summary truncation */
+.text-xs {
+  line-height: 1.25;
+}
+
+/* Modal animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+[role="dialog"] {
+  animation: fadeIn 200ms ease-out;
+}
+
+/* Loader animation */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Status badges */
+.rounded-full {
+  transition: all 150ms ease-out;
+}
+
+/* Workload bars */
+[style*="width"] {
+  transition: width 300ms ease-out;
+}
+
+/* Print styles for kitchen paper */
+@media print {
+  body {
+    background: white;
+  }
+
+  .no-print {
+    display: none;
+  }
+
+  article {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+  :host {
+    --text-sm: 0.875rem;
+  }
+
+  article {
+    transition: all 200ms ease-out;
+  }
+}
+
+/* Dark mode support (optional) */
+@media (prefers-color-scheme: dark) {
+  :host {
+    --bg-primary: #1f2937;
+    --bg-secondary: #111827;
+    --text-primary: #f3f4f6;
+    --text-secondary: #d1d5db;
+  }
+}

@@ -156,12 +156,12 @@
                     </div>
                     <button
                         type="button"
-                        [disabled]="isBusy(card)"
-                        [class.opacity-60]="isBusy(card)"
-                        [class.cursor-not-allowed]="isBusy(card)"
+                        [disabled]="isBusy(card) || !!card.waiterId"
+                        [class.opacity-60]="isBusy(card) || !!card.waiterId"
+                        [class.cursor-not-allowed]="isBusy(card) || !!card.waiterId"
                         (click)="openWaiterAssignmentModal(card.id)"
                         class="w-full rounded-md border border-emerald-300 bg-white px-3 py-2 text-xs font-medium text-emerald-700 hover:bg-emerald-100">
-                        {{ card.waiterName ? 'Change Waiter' : 'Assign Waiter' }}
+                        {{ card.waiterName ? 'Waiter Assigned' : 'Assign Waiter' }}
                     </button>
                 </article>
                 } @empty {

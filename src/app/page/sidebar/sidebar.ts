@@ -60,17 +60,17 @@ export class Sidebar {
 
   readonly kitchenDashboardRoute = computed(() => {
     const role = this.userRole();
-    return role === 'ROLE_CHEF' ? '/chef' : '/admin/kitchen';
+    return role === 'ROLE_CHEF' ? '/chef/kitchen' : '/admin/kitchen';
   });
 
   readonly kitchenOrderTableRoute = computed(() => {
     const role = this.userRole();
-    return role === 'ROLE_CHEF' ? '/chef' : '/admin/kitchen';
+    return role === 'ROLE_CHEF' ? '/chef/kitchen' : '/admin/kitchen';
   });
 
   readonly kitchenOrderAssignRoute = computed(() => {
     const role = this.userRole();
-    return role === 'ROLE_CHEF' ? '/chef' : '/admin/kitchen';
+    return role === 'ROLE_CHEF' ? '/chef/kitchen' : '/admin/kitchen';
   });
 
   constructor() {

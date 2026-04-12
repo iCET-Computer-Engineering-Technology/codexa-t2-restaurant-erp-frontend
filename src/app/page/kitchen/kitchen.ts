@@ -2,12 +2,15 @@ import {
   ChangeDetectionStrategy,
   Component,
   OnInit,
+  OnDestroy,
   computed,
   inject,
   signal,
 } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { KitchenService, Order, Waiter } from '../../services/kitchen.service';
-import { catchError, of, tap } from 'rxjs';
+import { Subject, catchError, of, takeUntil, tap } from 'rxjs';
+import { KitchenRealtimeService } from '../../services/kitchen-realtime.service';
 
 type BoardColumn = 'new' | 'preparing' | 'ready';
 
@@ -22,13 +25,18 @@ interface WaiterAssignmentOption {
 
 @Component({
   selector: 'app-kitchen',
-  imports: [],
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './kitchen.html',
   styleUrl: './kitchen.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Kitchen implements OnInit {
+export class Kitchen implements OnInit, OnDestroy {
   private readonly kitchenService = inject(KitchenService);
+  private readonly kitchenRealtimeService = inject(KitchenRealtimeService);
+  private readonly alertDismissTimeoutMs = 3000;
+  private alertDismissTimer: ReturnType<typeof setTimeout> | null = null;
+  private readonly destroy$ = new Subject<void>();
 
   readonly orders = signal<Order[]>([]);
   readonly waiters = signal<Waiter[]>([]);
@@ -67,7 +75,11 @@ export class Kitchen implements OnInit {
     }, {});
 
     return this.waiters().map((waiter) => {
-      const assignedReadyOrders = assignmentsByWaiter[waiter.id] ?? 0;
+      const assignedReadyOrders = Math.max(
+        Number(waiter.activeOrdersCount ?? 0),
+        assignmentsByWaiter[waiter.id] ?? 0,
+      );
+
       return {
         id: waiter.id,
         label: `${waiter.name} (#${waiter.id})`,
@@ -86,11 +98,12 @@ export class Kitchen implements OnInit {
   ngOnInit(): void {
     this.refreshBoard();
     this.loadWaiters();
+    this.connectRealtimeUpdates();
   }
 
   refreshBoard(): void {
     this.isLoading.set(true);
-    this.errorMessage.set('');
+    this.clearAlerts();
 
     this.loadBoard().subscribe();
   }
@@ -102,7 +115,7 @@ export class Kitchen implements OnInit {
         this.isLoading.set(false);
       }),
       catchError(() => {
-        this.errorMessage.set('Failed to load kitchen orders. Please try again.');
+        this.showErrorMessage('Failed to load kitchen orders. Please try again.');
         this.isLoading.set(false);
         return of([] as Order[]);
       })
@@ -180,6 +193,17 @@ export class Kitchen implements OnInit {
   }
 
   openWaiterAssignmentModal(cardId: number): void {
+    const selectedOrder = this.readyCards().find((card) => card.id === cardId) ?? null;
+    if (!selectedOrder) {
+      this.showErrorMessage('Selected order not found in ready list.');
+      return;
+    }
+
+    if (selectedOrder.waiterId) {
+      this.showErrorMessage('This order already has a waiter assigned.');
+      return;
+    }
+
     this.selectedWaiterModalCardId.set(cardId);
     this.successMessage.set('');
     this.errorMessage.set('');
@@ -197,24 +221,13 @@ export class Kitchen implements OnInit {
 
     const selectedOrder = this.readyCards().find((order) => order.id === selectedCardId) ?? null;
     if (!selectedOrder) {
-      this.errorMessage.set('Selected order could not be found. Please refresh the board.');
+      this.showErrorMessage('Selected order could not be found. Please refresh the board.');
       return;
     }
 
-    if (!selectedOrder.kitchenOrderId) {
-      this.errorMessage.set('Refreshing kitchen data before assigning waiter...');
-      this.isLoading.set(true);
-      this.loadBoard().subscribe({
-        next: () => {
-          const refreshedOrder = this.readyCards().find((order) => order.id === selectedCardId) ?? null;
-          if (!refreshedOrder) {
-            this.errorMessage.set('Order data is unavailable right now. Please refresh and try again.');
-            return;
-          }
-
-          this.assignWaiterToOrder(refreshedOrder, waiterId);
-        },
-      });
+    if (selectedOrder.waiterId) {
+      this.showErrorMessage('This order already has a waiter assigned.');
+      this.closeWaiterAssignmentModal();
       return;
     }
 
@@ -223,9 +236,9 @@ export class Kitchen implements OnInit {
 
   private assignWaiterToOrder(selectedOrder: Order, waiterId: number): void {
     this.activeOrderActionId.set(selectedOrder.id);
-    this.kitchenService
-      .assignWaiterWithFallback(selectedOrder.kitchenOrderId ?? selectedOrder.id, waiterId, selectedOrder.id)
-      .subscribe({
+
+    const assignToKitchenOrder = (kitchenOrderId: number): void => {
+      this.kitchenService.assignWaiter(kitchenOrderId, waiterId).subscribe({
       next: () => {
         const waiter = this.waiters().find((item) => item.id === waiterId);
         this.orders.update((orders) =>
@@ -233,6 +246,7 @@ export class Kitchen implements OnInit {
             order.id === selectedOrder.id
               ? {
                   ...order,
+                  kitchenOrderId,
                   waiterId,
                   waiterName: waiter?.name ?? order.waiterName,
                 }
@@ -240,11 +254,34 @@ export class Kitchen implements OnInit {
           )
         );
         this.successMessage.set('Waiter assigned successfully.');
+        this.scheduleAlertDismissal();
         this.activeOrderActionId.set(null);
         this.closeWaiterAssignmentModal();
       },
       error: () => {
-        this.errorMessage.set('Failed to assign waiter. Please try again.');
+        this.showErrorMessage('Failed to assign waiter. Please try again.');
+        this.activeOrderActionId.set(null);
+      },
+    });
+    };
+
+    if (selectedOrder.kitchenOrderId && selectedOrder.kitchenOrderId > 0) {
+      assignToKitchenOrder(selectedOrder.kitchenOrderId);
+      return;
+    }
+
+    this.kitchenService.resolveKitchenOrderId(selectedOrder.id).subscribe({
+      next: (resolvedKitchenOrderId) => {
+        if (!resolvedKitchenOrderId) {
+          this.showErrorMessage('Kitchen order reference not found. This order may already be closed in backend.');
+          this.activeOrderActionId.set(null);
+          return;
+        }
+
+        assignToKitchenOrder(resolvedKitchenOrderId);
+      },
+      error: () => {
+        this.showErrorMessage('Failed to locate kitchen order reference. Please refresh and try again.');
         this.activeOrderActionId.set(null);
       },
     });
@@ -263,19 +300,18 @@ export class Kitchen implements OnInit {
   }
 
   private changeOrderStatus(order: Order, status: string): void {
-    this.errorMessage.set('');
-    this.successMessage.set('');
+    this.clearAlerts();
     this.activeOrderActionId.set(order.id);
 
     const executeStatusUpdate = (): void => {
       this.kitchenService.updateOrderStatus(order.id, status).subscribe({
         next: () => {
-          this.successMessage.set('Order status updated.');
+          this.showSuccessMessage('Order status updated.');
           this.activeOrderActionId.set(null);
           this.refreshBoard();
         },
         error: () => {
-          this.errorMessage.set('Failed to update order status.');
+          this.showErrorMessage('Failed to update order status.');
           this.activeOrderActionId.set(null);
         },
       });
@@ -285,7 +321,7 @@ export class Kitchen implements OnInit {
       this.kitchenService.sendToKitchen(order.id).subscribe({
         next: () => executeStatusUpdate(),
         error: () => {
-          this.errorMessage.set('Failed to send order to kitchen.');
+          this.showErrorMessage('Failed to send order to kitchen.');
           this.activeOrderActionId.set(null);
         },
       });
@@ -387,4 +423,66 @@ export class Kitchen implements OnInit {
     return this.activeOrderActionId() === order.id;
   }
 
+  ngOnDestroy(): void {
+    this.clearAlertDismissTimer();
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.kitchenRealtimeService.disconnect();
+  }
+
+  private connectRealtimeUpdates(): void {
+    this.kitchenRealtimeService.connect();
+
+    this.kitchenRealtimeService.connection$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((isConnected) => {
+        if (!isConnected) {
+          return;
+        }
+
+        this.loadBoard().subscribe();
+        this.loadWaiters();
+      });
+
+    this.kitchenRealtimeService.updates$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.loadBoard().subscribe();
+        this.loadWaiters();
+      });
+  }
+
+  private showSuccessMessage(message: string): void {
+    this.errorMessage.set('');
+    this.successMessage.set(message);
+    this.scheduleAlertDismissal();
+  }
+
+  private showErrorMessage(message: string): void {
+    this.successMessage.set('');
+    this.errorMessage.set(message);
+    this.scheduleAlertDismissal();
+  }
+
+  private clearAlerts(): void {
+    this.clearAlertDismissTimer();
+    this.errorMessage.set('');
+    this.successMessage.set('');
+  }
+
+  private scheduleAlertDismissal(): void {
+    this.clearAlertDismissTimer();
+    this.alertDismissTimer = setTimeout(() => {
+      this.errorMessage.set('');
+      this.successMessage.set('');
+      this.alertDismissTimer = null;
+    }, this.alertDismissTimeoutMs);
+  }
+
+  private clearAlertDismissTimer(): void {
+    if (this.alertDismissTimer !== null) {
+      clearTimeout(this.alertDismissTimer);
+      this.alertDismissTimer = null;
+    }
+  }
 }

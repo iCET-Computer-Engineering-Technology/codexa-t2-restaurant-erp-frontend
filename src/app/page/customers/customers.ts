@@ -156,7 +156,7 @@ closeProfile() {
   }
 
   deleteCustomer(phone: string) {
-    Swal.fire({ title: "Are you sure?", text: "Delete this customer?", icon: "warning", showCancelButton: true, confirmButtonColor: '#ef4444' }).then((result) => {
+    Swal.fire({ title: "Are you sure?", text: "Delete this customer?", icon: "warning", showCancelButton: true, confirmButtonColor: '#ef4444' }).then((result: any) => {
       if (result.isConfirmed) {
         this.http.delete<boolean>('http://localhost:8080/customers/'+phone).subscribe({
           next: () => { Swal.fire('Deleted!', '', 'success'); this.loadCustomers(); },

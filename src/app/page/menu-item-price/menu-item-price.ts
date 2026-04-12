@@ -121,7 +121,7 @@ export class MenuItemPrice implements OnInit {
       confirmButtonColor: "#dc2626",
       cancelButtonColor: "#6b7280",
       confirmButtonText: "Yes, delete it!"
-    }).then((result) => {
+    }).then((result: any) => {
       if (result.isConfirmed) {
         this.http.delete(`http://localhost:8080/api/menu-item-price/${id}`).subscribe({
           next: (data) => {
