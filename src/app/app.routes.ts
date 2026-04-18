@@ -20,6 +20,8 @@ import { ReservationsComponent } from './page/reservations/reservations';
 import { roleGuard } from './guards/role.guard';
 import { RevenueService } from './services/revenue.service';
 import { Revenue } from './page/revenue/revenue';
+import { FloorPlanManager } from './page/floor-plan-manager/floor-plan-manager';
+import { FloorPlanCashier } from './page/floor-plan-cashier/floor-plan-cashier';
 export const routes: Routes = [
   {
     path: '',
@@ -47,6 +49,10 @@ export const routes: Routes = [
       {
         path: "reservations",
         component: ReservationsComponent
+      },
+      {
+        path: 'floor-plan',
+        component: FloorPlanCashier
       }
     ]
   },
@@ -146,6 +152,10 @@ export const routes: Routes = [
       {
         path: 'revenue',
         component: Revenue
+      },
+      {
+        path: 'floor-plan-manager',
+        component: FloorPlanManager
       }
     ],
   },

@@ -42,6 +42,7 @@ export class Sidebar {
   readonly showProducts = computed(() => this.userRole() === 'ROLE_ADMIN');
   readonly showReservations = computed(() => ['ROLE_ADMIN', 'ROLE_CASHIER'].includes(this.userRole() || ''));
   readonly showRevenue = computed(() => this.userRole() === 'ROLE_ADMIN');
+  readonly showFloorPlan = computed(() => ['ROLE_ADMIN', 'ROLE_CASHIER'].includes(this.userRole() || ''));
 
   // Dynamic routes based on role
   readonly customersRoute = computed(() => {
@@ -72,6 +73,11 @@ export class Sidebar {
   readonly kitchenOrderAssignRoute = computed(() => {
     const role = this.userRole();
     return role === 'ROLE_CHEF' ? '/chef' : '/admin/kitchen';
+  });
+
+  readonly floorPlanRoute = computed(() => {
+    const role = this.userRole();
+    return role === 'ROLE_CASHIER' ? '/cashier/floor-plan' : '/admin/floor-plan-manager';
   });
 
   constructor() {

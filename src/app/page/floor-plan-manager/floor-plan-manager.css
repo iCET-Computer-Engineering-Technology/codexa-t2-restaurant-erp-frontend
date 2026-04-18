@@ -1,0 +1,44 @@
+/* Floor Plan Manager Styles */
+
+.text-xxs {
+  font-size: 0.65rem;
+  line-height: 0.875rem;
+}
+
+/* Table elements */
+.w-30 {
+  width: 120px;
+}
+
+/* Drag and drop cursor */
+[draggable="true"] {
+  user-select: none;
+  -webkit-user-drag: element;
+}
+
+[draggable="true"]:hover {
+  cursor: grab;
+}
+
+[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+/* Canvas grid background */
+.grid-pattern {
+  background-size: 10px 10px;
+  background-image: 
+    repeating-linear-gradient(0deg, transparent, transparent 9px, #e5e7eb 9px, #e5e7eb 10px),
+    repeating-linear-gradient(90deg, transparent, transparent 9px, #e5e7eb 9px, #e5e7eb 10px);
+}
+
+/* Loading animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}

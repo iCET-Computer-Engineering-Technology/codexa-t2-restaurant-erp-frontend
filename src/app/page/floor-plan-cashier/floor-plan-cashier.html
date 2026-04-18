@@ -1,0 +1,148 @@
+<div class="min-h-screen bg-gray-50 p-5">
+  <!-- Header -->
+  <div class="mb-5 flex items-center justify-between">
+    <div>
+      <h1 class="text-3xl font-semibold text-gray-900">Table Floor Plan</h1>
+      <p class="mt-2 text-sm text-gray-600">View tables and make reservations</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <select
+        [(ngModel)]="filterStatus"
+        (change)="loadTables()"
+        class="rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none">
+        <option value="">All Tables</option>
+        <option value="available">Available</option>
+        <option value="occupied">Occupied</option>
+        <option value="reserved">Reserved</option>
+        <option value="cleaning">Cleaning</option>
+      </select>
+      <button
+        (click)="loadTables()"
+        class="rounded-lg bg-gray-600 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700">
+        Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- Alert Messages -->
+  <div *ngIf="errorMessage" class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading && sections.length === 0" class="flex min-h-70 flex-col items-center justify-center gap-4">
+    <div class="h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-blue-600"></div>
+    <p class="text-base text-gray-600">Loading floor plan...</p>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!loading || sections.length > 0" class="grid grid-cols-1 gap-6 lg:grid-cols-4">
+    <!-- Left Sidebar: Sections & Legend -->
+    <div class="space-y-6">
+      <!-- Section Tabs -->
+      <div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+        <h2 class="mb-3 text-base font-semibold text-gray-900">Floor Sections</h2>
+        <div class="space-y-2">
+          <button
+            *ngFor="let section of sections"
+            (click)="selectSection(section.id)"
+            [ngClass]="selectedSectionId === section.id ? 'bg-blue-50 border-blue-600 text-blue-600' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'"
+            class="w-full rounded-md border px-3 py-2 text-sm font-medium transition-colors">
+            {{ section.name }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Status Legend -->
+      <div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+        <h2 class="mb-3 text-base font-semibold text-gray-900">Status Colors</h2>
+        <div class="space-y-2 text-sm">
+          <div class="flex items-center gap-2">
+            <div class="h-4 w-4 rounded bg-green-500"></div>
+            <span>Available</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="h-4 w-4 rounded bg-red-500"></div>
+            <span>Occupied</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="h-4 w-4 rounded bg-blue-500"></div>
+            <span>Reserved</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="h-4 w-4 rounded bg-yellow-500"></div>
+            <span>Cleaning</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Instructions -->
+      <div class="rounded-lg border border-blue-200 bg-blue-50 p-4 shadow-sm">
+        <h2 class="mb-2 text-sm font-semibold text-blue-900">How to Book</h2>
+        <p class="text-xs text-blue-700">
+          Click on any available table to make a reservation. Occupied tables cannot be booked.
+        </p>
+      </div>
+    </div>
+
+    <!-- Right: Canvas Area -->
+    <div class="lg:col-span-3">
+      <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+        <div class="mb-4 flex items-center justify-between">
+          <h2 class="text-base font-semibold text-gray-900">
+            {{ sections.find(s => s.id === selectedSectionId)?.name || 'Floor Plan' }}
+          </h2>
+          <div class="text-sm text-gray-500">
+            {{ getTablesForSelectedSection().length }} tables
+          </div>
+        </div>
+
+        <!-- Canvas -->
+        <div
+          class="relative overflow-auto rounded border-2 border-gray-300 bg-gray-50"
+          [style.width.px]="canvasWidth"
+          [style.height.px]="canvasHeight">
+
+          <!-- Tables -->
+          <div
+            *ngFor="let table of getTablesForSelectedSection()"
+            (click)="onTableClick(table)"
+            [ngClass]="getStatusColorClass(table.status)"
+            [style.left.px]="table.posX || 100 + (table.id * 60)"
+            [style.top.px]="table.posY || 100 + ((table.sectionId - 1) * 150)"
+            class="absolute flex h-24 w-28 cursor-pointer flex-col items-center justify-center rounded-lg text-white shadow-lg transition-all hover:scale-110 hover:shadow-xl"
+            [class.cursor-not-allowed]="table.status === 'occupied' || table.status === 'reserved'"
+            [class.opacity-75]="table.status === 'occupied'">
+            <div class="text-base font-bold">{{ table.tableNumber }}</div>
+            <div class="text-xs">{{ table.capacity }} seats</div>
+            <div class="text-xxs mt-1 capitalize">{{ table.status }}</div>
+          </div>
+
+          <!-- Empty state -->
+          <div
+            *ngIf="getTablesForSelectedSection().length === 0"
+            class="flex h-full items-center justify-center text-gray-400">
+            <div class="text-center">
+              <svg class="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              </svg>
+              <p class="mt-2 text-sm">No tables in this section</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Info Footer -->
+        <div class="mt-4 rounded-lg bg-gray-100 px-4 py-3">
+          <div class="flex items-center justify-between text-sm text-gray-600">
+            <div>
+              <span class="font-medium">Auto-refresh:</span> Every 30 seconds
+            </div>
+            <div>
+              <span class="font-medium">Total Tables:</span> {{ getTablesForSelectedSection().length }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

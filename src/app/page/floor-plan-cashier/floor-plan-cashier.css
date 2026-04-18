@@ -1,0 +1,27 @@
+/* Floor Plan Cashier Styles */
+
+.text-xxs {
+  font-size: 0.65rem;
+  line-height: 0.875rem;
+}
+
+/* Table elements */
+.w-30 {
+  width: 120px;
+}
+
+/* Smooth transitions */
+.transition-all {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Loading animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
