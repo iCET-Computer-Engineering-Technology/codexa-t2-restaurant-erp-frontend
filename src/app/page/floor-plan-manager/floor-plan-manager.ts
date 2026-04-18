@@ -5,6 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import Swal from 'sweetalert2';
 import { Subscription } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 
 interface Table {
   id: number;
@@ -48,6 +49,10 @@ export class FloorPlanManager implements OnInit, OnDestroy {
   canvasHeight: number = 700;
   gridSize: number = 10;
 
+  // WebSocket and real-time updates
+  private ws$?: WebSocketSubject<any>;
+  private wsSubscription?: Subscription;
+
   // Subscriptions
   private autoRefreshSubscription?: Subscription;
 
@@ -55,11 +60,74 @@ export class FloorPlanManager implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadTables();
+    this.connectWebSocket();
   }
 
   ngOnDestroy(): void {
     if (this.autoRefreshSubscription) {
       this.autoRefreshSubscription.unsubscribe();
+    }
+    if (this.ws$) {
+      this.ws$.complete();
+    }
+    if (this.wsSubscription) {
+      this.wsSubscription.unsubscribe();
+    }
+  }
+
+  /**
+   * Connect to WebSocket for real-time table updates
+   */
+  connectWebSocket(): void {
+    try {
+      const wsUrl = environment.apiUrl.replace(/^http/, 'ws') + '/table-updates';
+      this.ws$ = webSocket({
+        url: wsUrl,
+        openObserver: {
+          next: () => {
+            console.log('WebSocket connected');
+          }
+        },
+        closeObserver: {
+          next: () => {
+            console.log('WebSocket disconnected, attempting to reconnect...');
+            setTimeout(() => this.connectWebSocket(), 3000);
+          }
+        }
+      });
+
+      this.wsSubscription = this.ws$.subscribe({
+        next: (message: any) => {
+          if (message.event === 'TABLE_STATUS_UPDATE' || message.type === 'TABLE_STATUS_UPDATE') {
+            this.handleTableStatusUpdate(message);
+          }
+        },
+        error: (error) => {
+          console.error('WebSocket error:', error);
+          setTimeout(() => this.connectWebSocket(), 3000);
+        }
+      });
+    } catch (error) {
+      console.error('Error establishing WebSocket connection:', error);
+    }
+  }
+
+  /**
+   * Handle real-time table status updates
+   */
+  handleTableStatusUpdate(event: any): void {
+    const tableId = event.tableId;
+    const newStatus = event.status;
+    
+    const table = this.allTables.find(t => t.id === tableId);
+    if (table) {
+      const oldStatus = table.status;
+      table.status = newStatus;
+      table.updatedAt = event.timestamp || new Date().toISOString();
+      
+      if (oldStatus !== newStatus) {
+        console.log(`Table ${table.tableNumber} status changed from ${oldStatus} to ${newStatus}`);
+      }
     }
   }
 

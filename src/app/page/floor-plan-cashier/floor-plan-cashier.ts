@@ -5,6 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import Swal from 'sweetalert2';
 import { Subscription, interval } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 
 interface Table {
   id: number;
@@ -35,7 +36,7 @@ export class FloorPlanCashier implements OnInit, OnDestroy {
   selectedSectionId: number | null = null;
   loading: boolean = false;
   errorMessage: string = '';
-  filterStatus: string = '';
+
   
   // Canvas dimensions
   canvasWidth: number = 1200;
@@ -44,11 +45,13 @@ export class FloorPlanCashier implements OnInit, OnDestroy {
   // Subscriptions
   private wsSubscription?: Subscription;
   private autoRefreshSubscription?: Subscription;
+  private ws$?: WebSocketSubject<any>;
 
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
     this.loadTables();
+    this.connectWebSocket();
     this.startAutoRefresh();
   }
 
@@ -58,6 +61,127 @@ export class FloorPlanCashier implements OnInit, OnDestroy {
     }
     if (this.autoRefreshSubscription) {
       this.autoRefreshSubscription.unsubscribe();
+    }
+    if (this.ws$) {
+      this.ws$.complete();
+    }
+  }
+
+  /**
+   * Connect to WebSocket for real-time table updates
+   */
+  connectWebSocket(): void {
+    try {
+      // Use WebSocket for real-time updates
+      const wsUrl = environment.apiUrl.replace(/^http/, 'ws') + '/table-updates';
+      this.ws$ = webSocket({
+        url: wsUrl,
+        openObserver: {
+          next: () => {
+            console.log('WebSocket connected');
+          }
+        },
+        closeObserver: {
+          next: () => {
+            console.log('WebSocket disconnected, attempting to reconnect...');
+            setTimeout(() => this.connectWebSocket(), 3000);
+          }
+        }
+      });
+
+      this.wsSubscription = this.ws$.subscribe({
+        next: (message: any) => {
+          if (message.event === 'TABLE_STATUS_UPDATE' || message.type === 'TABLE_STATUS_UPDATE') {
+            this.handleTableStatusUpdate(message);
+          }
+        },
+        error: (error) => {
+          console.error('WebSocket error:', error);
+          setTimeout(() => this.connectWebSocket(), 3000);
+        }
+      });
+    } catch (error) {
+      console.error('Error establishing WebSocket connection:', error);
+      // Fallback to polling if WebSocket fails
+    }
+  }
+
+  /**
+   * Handle real-time table status updates
+   */
+  handleTableStatusUpdate(event: any): void {
+    const tableId = event.tableId;
+    const newStatus = event.status;
+    
+    const table = this.allTables.find(t => t.id === tableId);
+    if (table) {
+      const oldStatus = table.status;
+      table.status = newStatus;
+      table.updatedAt = event.timestamp || new Date().toISOString();
+      
+      // Show notification if status changed
+      if (oldStatus !== newStatus) {
+        console.log(`Table ${table.tableNumber} status changed from ${oldStatus} to ${newStatus}`);
+      }
+    }
+  }
+
+  /**
+   * Connect to WebSocket for real-time table updates
+   */
+  connectWebSocket(): void {
+    try {
+      // Use WebSocket for real-time updates
+      const wsUrl = environment.apiUrl.replace(/^http/, 'ws') + '/table-updates';
+      this.ws$ = webSocket({
+        url: wsUrl,
+        openObserver: {
+          next: () => {
+            console.log('WebSocket connected');
+          }
+        },
+        closeObserver: {
+          next: () => {
+            console.log('WebSocket disconnected, attempting to reconnect...');
+            setTimeout(() => this.connectWebSocket(), 3000);
+          }
+        }
+      });
+
+      this.wsSubscription = this.ws$.subscribe({
+        next: (message: any) => {
+          if (message.event === 'TABLE_STATUS_UPDATE' || message.type === 'TABLE_STATUS_UPDATE') {
+            this.handleTableStatusUpdate(message);
+          }
+        },
+        error: (error) => {
+          console.error('WebSocket error:', error);
+          setTimeout(() => this.connectWebSocket(), 3000);
+        }
+      });
+    } catch (error) {
+      console.error('Error establishing WebSocket connection:', error);
+      // Fallback to polling if WebSocket fails
+    }
+  }
+
+  /**
+   * Handle real-time table status updates
+   */
+  handleTableStatusUpdate(event: any): void {
+    const tableId = event.tableId;
+    const newStatus = event.status;
+    
+    const table = this.allTables.find(t => t.id === tableId);
+    if (table) {
+      const oldStatus = table.status;
+      table.status = newStatus;
+      table.updatedAt = event.timestamp || new Date().toISOString();
+      
+      // Show notification if status changed
+      if (oldStatus !== newStatus) {
+        console.log(`Table ${table.tableNumber} status changed from ${oldStatus} to ${newStatus}`);
+      }
     }
   }
 
@@ -110,13 +234,7 @@ export class FloorPlanCashier implements OnInit, OnDestroy {
    * Get tables for selected section
    */
   getTablesForSelectedSection(): Table[] {
-    let tables = this.allTables.filter((t) => t.sectionId === this.selectedSectionId);
-    
-    if (this.filterStatus) {
-      tables = tables.filter((t) => t.status === this.filterStatus);
-    }
-    
-    return tables;
+    return this.allTables.filter((t) => t.sectionId === this.selectedSectionId);
   }
 
   /**
@@ -329,6 +447,29 @@ export class FloorPlanCashier implements OnInit, OnDestroy {
           this.showError('Failed to create reservation');
         },
       });
+  }
+
+  /**
+   * Get table positioning
+   */
+  getTablePosition(table: Table): { x: number; y: number } {
+    // If table has explicit coordinates, use them
+    if (table.posX !== null && table.posX !== undefined && table.posY !== null && table.posY !== undefined) {
+      return { x: table.posX, y: table.posY };
+    }
+
+    // Otherwise, calculate based on section and table order
+    const tablesInSection = this.allTables.filter(t => t.sectionId === table.sectionId).sort((a, b) => a.id - b.id);
+    const indexInSection = tablesInSection.findIndex(t => t.id === table.id);
+    
+    // Arrange tables in rows of 3 per section
+    const rowIndex = Math.floor(indexInSection / 3);
+    const colIndex = indexInSection % 3;
+    
+    const baseX = 50 + (colIndex * 180);
+    const baseY = 50 + (rowIndex * 150);
+    
+    return { x: baseX, y: baseY };
   }
 
   /**
