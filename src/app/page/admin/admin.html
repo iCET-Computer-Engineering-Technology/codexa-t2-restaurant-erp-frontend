@@ -1,7 +1,240 @@
 <app-sidebar></app-sidebar>
 
-<div class="admin-layout p-6 sm:ml-72 min-h-screen">
-   <div class="compo">
-      <router-outlet></router-outlet>
-   </div>
+<div class="sm:ml-72 min-h-screen bg-gray-50 p-6">
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-4xl font-bold text-gray-900 mb-2">Restaurant Admin Dashboard</h1>
+    <p class="text-gray-600">Manage tables, sections, and floor layout in real-time</p>
+  </div>
+
+  <!-- Messages -->
+  <div *ngIf="errorMessage" class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+    {{ errorMessage }}
+  </div>
+  <div *ngIf="successMessage" class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+    {{ successMessage }}
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="mb-8 border-b border-gray-200">
+    <div class="flex gap-8 flex-wrap">
+      <button
+        (click)="activeTab = 'dashboard'"
+        [ngClass]="activeTab === 'dashboard' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-600 hover:text-gray-900'"
+        class="pb-4 font-semibold transition-colors"
+      >
+        📊 Dashboard
+      </button>
+      <button
+        (click)="activeTab = 'tables'"
+        [ngClass]="activeTab === 'tables' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-600 hover:text-gray-900'"
+        class="pb-4 font-semibold transition-colors"
+      >
+        🪑 Table Management
+      </button>
+      <button
+        (click)="activeTab = 'floorplan'"
+        [ngClass]="activeTab === 'floorplan' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-600 hover:text-gray-900'"
+        class="pb-4 font-semibold transition-colors"
+      >
+        🗺️ Floor Plan
+      </button>
+    </div>
+  </div>
+
+  <!-- ============ DASHBOARD TAB ============ -->
+  <div *ngIf="activeTab === 'dashboard'" class="space-y-6">
+    <!-- Statistics Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <!-- Total Tables -->
+      <div class="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
+        <div class="text-gray-600 text-sm font-medium">Total Tables</div>
+        <div class="text-3xl font-bold text-blue-600 mt-2">{{ getTableStats().total }}</div>
+      </div>
+
+      <!-- Available -->
+      <div class="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
+        <div class="text-gray-600 text-sm font-medium">Available</div>
+        <div class="text-3xl font-bold text-green-600 mt-2">{{ getTableStats().available }}</div>
+      </div>
+
+      <!-- Occupied -->
+      <div class="bg-white rounded-lg shadow p-6 border-l-4 border-red-500">
+        <div class="text-gray-600 text-sm font-medium">Occupied</div>
+        <div class="text-3xl font-bold text-red-600 mt-2">{{ getTableStats().occupied }}</div>
+      </div>
+
+      <!-- Reserved -->
+      <div class="bg-white rounded-lg shadow p-6 border-l-4 border-blue-400">
+        <div class="text-gray-600 text-sm font-medium">Reserved</div>
+        <div class="text-3xl font-bold text-blue-400 mt-2">{{ getTableStats().reserved }}</div>
+      </div>
+
+      <!-- Cleaning -->
+      <div class="bg-white rounded-lg shadow p-6 border-l-4 border-yellow-500">
+        <div class="text-gray-600 text-sm font-medium">Cleaning</div>
+        <div class="text-3xl font-bold text-yellow-600 mt-2">{{ getTableStats().cleaning }}</div>
+      </div>
+    </div>
+
+    <!-- Status Legend -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <h3 class="font-bold text-gray-900 mb-4">Status Information</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-6 h-6 bg-green-500 rounded"></div>
+          <span class="text-gray-700">Available - No reservations</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="w-6 h-6 bg-red-500 rounded"></div>
+          <span class="text-gray-700">Occupied - Currently in use</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="w-6 h-6 bg-blue-500 rounded"></div>
+          <span class="text-gray-700">Reserved - Upcoming reservation</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="w-6 h-6 bg-yellow-500 rounded"></div>
+          <span class="text-gray-700">Cleaning - Being cleaned</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TABLE MANAGEMENT TAB ============ -->
+  <div *ngIf="activeTab === 'tables'" class="space-y-6">
+    <!-- Add Button -->
+    <div class="flex justify-between items-center">
+      <h2 class="text-2xl font-bold text-gray-900">All Tables</h2>
+      <button
+        (click)="addTable()"
+        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+      >
+        ➕ Add New Table
+      </button>
+    </div>
+
+    <!-- Tables Table -->
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+      <table class="w-full">
+        <thead class="bg-gray-100 border-b">
+          <tr>
+            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Table Number</th>
+            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Section</th>
+            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Capacity</th>
+            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Status</th>
+            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Last Updated</th>
+            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let table of allTables" class="border-b hover:bg-gray-50">
+            <td class="px-6 py-4 font-bold text-gray-900">{{ table.tableNumber }}</td>
+            <td class="px-6 py-4 text-gray-700">Section {{ table.sectionId }}</td>
+            <td class="px-6 py-4 text-gray-700">{{ table.capacity }} seats</td>
+            <td class="px-6 py-4">
+              <span [ngClass]="getStatusColorClass(table.status)" class="px-3 py-1 rounded-full text-white text-sm font-medium">
+                {{ table.status | uppercase }}
+              </span>
+            </td>
+            <td class="px-6 py-4 text-gray-600 text-sm">
+              {{ table.updatedAt ? (table.updatedAt | date: 'short') : 'N/A' }}
+            </td>
+            <td class="px-6 py-4 space-x-2">
+              <button
+                (click)="editTable(table)"
+                class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors"
+              >
+                ✏️ Edit
+              </button>
+              <button
+                (click)="deleteTable(table)"
+                class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition-colors"
+              >
+                🗑️ Delete
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ============ FLOOR PLAN TAB ============ -->
+  <div *ngIf="activeTab === 'floorplan'" class="space-y-6">
+    <!-- Section Selector & Edit Mode -->
+    <div class="flex justify-between items-center bg-white rounded-lg shadow p-4">
+      <div class="flex items-center gap-4">
+        <label class="font-semibold text-gray-700">Section:</label>
+        <select
+          [(ngModel)]="selectedSectionId"
+          class="border border-gray-300 rounded-lg px-4 py-2"
+        >
+          <option *ngFor="let section of sections" [value]="section.id">
+            {{ section.name }}
+          </option>
+        </select>
+      </div>
+      <div class="flex gap-2">
+        <button
+          (click)="editMode = !editMode"
+          [ngClass]="editMode ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-500 hover:bg-green-600'"
+          class="text-white font-bold py-2 px-4 rounded-lg transition-colors"
+        >
+          {{ editMode ? '❌ Exit Edit' : '✏️ Edit Mode' }}
+        </button>
+        <button
+          *ngIf="editMode"
+          (click)="saveFloorLayout()"
+          class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+        >
+          💾 Save Layout
+        </button>
+      </div>
+    </div>
+
+    <!-- Floor Plan Canvas -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <div
+        (dragover)="onDragOver($event)"
+        (drop)="onDrop($event)"
+        [style.width.px]="canvasWidth"
+        [style.height.px]="canvasHeight"
+        class="relative border-2 dashed border-gray-300 bg-gradient-to-b from-gray-50 to-gray-100 mx-auto"
+        [style.background-image]="'linear-gradient(0deg, transparent 24%, rgba(200,200,200,.05) 25%, rgba(200,200,200,.05) 26%, transparent 27%, transparent 74%, rgba(200,200,200,.05) 75%, rgba(200,200,200,.05) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(200,200,200,.05) 25%, rgba(200,200,200,.05) 26%, transparent 27%, transparent 74%, rgba(200,200,200,.05) 75%, rgba(200,200,200,.05) 76%, transparent 77%, transparent)'"
+        [style.background-size]="'50px 50px'"
+      >
+        <!-- Section Label -->
+        <div class="absolute top-4 left-4 bg-blue-600 text-white px-4 py-2 rounded-lg font-bold">
+          {{ sections.find(s => s.id === selectedSectionId)?.name }}
+        </div>
+
+        <!-- Tables -->
+        <div
+          *ngFor="let table of getTablesForSection()"
+          [style.left.px]="getTablePosition(table).x"
+          [style.top.px]="getTablePosition(table).y"
+          class="absolute w-32 h-28 rounded-xl shadow-lg cursor-move transition-all hover:shadow-xl"
+          [ngClass]="getStatusColorClass(table.status)"
+          [draggable]="editMode"
+          (dragstart)="onDragStart($event, table)"
+          [style.opacity]="draggedTable?.id === table.id ? '0.5' : '1'"
+        >
+          <div class="h-full flex flex-col justify-center items-center text-white p-3">
+            <div class="text-2xl font-bold">{{ table.tableNumber }}</div>
+            <div class="text-sm">{{ table.capacity }} seats</div>
+            <div class="text-xs mt-1 font-semibold">{{ table.status | uppercase }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Legend -->
+      <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+        <p class="text-sm text-gray-600 mb-2">
+          <strong>💡 Tip:</strong>
+          {{ editMode ? 'Drag tables to reposition them on the floor plan' : 'Click "Edit Mode" to reposition tables' }}
+        </p>
+      </div>
+    </div>
+  </div>
 </div>

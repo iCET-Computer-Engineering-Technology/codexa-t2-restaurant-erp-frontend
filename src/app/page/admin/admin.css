@@ -1,7 +1,5 @@
 .admin-layout {
-  background:
-    radial-gradient(circle at top right, rgba(99, 102, 241, 0.10), transparent 28%),
-    linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
 }
 
 :host-context(.admin-light-theme) .admin-layout {
@@ -10,6 +8,68 @@
     linear-gradient(180deg, #fffdf7 0%, #f8fafc 100%);
 }
 
-.compo {
-  min-height: calc(100vh - 3rem);
+/* Tab Navigation */
+button:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Table Styles */
+table thead {
+  background-color: #f3f4f6;
+}
+
+table tbody tr {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+table tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+table td, table th {
+  vertical-align: middle;
+}
+
+/* Canvas Grid */
+.grid-canvas {
+  position: relative;
+  background-size: 50px 50px;
+  background-attachment: local;
+}
+
+/* Status Badge */
+.status-badge {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+}
+
+/* Card Styles */
+.stat-card {
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Animations */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s ease-out;
 }
