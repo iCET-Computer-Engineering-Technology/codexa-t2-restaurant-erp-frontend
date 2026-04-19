@@ -10,7 +10,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { KitchenService, Order, Waiter } from '../../services/kitchen.service';
 import { Subject, catchError, of, takeUntil, tap } from 'rxjs';
-import { KitchenRealtimeService } from '../../services/kitchen-realtime.service';
+import { KitchenRealtimeEvent, KitchenRealtimeService } from '../../services/kitchen-realtime.service';
 
 type BoardColumn = 'new' | 'preparing' | 'ready';
 
@@ -35,7 +35,9 @@ export class Kitchen implements OnInit, OnDestroy {
   private readonly kitchenService = inject(KitchenService);
   private readonly kitchenRealtimeService = inject(KitchenRealtimeService);
   private readonly alertDismissTimeoutMs = 3000;
+  private readonly fallbackPollingIntervalMs = 1500;
   private alertDismissTimer: ReturnType<typeof setTimeout> | null = null;
+  private fallbackPollingTimer: ReturnType<typeof setInterval> | null = null;
   private readonly destroy$ = new Subject<void>();
 
   readonly orders = signal<Order[]>([]);
@@ -99,6 +101,7 @@ export class Kitchen implements OnInit, OnDestroy {
     this.refreshBoard();
     this.loadWaiters();
     this.connectRealtimeUpdates();
+    this.startFallbackPolling();
   }
 
   refreshBoard(): void {
@@ -425,31 +428,132 @@ export class Kitchen implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.clearAlertDismissTimer();
+    this.stopFallbackPolling();
     this.destroy$.next();
     this.destroy$.complete();
     this.kitchenRealtimeService.disconnect();
   }
 
   private connectRealtimeUpdates(): void {
-    this.kitchenRealtimeService.connect();
+    console.debug('[Kitchen] Initiating WebSocket connection...');
+    void this.kitchenRealtimeService.connect();
 
     this.kitchenRealtimeService.connection$
       .pipe(takeUntil(this.destroy$))
       .subscribe((isConnected) => {
+        console.debug(`[Kitchen] WebSocket connection status: ${isConnected}`);
         if (!isConnected) {
           return;
         }
-
+        console.debug('[Kitchen] WebSocket connected, loading initial board and waiters...');
         this.loadBoard().subscribe();
         this.loadWaiters();
       });
 
     this.kitchenRealtimeService.updates$
       .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
+      .subscribe((payload) => {
+        console.debug(`[Kitchen] Received real-time event: ${payload.event}`);
+        
+        if (this.applySnapshotIfAvailable(payload)) {
+          console.debug(`[Kitchen] Applied snapshot with ${(payload['orders'] as unknown[])?.length ?? 0} orders`);
+          return;
+        }
+
+        // For other events, reload the board to stay in sync
+        console.debug('[Kitchen] Reloading board for event:', payload.event);
         this.loadBoard().subscribe();
-        this.loadWaiters();
       });
+  }
+
+  private startFallbackPolling(): void {
+    if (this.fallbackPollingTimer) {
+      return;
+    }
+
+    this.fallbackPollingTimer = setInterval(() => {
+      this.loadBoard().subscribe();
+    }, this.fallbackPollingIntervalMs);
+  }
+
+  private stopFallbackPolling(): void {
+    if (!this.fallbackPollingTimer) {
+      return;
+    }
+
+    clearInterval(this.fallbackPollingTimer);
+    this.fallbackPollingTimer = null;
+  }
+
+  private applySnapshotIfAvailable(payload: KitchenRealtimeEvent): boolean {
+    if (payload.event !== 'KDS_ORDERS_SNAPSHOT' || !Array.isArray(payload['orders'])) {
+      return false;
+    }
+
+    const normalizedOrders = this.normalizeSnapshotOrders(payload['orders']);
+    this.orders.set(normalizedOrders);
+    this.isLoading.set(false);
+    return true;
+  }
+
+  private normalizeSnapshotOrders(rawOrders: unknown[]): Order[] {
+    const normalized: Order[] = [];
+
+    rawOrders.forEach((raw) => {
+      if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+        return;
+      }
+
+      const source = raw as Record<string, unknown>;
+      const id = Number(source['id']);
+      if (!Number.isFinite(id) || id <= 0) {
+        return;
+      }
+
+      const tableId = Number(source['tableId'] ?? 0);
+      const orderNumber = String(source['orderNumber'] ?? `ORD-${id}`);
+      const status = String(source['status'] ?? '').trim().toUpperCase() || 'RECEIVED';
+      const waiterId = Number(source['waiterId']);
+
+      const itemsSource = Array.isArray(source['items']) ? source['items'] : [];
+      const items = itemsSource
+        .map((item) => {
+          if (!item || typeof item !== 'object' || Array.isArray(item)) {
+            return null;
+          }
+
+          const rawItem = item as Record<string, unknown>;
+          const quantity = Number(rawItem['quantity'] ?? 0);
+          const unitPrice = Number(rawItem['unitPrice'] ?? rawItem['price'] ?? 0);
+
+          return {
+            id: Number(rawItem['id'] ?? 0),
+            orderId: Number(rawItem['orderId'] ?? id),
+            menuItemId: Number(rawItem['menuItemId'] ?? rawItem['itemId'] ?? 0),
+            menuItemName:
+              rawItem['menuItemName'] != null ? String(rawItem['menuItemName']) : undefined,
+            quantity: Number.isFinite(quantity) ? quantity : 0,
+            unitPrice: Number.isFinite(unitPrice) ? unitPrice : 0,
+            totalPrice: Number(rawItem['totalPrice'] ?? unitPrice * quantity),
+          };
+        })
+        .filter((item): item is NonNullable<typeof item> => item != null);
+
+      normalized.push({
+        id,
+        kitchenOrderId:
+          source['kitchenOrderId'] != null ? Number(source['kitchenOrderId']) : undefined,
+        isSentToKitchen: true,
+        tableId: Number.isFinite(tableId) ? tableId : 0,
+        orderNumber,
+        status,
+        waiterId: Number.isFinite(waiterId) && waiterId > 0 ? waiterId : undefined,
+        waiterName: source['waiterName'] != null ? String(source['waiterName']) : undefined,
+        items,
+      });
+    });
+
+    return normalized.sort((a, b) => b.id - a.id);
   }
 
   private showSuccessMessage(message: string): void {
