@@ -21,6 +21,10 @@ export class ViewOrdersComponent implements OnInit {
   readonly activeFilter = signal<OrderStatus | 'all'>('all');
   readonly portionsById = signal<Map<number, string>>(new Map());
 
+  // Pagination state 
+  readonly currentPage = signal<number>(1);
+  readonly itemsPerPage = signal<number>(10);
+
   // Status filters
   readonly statusFilters: OrderStatusFilter[] = [
     { label: 'All', value: 'all', color: 'gray' },
@@ -35,6 +39,20 @@ export class ViewOrdersComponent implements OnInit {
   // Computed values
   readonly hasOrders = computed(() => this.orders().length > 0);
   readonly hasError = computed(() => this.error() !== null);
+
+  readonly paginatedOrders = computed(() => {
+    const all = this.orders();
+    const page = this.currentPage();
+    const perPage = this.itemsPerPage();
+    const start = (page - 1) * perPage;
+    const end = start + perPage;
+    return all.slice(start, end);
+  });
+
+  readonly totalPages = computed(() => {
+    const perPage = this.itemsPerPage();
+    return Math.ceil(this.orders().length / perPage) || 1;
+  });
 
   constructor(private orderService: OrderService) { }
 
@@ -71,6 +89,7 @@ export class ViewOrdersComponent implements OnInit {
     this.isLoadingOrders.set(true);
     this.selectedOrder.set(null);
     this.selectedOrderId.set(null);
+    this.currentPage.set(1);
 
     const filter = this.activeFilter();
     const request$ = filter === 'all'
@@ -204,5 +223,33 @@ export class ViewOrdersComponent implements OnInit {
 
   retry(): void {
     this.loadOrders();
+  }
+
+  // Pagination controls
+  nextPage(): void {
+    if (this.currentPage() < this.totalPages()) {
+      this.currentPage.set(this.currentPage() + 1);
+    }
+  }
+
+  previousPage(): void {
+    if (this.currentPage() > 1) {
+      this.currentPage.set(this.currentPage() - 1);
+    }
+  }
+
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages()) {
+      this.currentPage.set(page);
+    }
+  }
+
+  getPageNumbers(): number[] {
+    const total = this.totalPages();
+    const pages: number[] = [];
+    for (let i = 1; i <= total; i++) {
+      pages.push(i);
+    }
+    return pages;
   }
 }

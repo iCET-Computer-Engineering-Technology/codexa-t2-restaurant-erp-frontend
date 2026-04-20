@@ -105,7 +105,7 @@
 
               <!-- Orders -->
               @if (hasOrders()) {
-                @for (order of orders(); track order.id) {
+                @for (order of paginatedOrders(); track order.id) {
                   <tr
                     (click)="selectOrder(order)"
                     tabindex="0"
@@ -147,6 +147,42 @@
             </tbody>
           </table>
         </div>
+
+        <!-- Pagination (like Receipts) -->
+        @if (!isLoadingOrders() && hasOrders() && totalPages() > 1) {
+          <div class="border-t border-gray-200 bg-gray-50 p-3 flex items-center justify-between text-sm">
+            <button
+              (click)="previousPage()"
+              [disabled]="currentPage() === 1"
+              class="px-3 py-1 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              ← Prev
+            </button>
+
+            <div class="flex gap-1">
+              @for (page of getPageNumbers(); track page) {
+                <button
+                  (click)="goToPage(page)"
+                  [class.bg-blue-600]="currentPage() === page"
+                  [class.text-white]="currentPage() === page"
+                  [class.bg-gray-200]="currentPage() !== page"
+                  [class.text-gray-700]="currentPage() !== page"
+                  class="px-2 py-1 rounded text-xs font-medium hover:bg-blue-500 hover:text-white transition-colors"
+                >
+                  {{ page }}
+                </button>
+              }
+            </div>
+
+            <button
+              (click)="nextPage()"
+              [disabled]="currentPage() === totalPages()"
+              class="px-3 py-1 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              Next →
+            </button>
+          </div>
+        }
       </div>
     </div>
 
