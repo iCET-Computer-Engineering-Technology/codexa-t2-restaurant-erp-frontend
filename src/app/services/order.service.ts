@@ -36,6 +36,12 @@ export class OrderService {
 
     private readonly apiUrl = environment.apiUrl; //http://localhost:8080/api
     private readonly rootUrl = environment.apiUrl.replace(/\/api\/?$/, ''); //http://localhost:8080
+    private readonly supabaseUrl = (environment as any)?.supabase?.url
+        ? String((environment as any).supabase.url).replace(/\/+$/, '')
+        : undefined;
+    private readonly supabaseBucket = (environment as any)?.supabase?.bucket
+        ? String((environment as any).supabase.bucket)
+        : undefined;
 
     //Category Tabs
     getAllCategories(): Observable<MenuCategoriesDto[]> {
@@ -253,6 +259,29 @@ export class OrderService {
                 return new URL(normalizedPath).toString();
             } catch {
                 return normalizedPath;
+            }
+        }
+
+        // Support Supabase-relative paths stored in DB, e.g.
+        // /storage/v1/object/public/<bucket>/menu-items/<file>.jpg
+        if (this.supabaseUrl) {
+            const trimmed = normalizedPath.replace(/^\/+/, '');
+            if (trimmed.startsWith('storage/v1/object/')) {
+                try {
+                    return new URL(`/${trimmed}`, this.supabaseUrl).toString();
+                } catch {
+                    // fall through
+                }
+            }
+        }
+
+        // Support legacy values where backend stores only a file name
+        // If objects are kept in: <bucket>/menu-items/<filename>
+        if (this.supabaseUrl && this.supabaseBucket) {
+            const isBareFilename = /^[^/\\]+\.(png|jpe?g|webp|gif|svg)$/i.test(normalizedPath);
+            if (isBareFilename) {
+                const encoded = encodeURIComponent(normalizedPath);
+                return `${this.supabaseUrl}/storage/v1/object/public/${this.supabaseBucket}/menu-items/${encoded}`;
             }
         }
 
