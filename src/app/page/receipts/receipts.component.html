@@ -1,0 +1,389 @@
+<div class="h-full overflow-y-auto bg-gray-50 p-5">
+  <!-- Header -->
+  <div class="mb-5 flex items-start justify-between gap-5">
+    <div>
+      <h1 class="text-3xl font-semibold text-gray-900">Receipts</h1>
+      <p class="mt-2 text-sm text-gray-600">View and manage all paid order receipts</p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
+    <!-- Left Column: Receipts List -->
+    <div class="space-y-6 lg:col-span-2">
+      <div class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+        <!-- Header with filters -->
+        <div class="border-b border-gray-200 px-4 py-4">
+          <div class="mb-4">
+            <h2 class="text-base font-semibold text-gray-900">Receipts</h2>
+            <p class="mt-1 text-xs text-gray-500">
+              @if (isLoading()) {
+                Loading receipts...
+              } @else {
+                {{ resultCount() }} receipt(s) found
+              }
+            </p>
+          </div>
+
+          <!-- Search and Filter Section -->
+          <div class="space-y-3">
+            <!-- Search by Order Number -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Search Order Number</label>
+              <input
+                [ngModel]="searchOrderNumber()"
+                (ngModelChange)="searchOrderNumber.set($event)"
+                (keyup.enter)="applySearch()"
+                type="text"
+                placeholder="e.g., ORD-001"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-900 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <!-- Date Range Filter -->
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">From Date</label>
+                <div class="flex gap-2">
+                  <div class="flex-1 relative">
+                    <input
+                      [ngModel]="filterStartDate()"
+                      (ngModelChange)="filterStartDate.set($event)"
+                      type="date"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">To Date</label>
+                <div class="flex gap-2">
+                  <div class="flex-1 relative">
+                    <input
+                      [ngModel]="filterEndDate()"
+                      (ngModelChange)="filterEndDate.set($event)"
+                      type="date"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex gap-2">
+              <button
+                (click)="applySearch()"
+                class="flex-1 px-3 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
+              >
+                <svg class="inline-block w-4 h-4 mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                Search
+              </button>
+              <button
+                *ngIf="hasFiltersApplied()"
+                (click)="clearFilters()"
+                class="flex-1 px-3 py-2 bg-gray-300 text-gray-800 rounded-md text-sm font-medium hover:bg-gray-400 transition-colors"
+              >
+                Clear Filters
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        @if (isLoading()) {
+          <div class="border-b border-gray-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
+            <span class="inline-flex items-center gap-2">
+              <span class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-blue-300 border-t-blue-600"></span>
+              Loading receipts...
+            </span>
+          </div>
+        }
+
+        <!-- Receipts Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full border-collapse text-sm">
+            <thead class="bg-gray-100">
+              <tr class="border-b border-gray-200">
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700" style="width: 20%">Order</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700" style="width: 15%">Type</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700" style="width: 12%">Table</th>
+                <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700" style="width: 15%">Total</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700" style="width: 18%">Payment</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 bg-white">
+              @if (!hasReceipts() && !isLoading() && !hasError()) {
+                <tr>
+                  <td colspan="5" class="px-4 py-12 text-center text-sm text-gray-500">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <p class="mt-2">No receipts found</p>
+                  </td>
+                </tr>
+              }
+              @for (receipt of paginatedReceipts(); track receipt.orderId) {
+                <tr
+                  (click)="selectReceipt(receipt)"
+                  [class]="selectedReceipt()?.orderId === receipt.orderId
+                    ? 'bg-blue-50 cursor-pointer hover:bg-blue-100'
+                    : 'cursor-pointer hover:bg-gray-50'"
+                  class="transition-colors">
+                  <td class="px-4 py-3">
+                    <div class="font-semibold text-gray-900">{{ receipt.orderNumber }}</div>
+                  </td>
+                  <td class="px-4 py-3">
+                    <span class="inline-flex items-center rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-medium text-purple-800">
+                      {{ receipt.orderType }}
+                    </span>
+                  </td>
+                  <td class="px-4 py-3 text-gray-700">
+                    @if (receipt.tableId) {
+                      Table {{ receipt.tableId }}
+                    } @else {
+                      <span class="text-gray-400">-</span>
+                    }
+                  </td>
+                  <td class="px-4 py-3 text-right font-semibold text-gray-900">
+                    Rs. {{ receipt.totalAmount | number:'1.2-2' }}
+                  </td>
+                  <td class="px-4 py-3 text-sm text-gray-600">
+                    {{ getRelativeTime(receipt.createdAt) }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div *ngIf="!isLoading() && hasReceipts() && totalPages() > 1" class="border-t border-gray-200 bg-gray-50 p-3 flex items-center justify-between text-sm">
+          <button
+            (click)="previousPage()"
+            [disabled]="currentPage() === 1"
+            class="px-3 py-1 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            ← Prev
+          </button>
+
+          <div class="flex gap-1">
+            @for (page of getPageNumbers(); track page) {
+              <button
+                (click)="goToPage(page)"
+                [class.bg-blue-600]="currentPage() === page"
+                [class.text-white]="currentPage() === page"
+                [class.bg-gray-200]="currentPage() !== page"
+                [class.text-gray-700]="currentPage() !== page"
+                class="px-2 py-1 rounded text-xs font-medium hover:bg-blue-500 hover:text-white transition-colors"
+              >
+                {{ page }}
+              </button>
+            }
+          </div>
+
+          <button
+            (click)="nextPage()"
+            [disabled]="currentPage() === totalPages()"
+            class="px-3 py-1 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            Next →
+          </button>
+        </div>
+
+        <!-- Error State -->
+        @if (hasError()) {
+          <div class="border-t border-gray-200 bg-red-50 px-4 py-4">
+            <div class="flex items-start gap-3">
+              <svg class="w-6 h-6 text-red-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4v2m0 0a9 9 0 1118 0 9 9 0 01-18 0z"></path>
+              </svg>
+              <div class="flex-1">
+                <h3 class="text-red-800 font-semibold mb-2">Error Loading Receipts</h3>
+                <p class="text-red-700 text-sm">{{ error() }}</p>
+                <button
+                  (click)="loadReceipts()"
+                  class="mt-2 px-3 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700 transition-colors"
+                >
+                  🔄 Retry
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Right Column: Receipt Details / Detailed Report -->
+    <div class="lg:col-span-1">
+      <div class="sticky top-5 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+        @if (!selectedReceipt()) {
+          <!-- Placeholder -->
+          <div class="flex h-96 items-center justify-center p-6 text-center">
+            <div>
+              <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              <p class="mt-2 text-sm text-gray-500">Select a receipt to view details</p>
+            </div>
+          </div>
+        } @else {
+          <!-- Receipt Detail View -->
+          @if (selectedReceipt() && selectedReceiptFinancials()) {
+            <div class="divide-y divide-gray-200">
+              <!-- Header -->
+              <div class="px-4 py-4">
+                <h3 class="text-lg font-semibold text-gray-900">{{ selectedReceipt()?.orderNumber }}</h3>
+                <div class="mt-2 flex items-center gap-2 text-sm text-gray-600">
+                  <span>{{ selectedReceipt()?.orderType }}</span>
+                  @if (selectedReceipt()?.tableId) {
+                    <span>•</span>
+                    <span>Table {{ selectedReceipt()?.tableId }}</span>
+                  }
+                </div>
+                <p class="mt-1 text-xs text-gray-500">
+                  {{ getDisplayDate(selectedReceipt()!.createdAt) }}
+                </p>
+
+                <div class="mt-3 rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">
+                  ✓ Paid
+                </div>
+              </div>
+
+              <!-- Customer Information (if available) -->
+              @if (selectedReceipt()?.customerId) {
+                <div class="px-4 py-4">
+                  <h4 class="mb-3 text-sm font-semibold text-gray-700">Customer Information</h4>
+                  <div class="space-y-2 text-sm">
+                    @if (selectedReceipt()?.customerName) {
+                      <div class="flex justify-between">
+                        <span class="text-gray-600">Name</span>
+                        <span class="font-medium text-gray-900">{{ selectedReceipt()?.customerName }}</span>
+                      </div>
+                    }
+                    @if (selectedReceipt()?.customerPhone) {
+                      <div class="flex justify-between">
+                        <span class="text-gray-600">Phone</span>
+                        <span class="font-medium text-gray-900">{{ selectedReceipt()?.customerPhone }}</span>
+                      </div>
+                    }
+                    @if (selectedReceipt()?.customerEmail) {
+                      <div class="flex justify-between">
+                        <span class="text-gray-600">Email</span>
+                        <span class="font-medium text-gray-900 text-xs break-all">{{ selectedReceipt()?.customerEmail }}</span>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+
+              <!-- Items Summary -->
+              <div class="px-4 py-4">
+                <h4 class="mb-3 text-sm font-semibold text-gray-700">Order Items</h4>
+                <div class="space-y-2">
+                  @for (item of selectedReceipt()?.items || []; track item.id) {
+                    <div class="flex justify-between text-sm">
+                      <div class="flex-1">
+                        <span class="text-gray-900">{{ item.itemName }}</span>
+                        <span class="text-gray-500"> ({{ item.portionName }})</span>
+                        <span class="text-gray-600"> × {{ item.quantity }}</span>
+                      </div>
+                      <span class="font-medium text-gray-900">Rs. {{ item.lineTotal | number:'1.2-2' }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <!-- Financial Summary -->
+              <div class="px-4 py-4">
+                <div class="space-y-2 text-sm">
+                  <div class="flex justify-between text-gray-600">
+                    <span>Subtotal</span>
+                    <span>Rs. {{ selectedReceiptFinancials()!.subTotal | number:'1.2-2' }}</span>
+                  </div>
+                  @if (selectedReceiptFinancials()!.discount > 0) {
+                    <div class="flex justify-between text-green-600">
+                      <span>Discount</span>
+                      <span>-Rs. {{ selectedReceiptFinancials()!.discount | number:'1.2-2' }}</span>
+                    </div>
+                  }
+                  <div class="flex justify-between text-gray-600">
+                    <span>Tax</span>
+                    <span>Rs. {{ selectedReceiptFinancials()!.tax | number:'1.2-2' }}</span>
+                  </div>
+                  @if (selectedReceiptFinancials()!.serviceCharge > 0) {
+                    <div class="flex justify-between text-gray-600">
+                      <span>Service Charge</span>
+                      <span>Rs. {{ selectedReceiptFinancials()!.serviceCharge | number:'1.2-2' }}</span>
+                    </div>
+                  }
+                  <div class="flex justify-between border-t border-gray-200 pt-2 text-lg font-bold text-gray-900">
+                    <span>TOTAL</span>
+                    <span class="text-blue-700">Rs. {{ selectedReceiptFinancials()!.total | number:'1.2-2' }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Payment Details -->
+              <div class="px-4 py-4">
+                <div class="space-y-2 text-sm">
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">Payment Method</span>
+                    <span class="font-medium text-gray-900">{{ selectedReceipt()!.paymentMethod | uppercase }}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">Amount Paid</span>
+                    <span class="text-gray-900">Rs. {{ selectedReceipt()!.paymentAmount | number:'1.2-2' }}</span>
+                  </div>
+                  @if (selectedReceipt()!.tipAmount > 0) {
+                    <div class="flex justify-between">
+                      <span class="text-gray-600">Tip</span>
+                      <span class="text-green-700 font-medium">Rs. {{ selectedReceipt()!.tipAmount | number:'1.2-2' }}</span>
+                    </div>
+                  }
+                  @if (selectedReceipt()!.referenceNumber) {
+                    <div class="flex justify-between">
+                      <span class="text-gray-600">Reference #</span>
+                      <span class="font-mono text-gray-900 text-xs">{{ selectedReceipt()!.referenceNumber }}</span>
+                    </div>
+                  }
+                  @if (selectedReceiptFinancials()!.change > 0) {
+                    <div class="flex justify-between border-t border-gray-200 pt-2">
+                      <span class="text-gray-600">Change</span>
+                      <span class="font-medium text-green-700">Rs. {{ selectedReceiptFinancials()!.change | number:'1.2-2' }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="px-4 py-4 flex gap-2">
+                <button
+                  (click)="printReceipt()"
+                  class="flex-1 rounded-lg bg-blue-600 px-3 py-2 font-medium text-white transition-colors hover:bg-blue-700 flex items-center justify-center gap-2"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4H7a2 2 0 01-2-2v-4a2 2 0 012-2h10a2 2 0 012 2v4a2 2 0 01-2 2zm0 0h6a2 2 0 002-2v-4a2 2 0 00-2-2h-.756a2 2 0 00-1.789 1.106A2 2 0 0010.756 7H10a2 2 0 00-2 2v4a2 2 0 002 2h6z"></path>
+                  </svg>
+                  Print
+                </button>
+                <button
+                  (click)="sendToMail()"
+                  [disabled]="!selectedReceipt()?.customerId || !selectedReceipt()?.customerEmail"
+                  [title]="!selectedReceipt()?.customerEmail ? 'Customer email not available' : ''"
+                  class="flex-1 rounded-lg bg-green-600 px-3 py-2 font-medium text-white transition-colors hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                  </svg>
+                  Email
+                </button>
+              </div>
+            </div>
+          }
+        }
+      </div>
+    </div>
+  </div>
+</div>
