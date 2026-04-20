@@ -2,6 +2,8 @@ import { Component, computed, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ReceiptService } from '../../services/receipt.service';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 import {
   ReceiptDTO,
   ReceiptViewMode,
@@ -34,6 +36,8 @@ export class ReceiptsComponent implements OnInit {
   // Pagination state
   readonly currentPage = signal<number>(1);
   readonly itemsPerPage = signal<number>(10);
+
+  readonly isDownloadingPdf = signal<boolean>(false);
 
   // Computed
   readonly hasReceipts = computed(() => this.receipts().length > 0);
@@ -202,6 +206,99 @@ export class ReceiptsComponent implements OnInit {
     }, 250);
   }
 
+  // Download receipt as PDF
+  async downloadReceiptPdf(): Promise<void> {
+    const receipt = this.selectedReceipt();
+    if (!receipt) return;
+
+    if (this.isDownloadingPdf()) {
+      return;
+    }
+
+    this.isDownloadingPdf.set(true);
+
+    let wrapper: HTMLDivElement | null = null;
+
+    try {
+      const financials = calculateFinancialBreakdown(receipt);
+      const receiptCss = this.getReceiptCssForInlineRender();
+      const receiptMarkup = this.getReceiptMarkup(receipt, financials);
+
+      wrapper = document.createElement('div');
+      wrapper.setAttribute('data-receipt-render', '');
+      wrapper.style.position = 'fixed';
+      wrapper.style.left = '-10000px';
+      wrapper.style.top = '0';
+      wrapper.style.width = '210mm';
+      wrapper.style.background = '#fff';
+      wrapper.style.zIndex = '9999';
+
+      const style = document.createElement('style');
+      style.textContent = receiptCss;
+
+      wrapper.appendChild(style);
+
+      const content = document.createElement('div');
+      content.innerHTML = receiptMarkup;
+      wrapper.appendChild(content);
+
+      document.body.appendChild(wrapper);
+
+      const target = wrapper.querySelector('.receipt-container') as HTMLElement | null;
+      if (!target) {
+        throw new Error('Receipt render failed.');
+      }
+
+      const canvas = await html2canvas(target, {
+        backgroundColor: '#ffffff',
+        scale: 3,
+        useCORS: true,
+      });
+
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+
+      const pdf = new jsPDF({
+        orientation: 'p',
+        unit: 'mm',
+        format: 'a4',
+      });
+
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+
+      const margin = 10; // mm
+      const maxWidth = pageWidth - margin * 2;
+      const maxHeight = pageHeight - margin * 2;
+
+      // Fit within printable area; keep aspect ratio.
+      let imgWidth = maxWidth;
+      let imgHeight = (canvas.height * imgWidth) / canvas.width;
+      if (imgHeight > maxHeight) {
+        imgHeight = maxHeight;
+        imgWidth = (canvas.width * imgHeight) / canvas.height;
+      }
+
+      const x = (pageWidth - imgWidth) / 2;
+      const y = margin;
+
+      pdf.addImage(imgData, 'JPEG', x, y, imgWidth, imgHeight);
+
+      const fileSafeOrder = (receipt.orderNumber || `order-${receipt.orderId}`)
+        .toString()
+        .replace(/[^a-z0-9-_]+/gi, '_');
+
+      pdf.save(`receipt-${fileSafeOrder}.pdf`);
+    } catch (err) {
+      console.error('Failed to download receipt PDF:', err);
+      alert('Failed to download receipt as PDF. Please try again.');
+    } finally {
+      if (wrapper && wrapper.parentNode) {
+        wrapper.parentNode.removeChild(wrapper);
+      }
+      this.isDownloadingPdf.set(false);
+    }
+  }
+
   //Show debug information in browser console
   debugInfo(): void {
     console.group('🔍 RECEIPT MANAGEMENT DEBUG INFO');
@@ -220,9 +317,27 @@ export class ReceiptsComponent implements OnInit {
     alert('✅ Debug info logged to browser console (F12)');
   }
 
-  //Generate receipt HTML for printing (optimized for 1 page)
+  // Generate receipt HTML for printing (optimized for 1 page)
   private generateReceiptHTML(receipt: ReceiptDTO): string {
     const financials = calculateFinancialBreakdown(receipt);
+    const css = this.getReceiptCssForPrintDocument();
+    const markup = this.getReceiptMarkup(receipt, financials);
+
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Receipt-${receipt.orderNumber}</title><style>${css}</style></head><body>${markup}</body></html>`;
+  }
+
+  private getReceiptCssForPrintDocument(): string {
+    return `*{margin:0;padding:0;box-sizing:border-box;}body{font-family:Arial,sans-serif;font-size:11px;color:#333;line-height:1.25;background:#fff;}@page{size:A4;margin:10mm;}@media print{body{margin:0;padding:0;}.no-print{display:none !important;}}.receipt-container{width:100%;max-width:190mm;margin:0 auto;page-break-inside:avoid;display:flex;flex-direction:column;}.receipt-header{text-align:center;border-bottom:1px solid #000;padding:6px 0;margin-bottom:6px;}.receipt-header h1{font-size:16px;margin:0;font-weight:bold;letter-spacing:0.5px;}.receipt-header p{font-size:9px;margin:2px 0;}.receipt-section{margin-bottom:6px;page-break-inside:avoid;}.receipt-section-title{font-weight:bold;font-size:10px;border-bottom:1px solid #ddd;padding:3px 0;margin-bottom:4px;}.receipt-row{display:flex;justify-content:space-between;font-size:10px;padding:2px 0;margin:0;}.receipt-row.total{font-weight:bold;font-size:11px;border-top:1px solid #000;border-bottom:1px solid #000;padding:3px 0;margin:4px 0;}.receipt-row span:first-child{flex:1;}.receipt-row span:last-child{text-align:right;flex-shrink:0;}.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:9px;}.info-item{page-break-inside:avoid;}.info-label{font-weight:bold;}.info-value{margin:0;}.items-table{width:100%;border-collapse:collapse;font-size:10px;margin:4px 0;}.items-table th{background:#f5f5f5;padding:3px 4px;text-align:left;font-size:9px;font-weight:bold;border-bottom:1px solid #000;}.items-table td{padding:3px 4px;border-bottom:0.5px solid #eee;}.receipt-footer{text-align:center;font-size:8px;color:#666;margin-top:8px;padding-top:6px;border-top:1px solid #ddd;display:flex;flex-direction:column;justify-content:flex-end;}`;
+  }
+
+  // CSS used for the hidden DOM that html2canvas snapshots.
+  // MUST be scoped so it doesn't affect the visible app UI.
+  private getReceiptCssForInlineRender(): string {
+    const scope = '[data-receipt-render]';
+    return `${scope},${scope} *{box-sizing:border-box;}${scope}{font-family:Arial,sans-serif;font-size:11px;color:#333;line-height:1.25;background:#fff;}${scope} .receipt-container{width:100%;max-width:190mm;margin:0 auto;display:flex;flex-direction:column;}${scope} .receipt-header{text-align:center;border-bottom:1px solid #000;padding:6px 0;margin-bottom:6px;}${scope} .receipt-header h1{font-size:16px;margin:0;font-weight:bold;letter-spacing:0.5px;}${scope} .receipt-header p{font-size:9px;margin:2px 0;}${scope} .receipt-section{margin-bottom:6px;}${scope} .receipt-section-title{font-weight:bold;font-size:10px;border-bottom:1px solid #ddd;padding:3px 0;margin-bottom:4px;}${scope} .receipt-row{display:flex;justify-content:space-between;font-size:10px;padding:2px 0;margin:0;}${scope} .receipt-row.total{font-weight:bold;font-size:11px;border-top:1px solid #000;border-bottom:1px solid #000;padding:3px 0;margin:4px 0;}${scope} .receipt-row span:first-child{flex:1;}${scope} .receipt-row span:last-child{text-align:right;flex-shrink:0;}${scope} .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:9px;}${scope} .info-label{font-weight:bold;}${scope} .info-value{margin:0;}${scope} .items-table{width:100%;border-collapse:collapse;font-size:10px;margin:4px 0;}${scope} .items-table th{background:#f5f5f5;padding:3px 4px;text-align:left;font-size:9px;font-weight:bold;border-bottom:1px solid #000;}${scope} .items-table td{padding:3px 4px;border-bottom:0.5px solid #eee;}${scope} .receipt-footer{text-align:center;font-size:8px;color:#666;margin-top:8px;padding-top:6px;border-top:1px solid #ddd;display:flex;flex-direction:column;justify-content:flex-end;}`;
+  }
+
+  private getReceiptMarkup(receipt: ReceiptDTO, financials: FinancialBreakdown): string {
     const itemsHTML = receipt.items
       .map(
         (item) =>
@@ -230,7 +345,7 @@ export class ReceiptsComponent implements OnInit {
       )
       .join('');
 
-    return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Receipt-${receipt.orderNumber}</title><style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:Arial,sans-serif;font-size:11px;color:#333;line-height:1.2;}@page{size:A4;margin:5mm;}@media print{body{margin:0;padding:0;}.no-print{display:none !important;}}.receipt-container{width:100%;max-width:210mm;height:100%;page-break-inside:avoid;display:flex;flex-direction:column;}.receipt-header{text-align:center;border-bottom:1px solid #000;padding:4px 0;margin-bottom:4px;}.receipt-header h1{font-size:16px;margin:0;font-weight:bold;}.receipt-header p{font-size:9px;margin:1px 0;}.receipt-section{margin-bottom:3px;page-break-inside:avoid;}.receipt-section-title{font-weight:bold;font-size:10px;border-bottom:1px solid #ddd;padding:2px 0;margin-bottom:2px;}.receipt-row{display:flex;justify-content:space-between;font-size:10px;padding:1px 0;margin:0;}.receipt-row.total{font-weight:bold;font-size:11px;border-top:1px solid #000;border-bottom:1px solid #000;padding:2px 0;margin:2px 0;}.receipt-row span:first-child{flex:1;}.receipt-row span:last-child{text-align:right;flex-shrink:0;}.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:9px;}.info-item{page-break-inside:avoid;}.info-label{font-weight:bold;}.info-value{margin:0;}.items-table{width:100%;border-collapse:collapse;font-size:10px;margin:2px 0;}.items-table th{background:#f5f5f5;padding:2px 3px;text-align:left;font-size:9px;font-weight:bold;border-bottom:1px solid #000;}.items-table td{padding:2px 3px;border-bottom:0.5px solid #eee;}.receipt-footer{text-align:center;font-size:8px;color:#666;margin-top:4px;padding-top:3px;border-top:1px solid #ddd;flex-grow:1;display:flex;flex-direction:column;justify-content:flex-end;}</style></head><body><div class="receipt-container"><div class="receipt-header"><h1>RECEIPT</h1><p>Order #: ${receipt.orderNumber} | ${new Date(receipt.createdAt).toLocaleDateString('en-IN')}</p></div><div class="receipt-section"><div class="info-grid"><div class="info-item"><div class="info-label">Type:</div><div class="info-value">${receipt.orderType}</div></div>${receipt.tableId ? `<div class="info-item"><div class="info-label">Table:</div><div class="info-value">${receipt.tableId}</div></div>` : '<div></div>'}</div></div><div class="receipt-section"><div class="receipt-section-title">ITEMS</div><table class="items-table"><thead><tr><th>Item</th><th>Portion</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead><tbody>${itemsHTML}</tbody></table></div><div class="receipt-section"><div class="receipt-row"><span>Subtotal:</span><span>Rs.${financials.subTotal.toFixed(2)}</span></div>${financials.discount > 0 ? `<div class="receipt-row"><span>Discount:</span><span>-Rs.${financials.discount.toFixed(2)}</span></div>` : ''}<div class="receipt-row"><span>Tax:</span><span>Rs.${financials.tax.toFixed(2)}</span></div>${financials.serviceCharge > 0 ? `<div class="receipt-row"><span>Service Charge:</span><span>Rs.${financials.serviceCharge.toFixed(2)}</span></div>` : ''}<div class="receipt-row total"><span>TOTAL</span><span>Rs.${financials.total.toFixed(2)}</span></div></div><div class="receipt-section"><div class="receipt-row"><span>Method:</span><span>${receipt.paymentMethod.toUpperCase()}</span></div><div class="receipt-row"><span>Paid:</span><span>Rs.${receipt.paymentAmount.toFixed(2)}</span></div>${receipt.tipAmount > 0 ? `<div class="receipt-row"><span>Tip:</span><span>Rs.${receipt.tipAmount.toFixed(2)}</span></div>` : ''}${financials.change > 0 ? `<div class="receipt-row"><span>Change:</span><span>Rs.${financials.change.toFixed(2)}</span></div>` : ''}</div><div class="receipt-footer"><p>Thank you!</p><p style="font-size:8px;color:#999;">Generated: ${new Date().toLocaleTimeString('en-IN')}</p></div></div></body></html>`;
+    return `<div class="receipt-container"><div class="receipt-header"><h1>RECEIPT</h1><p>Order #: ${receipt.orderNumber} | ${new Date(receipt.createdAt).toLocaleDateString('en-IN')}</p></div><div class="receipt-section"><div class="info-grid"><div class="info-item"><div class="info-label">Type:</div><div class="info-value">${receipt.orderType}</div></div>${receipt.tableId ? `<div class="info-item"><div class="info-label">Table:</div><div class="info-value">${receipt.tableId}</div></div>` : '<div></div>'}</div></div><div class="receipt-section"><div class="receipt-section-title">ITEMS</div><table class="items-table"><thead><tr><th>Item</th><th>Portion</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead><tbody>${itemsHTML}</tbody></table></div><div class="receipt-section"><div class="receipt-row"><span>Subtotal:</span><span>Rs.${financials.subTotal.toFixed(2)}</span></div>${financials.discount > 0 ? `<div class="receipt-row"><span>Discount:</span><span>-Rs.${financials.discount.toFixed(2)}</span></div>` : ''}<div class="receipt-row"><span>Tax:</span><span>Rs.${financials.tax.toFixed(2)}</span></div>${financials.serviceCharge > 0 ? `<div class="receipt-row"><span>Service Charge:</span><span>Rs.${financials.serviceCharge.toFixed(2)}</span></div>` : ''}<div class="receipt-row total"><span>TOTAL</span><span>Rs.${financials.total.toFixed(2)}</span></div></div><div class="receipt-section"><div class="receipt-row"><span>Method:</span><span>${receipt.paymentMethod.toUpperCase()}</span></div><div class="receipt-row"><span>Paid:</span><span>Rs.${receipt.paymentAmount.toFixed(2)}</span></div>${receipt.tipAmount > 0 ? `<div class="receipt-row"><span>Tip:</span><span>Rs.${receipt.tipAmount.toFixed(2)}</span></div>` : ''}${financials.change > 0 ? `<div class="receipt-row"><span>Change:</span><span>Rs.${financials.change.toFixed(2)}</span></div>` : ''}</div><div class="receipt-footer"><p>Thank you!</p><p style="font-size:8px;color:#999;">Generated: ${new Date().toLocaleTimeString('en-IN')}</p></div></div>`;
   }
 
   // Navigate to next page
