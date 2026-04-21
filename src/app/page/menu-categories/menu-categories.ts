@@ -4,11 +4,10 @@ import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
-import { Sidebar } from "../sidebar/sidebar";
 
 @Component({
   selector: 'app-menu-categories',
-  imports: [ReactiveFormsModule, FormsModule, CommonModule, Sidebar],
+  imports: [ReactiveFormsModule, FormsModule, CommonModule],
   templateUrl: './menu-categories.html',
   styleUrl: './menu-categories.css',
 })
