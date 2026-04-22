@@ -7,16 +7,6 @@
     </div>
   </div>
 
-  <!-- Alert Messages -->
-  <div *ngIf="errorMessage" class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-    {{ errorMessage }}
-  </div>
-
-  <div *ngIf="successMessage"
-    class="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
-    {{ successMessage }}
-  </div>
-
   <!-- Loading State -->
   <div *ngIf="loadingCategories" class="flex min-h-70 flex-col items-center justify-center gap-4">
     <div class="h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-blue-600"></div>
@@ -106,7 +96,7 @@
       </div>
 
       <!-- Right Column: Cart + Order Details -->
-      <div class="space-y-6">
+      <div class="order-sidebar space-y-6">
         <!-- Cart -->
         <div class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
           <div class="flex items-baseline justify-between gap-3 border-b border-gray-200 px-4 py-4">
@@ -254,9 +244,9 @@
             </div>
 
             <!-- Actions -->
-            <div class="flex flex-col gap-3 sm:flex-row sm:justify-end">
+            <div class="flex flex-col gap-3 sm:flex-row sm:justify-end pt-2">
               <button type="button" (click)="submitOrder()" [disabled]="submittingOrder || cartItems.length === 0"
-                class="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50">
+                class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                 <span *ngIf="!submittingOrder">Create Order</span>
                 <span *ngIf="submittingOrder" class="inline-flex items-center gap-2">
                   <span
@@ -266,7 +256,7 @@
               </button>
 
               <button *ngIf="cartItems.length > 0" type="button" (click)="resetOrder()" [disabled]="submittingOrder"
-                class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50">
+                class="w-full sm:w-auto rounded-lg border border-gray-300 bg-white px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                 Clear Order
               </button>
             </div>

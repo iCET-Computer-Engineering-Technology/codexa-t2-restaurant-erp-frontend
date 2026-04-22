@@ -26,6 +26,7 @@ import {
     PortionDto,
     TableDto,
 } from '../models/order-placement.model';
+import { OrderWithItemNameResponse } from '../models/order.model';
 
 @Injectable({
     providedIn: 'root'
@@ -35,6 +36,12 @@ export class OrderService {
 
     private readonly apiUrl = environment.apiUrl; //http://localhost:8080/api
     private readonly rootUrl = environment.apiUrl.replace(/\/api\/?$/, ''); //http://localhost:8080
+    private readonly supabaseUrl = (environment as any)?.supabase?.url
+        ? String((environment as any).supabase.url).replace(/\/+$/, '')
+        : undefined;
+    private readonly supabaseBucket = (environment as any)?.supabase?.bucket
+        ? String((environment as any).supabase.bucket)
+        : undefined;
 
     //Category Tabs
     getAllCategories(): Observable<MenuCategoriesDto[]> {
@@ -77,7 +84,7 @@ export class OrderService {
                     console.error('Error fetching item prices:', error);
                     return throwError(() => error);
                 })
-        );
+            );
     }
 
     //Portions (master list)
@@ -138,9 +145,9 @@ export class OrderService {
             .map((raw: any) => {
                 const portionId = Number(
                     raw?.portionId ??
-                        raw?.portion_id ??
-                        raw?.portion?.id ??
-                        raw?.portion?.portionId
+                    raw?.portion_id ??
+                    raw?.portion?.id ??
+                    raw?.portion?.portionId
                 );
                 const itemId = Number(raw?.itemId ?? raw?.menuItemId ?? raw?.menu_item_id ?? fallbackItemId);
                 const price = Number(raw?.price ?? raw?.unitPrice ?? raw?.amount);
@@ -215,13 +222,13 @@ export class OrderService {
                 isAvailable: raw?.isAvailable != null ? Boolean(raw.isAvailable) : undefined,
                 imageUrl: this.normalizeImageUrl(
                     raw?.imageUrl ??
-                        raw?.image_url ??
-                        raw?.image ??
-                        raw?.photoUrl ??
-                        raw?.photo_url ??
-                        raw?.thumbnailUrl ??
-                        raw?.thumbnail_url ??
-                        raw?.thumbnail
+                    raw?.image_url ??
+                    raw?.image ??
+                    raw?.photoUrl ??
+                    raw?.photo_url ??
+                    raw?.thumbnailUrl ??
+                    raw?.thumbnail_url ??
+                    raw?.thumbnail
                 ),
                 createdAt: raw?.createdAt != null ? String(raw.createdAt) : undefined,
                 updatedAt: raw?.updatedAt != null ? String(raw.updatedAt) : undefined,
@@ -252,6 +259,29 @@ export class OrderService {
                 return new URL(normalizedPath).toString();
             } catch {
                 return normalizedPath;
+            }
+        }
+
+        // Support Supabase-relative paths stored in DB, e.g.
+        // /storage/v1/object/public/<bucket>/menu-items/<file>.jpg
+        if (this.supabaseUrl) {
+            const trimmed = normalizedPath.replace(/^\/+/, '');
+            if (trimmed.startsWith('storage/v1/object/')) {
+                try {
+                    return new URL(`/${trimmed}`, this.supabaseUrl).toString();
+                } catch {
+                    // fall through
+                }
+            }
+        }
+
+        // Support legacy values where backend stores only a file name
+        // If objects are kept in: <bucket>/menu-items/<filename>
+        if (this.supabaseUrl && this.supabaseBucket) {
+            const isBareFilename = /^[^/\\]+\.(png|jpe?g|webp|gif|svg)$/i.test(normalizedPath);
+            if (isBareFilename) {
+                const encoded = encodeURIComponent(normalizedPath);
+                return `${this.supabaseUrl}/storage/v1/object/public/${this.supabaseBucket}/menu-items/${encoded}`;
             }
         }
 
@@ -348,6 +378,64 @@ export class OrderService {
             orderData,
             (response) => this.normalizeOrderResponse(response)
         );
+    }
+
+    // View Orders Tab Methods
+    getAllOrdersWithItemNames(): Observable<OrderWithItemNameResponse[]> {
+        return this.http.get<OrderWithItemNameResponse[]>(
+            `${this.apiUrl}/order/find-all-with-item-names`
+        ).pipe(
+            map(orders => orders.map(order => this.normalizeOrderWithItems(order)))
+        );
+    }
+
+    getOrdersByStatus(status: string): Observable<OrderWithItemNameResponse[]> {
+        return this.http.get<OrderWithItemNameResponse[]>(
+            `${this.apiUrl}/order/find-by-status/${status}`
+        ).pipe(
+            map(orders => orders.map(order => this.normalizeOrderWithItems(order)))
+        );
+    }
+
+    getOrderWithItemNamesById(id: number): Observable<OrderWithItemNameResponse> {
+        return this.http.get<OrderWithItemNameResponse>(
+            `${this.apiUrl}/order/find-with-item-names/${id}`
+        ).pipe(
+            map(order => this.normalizeOrderWithItems(order))
+        );
+    }
+
+    private normalizeOrderWithItems(raw: any): OrderWithItemNameResponse {
+        return {
+            id: Number(raw?.id ?? 0),
+            orderTypeId: raw?.orderTypeId != null ? Number(raw.orderTypeId) : undefined,
+            orderNumber: String(raw?.orderNumber ?? ''),
+            orderType: String(raw?.orderType ?? ''),
+            tableId: raw?.tableId != null ? Number(raw.tableId) : undefined,
+            customerId: raw?.customerId != null ? Number(raw.customerId) : undefined,
+            serverId: raw?.serverId != null ? Number(raw.serverId) : undefined,
+            status: String(raw?.status ?? 'unknown'),
+            subTotal: Number(raw?.subTotal ?? 0),
+            discountAmount: Number(raw?.discountAmount ?? 0),
+            taxAmount: Number(raw?.taxAmount ?? 0),
+            serviceCharge: Number(raw?.serviceCharge ?? 0),
+            totalAmount: Number(raw?.totalAmount ?? 0),
+            notes: raw?.notes != null ? String(raw.notes) : undefined,
+            createdAt: String(raw?.createdAt ?? ''),
+            updatedAt: String(raw?.updatedAt ?? ''),
+            items: Array.isArray(raw?.items) ? raw.items.map((item: any) => ({
+                id: Number(item?.id ?? 0),
+                menuItemId: Number(item?.menuItemId ?? 0),
+                menuItemName: String(item?.menuItemName ?? item?.itemName ?? ''),
+                portionId: Number(item?.portionId ?? 0),
+                portionName: String(item?.portionName ?? ''),
+                quantity: Number(item?.quantity ?? 0),
+                price: Number(item?.price ?? 0),
+                lineTotal: item?.lineTotal != null ? Number(item.lineTotal) : Number(item?.price ?? 0) * Number(item?.quantity ?? 0),
+                status: item?.status != null ? String(item.status) : undefined,
+                notes: item?.notes != null ? String(item.notes) : undefined,
+            })) : []
+        };
     }
 
     private firstSuccessfulGet<T>(

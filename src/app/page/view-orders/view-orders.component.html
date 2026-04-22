@@ -1,0 +1,329 @@
+<div class="h-full overflow-y-auto bg-gray-50 p-5">
+  <!-- Header -->
+  <div class="mb-5 flex items-start justify-between gap-5">
+    <div>
+      <h1 class="text-3xl font-semibold text-gray-900">View Orders</h1>
+      <p class="mt-2 text-sm text-gray-600">Select an order to view details</p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
+    <!-- Left Column: Orders Table -->
+    <div class="space-y-6 lg:col-span-2">
+      <div class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 px-4 py-4">
+          <div>
+            <h2 class="text-base font-semibold text-gray-900">Orders</h2>
+            <p class="mt-1 text-xs text-gray-500">
+              @if (hasOrders()) { {{ orders().length }} orders } @else { No orders }
+            </p>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <label class="text-sm font-medium text-gray-700" for="order-status-filter">Status</label>
+            <select
+              id="order-status-filter"
+              class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              [value]="activeFilter()"
+              (change)="onStatusFilterChange($any($event.target).value)"
+            >
+              @for (filter of statusFilters; track filter.value) {
+                <option [value]="filter.value">{{ filter.label }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <!-- Inline Alerts -->
+        @if (hasError() && hasOrders()) {
+          <div class="border-b border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {{ error() }}
+          </div>
+        }
+
+        <!-- Loading bar (when switching selection/filter) -->
+        @if (isLoadingOrders() && hasOrders()) {
+          <div class="border-b border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600">
+            <span class="inline-flex items-center gap-2">
+              <span class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600"></span>
+              Loading...
+            </span>
+          </div>
+        }
+
+        <div class="overflow-x-auto">
+          <table class="w-full border-collapse text-sm">
+            <thead class="bg-gray-100">
+              <tr class="border-b border-gray-200">
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700" style="width: 20%">Order</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700" style="width: 12%">Table</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700" style="width: 18%">Type</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700" style="width: 22%">Status</th>
+                <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700" style="width: 14%">Total</th>
+                <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700" style="width: 14%">Created</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Loading State -->
+              @if (isLoadingOrders() && !hasOrders()) {
+                <tr>
+                  <td class="px-4 py-8 text-center text-sm text-gray-600" colspan="6">
+                    <span class="inline-flex items-center gap-2">
+                      <span class="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600"></span>
+                      Loading orders...
+                    </span>
+                  </td>
+                </tr>
+              }
+
+              <!-- Error State -->
+              @if (hasError() && !hasOrders()) {
+                <tr>
+                  <td class="px-4 py-8 text-center" colspan="6">
+                    <div class="mx-auto max-w-md">
+                      <p class="text-sm font-medium text-gray-900">{{ error() }}</p>
+                      <button
+                        type="button"
+                        class="mt-3 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                        (click)="retry()"
+                      >
+                        Retry
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+
+              <!-- Empty State -->
+              @if (!isLoadingOrders() && !hasError() && !hasOrders()) {
+                <tr>
+                  <td class="px-4 py-10 text-center text-sm text-gray-600" colspan="6">
+                    No orders found
+                  </td>
+                </tr>
+              }
+
+              <!-- Orders -->
+              @if (hasOrders()) {
+                @for (order of paginatedOrders(); track order.id) {
+                  <tr
+                    (click)="selectOrder(order)"
+                    tabindex="0"
+                    (keydown.enter)="selectOrder(order)"
+                    (keydown.space)="selectOrder(order)"
+                    [class]="selectedOrderId() === order.id
+                      ? 'border-b border-gray-200 bg-blue-50 cursor-pointer'
+                      : 'border-b border-gray-200 hover:bg-gray-50 cursor-pointer'"
+                  >
+                    <td class="px-4 py-3 align-top">
+                      <div class="font-semibold text-gray-900">{{ order.orderNumber }}</div>
+                      <div class="mt-1 text-xs text-gray-500">Updated: {{ order.updatedAt | date:'short' }}</div>
+                    </td>
+
+                    <td class="px-4 py-3 align-top text-sm text-gray-700">
+                      @if (order.tableId) { Table {{ order.tableId }} } @else { - }
+                    </td>
+
+                    <td class="px-4 py-3 align-top">
+                      <span [class]="getOrderTypePillClass()">{{ getStatusLabel(order.orderType) }}</span>
+                    </td>
+
+                    <td class="px-4 py-3 align-top">
+                      <span [class]="getOrderStatusPillClass(order.status)">
+                        {{ getStatusLabel(order.status) }}
+                      </span>
+                    </td>
+
+                    <td class="px-4 py-3 align-top text-right font-mono text-xs text-gray-700">
+                      Rs. {{ order.totalAmount.toFixed(2) }}
+                    </td>
+
+                    <td class="px-4 py-3 align-top text-right text-xs text-gray-600">
+                      {{ getRelativeTime(order.createdAt) }}
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination (like Receipts) -->
+        @if (!isLoadingOrders() && hasOrders() && totalPages() > 1) {
+          <div class="border-t border-gray-200 bg-gray-50 p-3 flex items-center justify-between text-sm">
+            <button
+              (click)="previousPage()"
+              [disabled]="currentPage() === 1"
+              class="px-3 py-1 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              ← Prev
+            </button>
+
+            <div class="flex gap-1">
+              @for (page of getPageNumbers(); track page) {
+                <button
+                  (click)="goToPage(page)"
+                  [class.bg-blue-600]="currentPage() === page"
+                  [class.text-white]="currentPage() === page"
+                  [class.bg-gray-200]="currentPage() !== page"
+                  [class.text-gray-700]="currentPage() !== page"
+                  class="px-2 py-1 rounded text-xs font-medium hover:bg-blue-500 hover:text-white transition-colors"
+                >
+                  {{ page }}
+                </button>
+              }
+            </div>
+
+            <button
+              (click)="nextPage()"
+              [disabled]="currentPage() === totalPages()"
+              class="px-3 py-1 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              Next →
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Right Column: Order Details (like Order Placement) -->
+    <div class="space-y-6">
+      <div class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+        <div class="border-b border-gray-200 px-4 py-4">
+          <h2 class="text-base font-semibold text-gray-900">Order Details</h2>
+        </div>
+
+        @if (!selectedOrder()) {
+          <div class="px-4 py-10 text-center text-sm text-gray-600">
+            Select an order from the table to view details
+          </div>
+        }
+
+        @if (selectedOrder(); as order) {
+          <div class="p-4">
+            <div class="mb-4 flex items-start justify-between gap-4">
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900">{{ order.orderNumber }}</h3>
+                <div class="mt-2 flex flex-wrap items-center gap-2">
+                  <span [class]="getOrderTypePillClass()">{{ getStatusLabel(order.orderType) }}</span>
+                  <span [class]="getOrderStatusPillClass(order.status)">{{ getStatusLabel(order.status) }}</span>
+                </div>
+
+                @if (isLoadingDetails()) {
+                  <div class="mt-2 inline-flex items-center gap-2 text-xs text-gray-500">
+                    <span class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600"></span>
+                    Loading order details...
+                  </div>
+                }
+              </div>
+
+              <div class="text-right">
+                <div class="text-xs text-gray-500">Total</div>
+                <div class="text-lg font-bold text-blue-600">Rs. {{ order.totalAmount.toFixed(2) }}</div>
+              </div>
+            </div>
+
+            <dl class="mb-4 grid grid-cols-1 gap-2 text-sm text-gray-700">
+              <div class="flex justify-between gap-3">
+                <dt class="text-gray-500">Table</dt>
+                <dd class="font-medium text-gray-900">@if (order.tableId) { {{ order.tableId }} } @else { - }</dd>
+              </div>
+              <div class="flex justify-between gap-3">
+                <dt class="text-gray-500">Created</dt>
+                <dd class="font-medium text-gray-900">{{ order.createdAt | date:'medium' }}</dd>
+              </div>
+              <div class="flex justify-between gap-3">
+                <dt class="text-gray-500">Updated</dt>
+                <dd class="font-medium text-gray-900">{{ order.updatedAt | date:'medium' }}</dd>
+              </div>
+            </dl>
+
+            @if (order.notes) {
+              <div class="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-gray-800">
+                <div class="text-xs font-semibold text-amber-800">Notes</div>
+                <div class="mt-1">{{ order.notes }}</div>
+              </div>
+            }
+
+            <div class="overflow-x-auto">
+              <table class="w-full border-collapse text-sm">
+                <thead class="bg-gray-100">
+                  <tr class="border-b border-gray-200">
+                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700" style="width: 38%">Item</th>
+                    <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700" style="width: 14%">Unit</th>
+                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700" style="width: 12%">Qty</th>
+                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700" style="width: 22%">Notes</th>
+                    <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700" style="width: 14%">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (item of order.items; track item.id) {
+                    <tr class="border-b border-gray-200">
+                      <td class="px-4 py-3 align-top">
+                        <span class="block font-medium text-gray-900" [title]="item.menuItemName">{{ item.menuItemName }}</span>
+                        <span class="mt-0.5 block text-xs text-gray-500" [title]="getPortionName(item)">{{ getPortionName(item) }}</span>
+                      </td>
+                      <td class="px-4 py-3 text-right align-top font-mono text-xs text-gray-700">
+                        Rs. {{ item.price.toFixed(2) }}
+                      </td>
+                      <td class="px-4 py-3 align-top text-sm text-gray-700">
+                        {{ item.quantity }}
+                      </td>
+                      <td class="px-4 py-3 align-top text-sm text-gray-700">
+                        @if (item.notes) { {{ item.notes }} } @else { - }
+                      </td>
+                      <td class="px-4 py-3 text-right align-top font-mono text-xs text-gray-700">
+                        Rs. {{ (item.lineTotal ?? (item.price * item.quantity)).toFixed(2) }}
+                      </td>
+                    </tr>
+                  }
+
+                  @if (!order.items || order.items.length === 0) {
+                    <tr>
+                      <td class="px-4 py-8 text-center text-sm text-gray-600" colspan="5">
+                        No items in this order
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            <div class="mt-4 border-t border-gray-200 pt-4">
+              <div class="space-y-2">
+                <div class="flex justify-between text-sm">
+                  <span class="text-gray-600">Subtotal:</span>
+                  <span class="font-medium text-gray-900">Rs. {{ order.subTotal.toFixed(2) }}</span>
+                </div>
+
+                @if (order.discountAmount > 0) {
+                  <div class="flex justify-between text-sm">
+                    <span class="text-gray-600">Discount:</span>
+                    <span class="font-medium text-red-600">-Rs. {{ order.discountAmount.toFixed(2) }}</span>
+                  </div>
+                }
+
+                <div class="flex justify-between text-sm">
+                  <span class="text-gray-600">Tax:</span>
+                  <span class="font-medium text-gray-900">Rs. {{ order.taxAmount.toFixed(2) }}</span>
+                </div>
+
+                @if (order.serviceCharge > 0) {
+                  <div class="flex justify-between text-sm">
+                    <span class="text-gray-600">Service Charge:</span>
+                    <span class="font-medium text-gray-900">Rs. {{ order.serviceCharge.toFixed(2) }}</span>
+                  </div>
+                }
+
+                <div class="mt-2 flex justify-between border-t border-gray-300 pt-2 text-lg font-bold">
+                  <span class="text-gray-900">Total:</span>
+                  <span class="text-gray-900">Rs. {{ order.totalAmount.toFixed(2) }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

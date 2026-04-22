@@ -4,6 +4,8 @@ import { CategoryModel, MenuItemsModel } from '../../../model/type';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
+import { environment } from '../../../environments/environment';
+import { SupabaseStorageService } from '../../services/supabase-storage.service';
 
 @Component({
   selector: 'app-menu-items',
@@ -20,6 +22,8 @@ export class MenuItem implements OnInit {
   itemsPerPage: number = 5; 
 
   categoryList: Array<CategoryModel> = [];
+
+  uploadingImage = false;
   
   menuItemObj: MenuItemsModel = {
     id: 0,
@@ -31,7 +35,13 @@ export class MenuItem implements OnInit {
     imageUrl: ''
   }
 
-  constructor(private readonly http: HttpClient, private readonly cdr: ChangeDetectorRef) { }
+  private readonly api = environment.apiUrl;
+
+  constructor(
+    private readonly http: HttpClient,
+    private readonly cdr: ChangeDetectorRef,
+    private readonly supabaseStorage: SupabaseStorageService
+  ) { }
 
   ngOnInit(): void {
     this.getAll();
@@ -39,16 +49,39 @@ export class MenuItem implements OnInit {
   }
 
   loadCategories() {
-    this.http.get<CategoryModel[]>("http://localhost:8080/api/categories/get-all").subscribe(data => {
+    this.http.get<CategoryModel[]>(`${this.api}/categories/get-all`).subscribe(data => {
       this.categoryList = data;
     });
   }
 
   getAll() {
-    this.http.get<MenuItemsModel[]>("http://localhost:8080/api/menu-items").subscribe(data => {
+    this.http.get<MenuItemsModel[]>(`${this.api}/menu-items`).subscribe(data => {
       this.menuItemList = data.sort((a, b) => Number(b.isAvailable) - Number(a.isAvailable));
       this.cdr.detectChanges();
     });
+  }
+
+  async onImageSelected(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement | null;
+    const file = input?.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    this.uploadingImage = true;
+    try {
+      const publicUrl = await this.supabaseStorage.uploadMenuItemImage(file);
+      this.menuItemObj.imageUrl = publicUrl;
+    } catch (err: any) {
+      const message = err?.message ? String(err.message) : 'Image upload failed.';
+      console.error('Supabase upload failed:', err);
+      Swal.fire('Upload failed', message, 'error');
+    } finally {
+      this.uploadingImage = false;
+      if (input) {
+        input.value = '';
+      }
+    }
   }
 
   get paginatedData() {
@@ -71,7 +104,12 @@ export class MenuItem implements OnInit {
   }
 
   addMenuItem(): void {
-    this.http.post("http://localhost:8080/api/menu-items", this.menuItemObj).subscribe(data => {
+    if (this.uploadingImage) {
+      Swal.fire('Please wait', 'Image is still uploading.', 'info');
+      return;
+    }
+
+    this.http.post(`${this.api}/menu-items`, this.menuItemObj).subscribe(data => {
       this.getAll();
       this.clearForm();
     })
@@ -96,7 +134,12 @@ export class MenuItem implements OnInit {
   }
 
   updateMenuItem() : void {
-    this.http.put("http://localhost:8080/api/menu-items" , this.menuItemObj).subscribe(data => {
+    if (this.uploadingImage) {
+      Swal.fire('Please wait', 'Image is still uploading.', 'info');
+      return;
+    }
+
+    this.http.put(`${this.api}/menu-items` , this.menuItemObj).subscribe(data => {
       this.getAll();
       this.clearForm();
     })
@@ -113,7 +156,7 @@ export class MenuItem implements OnInit {
       confirmButtonText: "Yes, delete it!"
     }).then((result) => {
       if (result.isConfirmed) {
-        this.http.delete(`http://localhost:8080/api/menu-items/${id}`).subscribe({
+        this.http.delete(`${this.api}/menu-items/${id}`).subscribe({
           next: (data) => {
             Swal.fire("Deleted!", "The item has been deleted.", "success");
             this.getAll();
