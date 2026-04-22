@@ -1,0 +1,137 @@
+  <div class="dashboard-container">
+     <h2 class="page-title">Allowance Management</h2>
+
+    <div class="main-content-grid">
+      <div class="form-section">
+        <div class="section-header">
+          <h3>Add New Allowance</h3>
+          <p class="subtitle">Enter the details below to assign an allowance to an employee.</p>
+        </div>
+
+          <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-body">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="employeeId">Select Employee</label>
+                <select
+                  id="employeeId"
+                  formControlName="employeeId"
+                  class="form-control"
+                  [class.input-error]="form.get('employeeId')?.invalid && form.get('employeeId')?.touched">
+                  <option value="" disabled selected>-- Select an Employee --</option>
+                  <option *ngFor="let employee of employees" [value]="employee.id">
+                    {{ employee.firstName + ' ' + employee.lastName }}
+                  </option>
+                </select>
+                <div *ngIf="form.get('employeeId')?.invalid && form.get('employeeId')?.touched" class="error-message">
+                  Employee is required
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="roleName">Select Type</label>
+                <select
+                  id="roleName"
+                  formControlName="type"
+                  class="form-control"
+                  [class.input-error]="form.get('type')?.invalid && form.get('type')?.touched">
+                  <option value="" disabled selected>-- Select a Type --</option>
+                  <option value="Transport">Transport</option>
+                  <option value="Meal">Meal</option>
+                  <option value="Other">Other</option>
+                </select>
+                <div *ngIf="form.get('type')?.invalid && form.get('type')?.touched" class="error-message">
+                  Type is required
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="amount">Amount (Rs.)</label>
+                <input
+                  id="amount"
+                  formControlName="amount"
+                  type="number"
+                  class="form-control"
+                  [class.input-error]="form.get('amount')?.invalid && form.get('amount')?.touched" />
+                <div *ngIf="form.get('amount')?.invalid && form.get('amount')?.touched" class="error-message">
+                  Valid amount is required
+                </div>
+              </div>
+
+              <div class="form-group" *ngIf="form.get('type')?.value === 'Other'">
+                <label for="other">Other</label>
+                <input id="other" formControlName="other" type="text" class="form-control" placeholder="Specify reason..." />
+              </div>
+            </div>
+
+            <div class="form-footer">
+              <button type="button" (click)="clearForm()" class="cancel-btn">Clear</button>
+              <button type="submit" [disabled]="!form.valid" class="save-btn">Save Allowance</button>
+            </div>
+          </form>
+    </div>
+
+      <div class="table-header-box" [formGroup]="form">
+        <h3>Allowance List <span class="badge">{{ allowancs.length }} Total</span></h3>
+        <input
+          type="text"
+          formControlName="search"
+          (keyup.enter)="search()"
+          placeholder="Search type & press Enter..."
+          class="search-box">
+      </div>
+
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+          <tr>
+            <th>#</th>
+            <th>Employee Info</th>
+            <th>Type</th>
+            <th>Amount</th>
+            <th style="text-align: center;">Actions</th>
+          </tr>
+          </thead>
+          <tbody>
+            @for (allowance of allowancs; track allowance.id; let i = $index) {
+              <tr>
+                <td class="fw-bold">{{ i + 1 }}</td>
+
+                <td>
+                  <div class="customer-info">
+                    <div>
+                      <div class="fw-bold">ID: {{ allowance.employeeId }}</div>
+                      <div>
+                        @for (employee of employees; track employee.id) {
+                          <div class="text-muted" *ngIf="employee.id === allowance.employeeId">{{employee.firstName +' ' +employee.lastName}}</div>}
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td (click)="fillSearch(allowance.type)" style="cursor: pointer;" title="Click to search this type">
+                  <span class="badge">{{ allowance.type }}</span>
+                </td>
+                <td class="fw-bold">Rs. {{ allowance.amount | number:'1.2-2' }}</td>
+                <td style="text-align: center;">
+                  <button (click)="editAllowance(allowance.id)" class="action-btn edit-btn" title="Edit">
+                    Edit
+                  </button>
+                  <button (click)="deleteAllowance(allowance.id)" class="action-btn delete-btn" title="Delete">
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" style="text-align: center; padding: 40px; color: #64748b;">
+                  No allowances found. Add a new record to get started.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+

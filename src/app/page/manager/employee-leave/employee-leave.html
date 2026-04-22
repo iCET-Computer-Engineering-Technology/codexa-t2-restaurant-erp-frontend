@@ -1,0 +1,153 @@
+<div class="dashboard-container">
+  <h2 class="page-title">Employee Leave Management</h2>
+
+  <div class="main-content-grid">
+    <div class="form-section">
+      <div class="section-header">
+        <h3>Register New Leave</h3>
+        <p class="subtitle">Log employee absences and calculate total leave duration.</p>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="employeeId">Select Employee</label>
+            <select
+              id="employeeId"
+              formControlName="employeeId"
+              class="form-control"
+              [class.input-error]="form.get('employeeId')?.invalid && form.get('employeeId')?.touched">
+              <option value="" disabled selected>-- Select an Employee --</option>
+              <option *ngFor="let employee of employees" [value]="employee.id">
+                {{ employee.firstName + ' ' + employee.lastName }}
+              </option>
+            </select>
+            <div *ngIf="form.get('employeeId')?.invalid && form.get('employeeId')?.touched" class="error-message">
+              Employee selection is required
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="leaveType">Leave Type</label>
+            <select
+              id="leaveType"
+              formControlName="leaveType"
+              class="form-control"
+              [class.input-error]="form.get('leaveType')?.invalid && form.get('leaveType')?.touched">
+              <option value="" disabled selected>-- Select Type --</option>
+              <option value="ANNUAL">Annual Leave</option>
+              <option value="CASUAL">Casual Leave</option>
+              <option value="SICK">Sick Leave</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row-3">
+          <div class="form-group">
+            <label for="startDate">Start Date</label>
+            <input
+              id="startDate"
+              formControlName="startDate"
+              type="date"
+              class="form-control"
+              [class.input-error]="form.get('startDate')?.invalid && form.get('startDate')?.touched" />
+          </div>
+
+          <div class="form-group">
+            <label for="endDate">End Date</label>
+            <input
+              id="endDate"
+              formControlName="endDate"
+              type="date"
+              class="form-control"
+              [class.input-error]="form.get('endDate')?.invalid && form.get('endDate')?.touched" />
+          </div>
+
+          <div class="form-group">
+            <label for="totalDays">Total Days</label>
+            <input
+              id="totalDays"
+              formControlName="totalDays"
+              type="number"
+              readonly
+              class="form-control"
+              style="background-color: #f1f5f9; font-weight: 700; color: #4f46e5;" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="reason">Reason for Leave</label>
+          <input
+            id="reason"
+            formControlName="reason"
+            type="text"
+            placeholder="e.g. Medical checkup, Family vacation..."
+            class="form-control"
+            [class.input-error]="form.get('reason')?.invalid && form.get('reason')?.touched" />
+        </div>
+
+        <div class="form-footer">
+          <button type="button" (click)="clearForm()" class="cancel-btn">Reset</button>
+          <button type="submit" [disabled]="!form.valid" class="save-btn">Save Leave Record</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="table-section">
+      <div class="table-header-box">
+        <h3>Leave History <span class="badge">{{ employeeLeaves.length }} Total Records</span></h3>
+        <input type="text" placeholder="Filter by employee ID..." class="search-box">
+      </div>
+
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+          <tr>
+            <th>#</th>
+            <th>Employee</th>
+            <th>Type / Period</th>
+            <th>Duration</th>
+            <th>Reason</th>
+            <th style="text-align: center;">Actions</th>
+          </tr>
+          </thead>
+          <tbody>
+            @for (leave of employeeLeaves; track leave.id; let i = $index) {
+              <tr>
+                <td class="fw-bold">{{ i + 1 }}</td>
+                <td>
+                  <div class="customer-info">
+                    <div class="avatar" style="background: #94a3b8;">{{ leave.employeeId.toString().substring(0,1) }}</div>
+                    <div class="fw-bold">ID: {{ leave.employeeId }}</div>
+                  </div>
+                </td>
+                <td>
+                  <div class="fw-bold">{{ leave.leaveType }}</div>
+                  <div class="text-muted">{{ leave.startDate }} to {{ leave.endDate }}</div>
+                </td>
+                <td>
+                  <span class="badge" style="background: #e0f2fe; color: #0369a1; font-size: 14px;">
+                    {{ leave.totalDays }} Days
+                  </span>
+                </td>
+                <td style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                  {{ leave.reason }}
+                </td>
+                <td style="text-align: center;">
+                  <button (click)="editEmployeeLeave(leave.id)" class="action-btn edit-btn">Edit</button>
+                  <button (click)="deleteEmployeeLeave(leave.id)" class="action-btn delete-btn">Delete</button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="6" style="text-align: center; padding: 60px; color: #64748b;">
+                  No leave records found.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,131 @@
+<div class="dashboard-container">
+  <h2 class="page-title">Deduction Management</h2>
+
+  <div class="main-content-grid">
+    <div class="form-section">
+      <div class="section-header">
+        <h3>Add New Deduction</h3>
+        <p class="subtitle">Log payroll subtractions such as taxes, EPF, or loan repayments.</p>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-body">
+        <div class="form-row-3">
+          <div class="form-group">
+            <label for="employeeId">Select Employee</label>
+            <select
+              id="employeeId"
+              formControlName="employeeId"
+              class="form-control"
+              [class.input-error]="form.get('employeeId')?.invalid && form.get('employeeId')?.touched">
+              <option value="" disabled selected>-- Select an Employee --</option>
+              <option *ngFor="let employee of employees" [value]="employee.id">
+                {{ employee.firstName + ' ' + employee.lastName }}
+              </option>
+            </select>
+            <div *ngIf="form.get('employeeId')?.invalid && form.get('employeeId')?.touched" class="error-message">
+              Employee is required
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="type">Deduction Type</label>
+            <select
+              id="type"
+              formControlName="type"
+              class="form-control"
+              [class.input-error]="form.get('type')?.invalid && form.get('type')?.touched">
+              <option value="" disabled selected>-- Select Type --</option>
+              <option value="EPF">EPF</option>
+              <option value="TAX">Income Tax (PAYE)</option>
+              <option value="LOAN">Loan Repayment</option>
+              <option value="DONATION">Donation</option>
+            </select>
+            <div *ngIf="form.get('type')?.invalid && form.get('type')?.touched" class="error-message">
+              Type is required
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="amount">Amount (Rs.)</label>
+            <input
+              id="amount"
+              formControlName="amount"
+              type="number"
+              class="form-control"
+              placeholder="0.00"
+              [class.input-error]="form.get('amount')?.invalid && form.get('amount')?.touched" />
+            <div *ngIf="form.get('amount')?.invalid && form.get('amount')?.touched" class="error-message">
+              Valid amount required
+            </div>
+          </div>
+        </div>
+
+        <div class="form-footer">
+          <button type="button" (click)="clearForm()" class="cancel-btn">Reset</button>
+          <button type="submit" [disabled]="!form.valid" class="save-btn">Record Deduction</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="table-section">
+      <div class="table-header-box">
+        <h3>Deduction History <span class="badge" style="background: #fee2e2; color: #ef4444;">{{ deductions.length }} Records</span></h3>
+        <input type="text" placeholder="Search records..." class="search-box">
+      </div>
+
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+          <tr>
+            <th>#</th>
+            <th>Employee Details</th>
+            <th>Deduction Category</th>
+            <th>Amount</th>
+            <th style="text-align: center;">Actions</th>
+          </tr>
+          </thead>
+          <tbody>
+            @for (deduction of deductions; track deduction.id; let i = $index) {
+              <tr>
+                <td class="fw-bold">{{ i + 1}}</td>
+                <td>
+                  <div class="customer-info">
+                    <div class="avatar" style="background: #f87171;">{{ deduction.employeeId.toString().substring(0,1) }}</div>
+                    <div>
+                      <div class="fw-bold">ID: {{ deduction.employeeId }}</div>
+                      @for (employee of employees; track employee.id) {
+                        <div class="text-muted" *ngIf="employee.id === deduction.employeeId">{{employee.firstName +' ' +employee.lastName}}</div>}
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="badge" style="background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;">
+                    {{ deduction.type }}
+                  </span>
+                </td>
+                <td class="fw-bold" style="color: #ef4444;">
+                  - Rs. {{ deduction.amount | number:'1.2-2' }}
+                </td>
+                <td style="text-align: center;">
+                  <button (click)="editDeduction(deduction.id)" class="action-btn edit-btn">
+                    Edit
+                  </button>
+                  <button (click)="deleteDeduction(deduction.id)" class="action-btn delete-btn">
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" style="text-align: center; padding: 60px; color: #64748b;">
+                  <div style="font-size: 40px; margin-bottom: 10px;">📋</div>
+                  <p>No deductions found. Records added will appear here.</p>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

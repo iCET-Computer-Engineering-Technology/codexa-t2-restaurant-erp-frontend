@@ -18,6 +18,8 @@ import { SupplierIngredient } from './page/supplier-ingredient/supplier-ingredie
 import { OrderPlacementComponent } from './page/order-placement/order-placement.component';
 import { ReservationsComponent } from './page/reservations/reservations';
 import { roleGuard } from './guards/role.guard';
+import { RevenueService } from './services/revenue.service';
+import { Revenue } from './page/revenue/revenue';
 import { OrdersContainerComponent } from './page/orders-container/orders-container.component';
 export const routes: Routes = [
   {
@@ -141,6 +143,10 @@ export const routes: Routes = [
       {
         path: 'supplier-ingredient',
         component: SupplierIngredient
+      },
+      {
+        path: 'revenue',
+        component: Revenue
       }
     ],
   },
