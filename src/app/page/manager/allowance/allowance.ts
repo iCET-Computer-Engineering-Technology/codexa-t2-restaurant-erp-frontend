@@ -1,6 +1,5 @@
 import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
-import {RouterLink} from '@angular/router';
-import {DecimalPipe, NgForOf, NgIf} from '@angular/common';
+import {CommonModule, DecimalPipe} from '@angular/common';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {AllowanceService} from '../../../services/manager/allowance-service';
 import {AllowanceModel, EmployeeModel} from '../../../models/salary.model';
@@ -9,7 +8,7 @@ import {EmployeeService} from '../../../services/manager/employee-service';
 @Component({
   selector: 'app-allowance',
   standalone: true,
-  imports: [DecimalPipe, FormsModule, NgIf, ReactiveFormsModule, NgForOf],
+  imports: [DecimalPipe, FormsModule, ReactiveFormsModule, CommonModule],
   templateUrl: './allowance.html',
   styleUrl: './allowance.css',
 })
